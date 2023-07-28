@@ -1,15 +1,23 @@
-import React, {useState, useEffect} from 'react';
-import { ActivityIndicator,View,StyleSheet, Image} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { ActivityIndicator, View, StyleSheet, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAppDispatch } from '../../redux/Hooks';
+import { setUserData } from '../../redux/state/UserStates';
 
-const SplashScreen = ({navigation}: any) => {
+const SplashScreen = ({ navigation }: any) => {
+  const dispatch = useAppDispatch();
   const [animating, setAnimating] = useState(true);
 
   useEffect(() => {
-    setTimeout(() => {
+    setTimeout(async () => {
       setAnimating(false);
-      AsyncStorage.getItem('user_id').then((value) =>navigation.replace(value === null ? 'Login' : 'DrawerNavigationRoutes'),
-      );
+      let userData = await AsyncStorage.getItem('userData');
+      if (userData != null) {
+        dispatch(setUserData({ userData: JSON.parse(userData) }));
+        navigation.replace("DrawerNavigationRoutes");
+      } else {
+        navigation.replace("Login");
+      }
     }, 1000);
   }, []);
 

@@ -10,7 +10,9 @@ export const FontSize = {
 export const GlobalColors = {
     blueLight: "#6eb7ff",
     blue: "#197af1",
-    lightGray2: "#F5F5F5"
+    lightGray2: "#F5F5F5",
+    error: '#d32f2f',
+    success: "#2e7d32"
 }
 
 export const GradientButtonColor = [GlobalColors.blueLight, GlobalColors.blue];

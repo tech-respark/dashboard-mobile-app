@@ -12,17 +12,49 @@ import {
   Button,
 } from 'react-native';
 
-import { FontSize, GradientButtonColor } from '../../Styles/GlobalStyleConfigs';
+import { FontSize, GlobalColors, GradientButtonColor } from '../../Styles/GlobalStyleConfigs';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppDispatch, useAppSelector } from '../../redux/Hooks';
-// import { addMessage, selectMessage } from '../../redux/state/Loaders';
 import { GlobalStyles } from '../../Styles/Styles';
+import { makeAPIRequest } from '../../utils/Helper';
+import { environment } from '../../utils/Constants';
+import { setIsLoading } from '../../redux/state/UIStates';
+import Toast from 'react-native-root-toast';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = ({ navigation }: any) => {
-
   const dispatch = useAppDispatch();
-  // const message = useAppSelector(selectMessage);
+
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
+
+  const checkUsernamePassword = () => {
+    !username ? setError("Username is required") : !password ? setError("Password is required") : setError("");
+    setTimeout(() => { setError("") }, 3000);
+  }
+  const loginAction = async () => {
+    if (!username || !password) {
+      checkUsernamePassword();
+      return;
+    }
+    let requestBody = { username: username, pwd: password };
+    dispatch(setIsLoading({ isLoading: true }));
+    let response = await makeAPIRequest(environment.sqlBaseUri + 'slogin', requestBody);
+    dispatch(setIsLoading({ isLoading: false }));
+    if (response) {
+      if (response.active == 0) {
+        Toast.show("Sorry, Account is disabled.", { duration: Toast.durations.LONG, backgroundColor: GlobalColors.error });
+      } else {
+        AsyncStorage.setItem("userData", JSON.stringify(response)); //now while on splash screen will fetch and save to store
+        Toast.show("Login successfully", { duration: Toast.durations.SHORT, backgroundColor: GlobalColors.success });
+        navigation.navigate("DrawerNavigationRoutes");
+      }
+    } else {
+      Toast.show("Invalid Username or Password!", { duration: Toast.durations.LONG, backgroundColor: GlobalColors.error });
+    }
+  };
 
   return (
     <View style={GlobalStyles.whiteContainer}>
@@ -41,6 +73,7 @@ const LoginScreen = ({ navigation }: any) => {
             placeholder="User Name"
             placeholderTextColor="lightgray"
             underlineColorAndroid="transparent"
+            onChangeText={(val) => { setUsername(val) }}
           />
         </View>
         <Text>Password</Text>
@@ -51,20 +84,21 @@ const LoginScreen = ({ navigation }: any) => {
             placeholder="Password"
             placeholderTextColor="lightgray"
             underlineColorAndroid="transparent"
+            secureTextEntry={true}
+            onChangeText={(val) => { setPassword(val) }}
           />
         </View>
         <TouchableOpacity
-        onPress={()=>{
-          navigation.navigate("Forgot Password");
-        }}
+          onPress={() => {
+            navigation.navigate("Forgot Password");
+          }}
         >
           <Text style={{ fontSize: FontSize.small, textAlign: 'right' }}>Forgot password ?</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={{ marginTop: 50, marginHorizontal: 5 }}
-          onPress={() => {
-            // const uuid = 'hendowie20e20';
-            // dispatch(addMessage({ uuid: uuid, text: "Hello hey" }));
-          }}
+        <Text style={{ fontSize: FontSize.small, color: GlobalColors.error }}>{error}</Text>
+
+        <TouchableOpacity style={{ marginTop: 40, marginHorizontal: 5 }}
+          onPress={loginAction}
         >
           <LinearGradient
             colors={GradientButtonColor}
@@ -74,7 +108,7 @@ const LoginScreen = ({ navigation }: any) => {
           >
             <Text style={styles.loginText}>LOGIN</Text>
           </LinearGradient>
-        </TouchableOpacity> 
+        </TouchableOpacity>
       </View>
     </View>
   );

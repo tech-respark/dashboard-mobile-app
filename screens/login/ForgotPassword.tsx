@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { GlobalStyles } from "../../Styles/Styles";
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -7,10 +7,12 @@ import { FontSize, GlobalColors, GradientButtonColor } from "../../Styles/Global
 import { Text } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import OTPInput from "../../components/OtpTextField";
-import { sleep } from "../../utils/Helper";
+import { makeAPIRequest, sleep } from "../../utils/Helper";
 import { useAppDispatch, useAppSelector } from "../../redux/Hooks";
-import { selectIsLoading, setIsLoading } from "../../redux/state/Loaders";
+import { selectIsLoading, setIsLoading } from "../../redux/state/UIStates";
 import PasswordInput from "../../components/PasswordTextField";
+import { environment } from "../../utils/Constants";
+import Toast from "react-native-root-toast";
 
 
 const ForgotPassword = ({ navigation }: any) => {
@@ -20,6 +22,8 @@ const ForgotPassword = ({ navigation }: any) => {
     const [otpString, setOtpString] = useState<string>("");
     const [newPassword, setNewPassword] = useState<string>("");
     const [confirmPassword, setConfirmPassword] = useState<string>("");
+    const [error, setError] = useState<string>("");
+    const [timer, setTimer] = useState<number>(0);
 
     const onOtpChange = (otp: string) => {
         setOtpString(otp);
@@ -33,26 +37,77 @@ const ForgotPassword = ({ navigation }: any) => {
         setConfirmPassword(password);
     };
 
+    const setErrorMsg = (msg: string) => {
+        setError(msg);
+        setTimeout(() => {
+            setError("");
+        }, 3000);
+    };
+
     const checkUserName = async () => {
+        if (!userName) {
+            setErrorMsg("Username is required!");
+            return;
+        }
         dispatch(setIsLoading({ isLoading: true }));
-        await sleep(500);
-        setCurrentState("OTP");
+        const headers: RequestInit = { headers: { 'Content-Type': "application/json", "user": userName } };
+        let response = await makeAPIRequest(environment.sqlBaseUri + 'staffs/resetotp', null, headers);
+        response ? setCurrentState("OTP") : Toast.show("This username does not exist!", { duration: Toast.durations.SHORT, backgroundColor: GlobalColors.error });
         dispatch(setIsLoading({ isLoading: false }));
     };
 
     const checkOtp = async () => {
+        if (otpString.length != 6) {
+            setErrorMsg("OTP is required!");
+            return;
+        }
         dispatch(setIsLoading({ isLoading: true }));
-        await sleep(500);
-        setCurrentState("UPDATE");
+        const headers: RequestInit = { headers: { 'Content-Type': "application/json", "user": userName, "otp": otpString } };
+        let response = await makeAPIRequest(environment.sqlBaseUri + 'staffs/verifyotp', null, headers);
+        response ? setCurrentState("UPDATE") : Toast.show("Incorrect OTP", { duration: Toast.durations.SHORT, backgroundColor: GlobalColors.error });
         dispatch(setIsLoading({ isLoading: false }));
     };
 
-    const updatePassword = async () => {
+    const resendOTP = async () => {
+        setTimer(60);
         dispatch(setIsLoading({ isLoading: true }));
-        await sleep(500);
+        const headers: RequestInit = { headers: { 'Content-Type': "application/json", "user": userName } };
+        let response = await makeAPIRequest(environment.sqlBaseUri + 'staffs/resetotp', null, headers);
         dispatch(setIsLoading({ isLoading: false }));
-        navigation.navigate("Login");
+        response ? Toast.show("OTP sent", { duration: Toast.durations.SHORT, backgroundColor: GlobalColors.success }) :
+            Toast.show("Failed to send OTP", { duration: Toast.durations.SHORT, backgroundColor: GlobalColors.error });
     };
+
+    const updatePassword = async () => {
+        if (!newPassword || !confirmPassword) {
+            !newPassword ? setErrorMsg("Password is required!") : !confirmPassword ? setErrorMsg("Confirm the password!") : setError("");
+        } else if (newPassword != confirmPassword) {
+            setErrorMsg("Password does not match!");
+        } else {
+            dispatch(setIsLoading({ isLoading: true }));
+            await sleep(500);
+            const headers: RequestInit = { headers: { 'Content-Type': "application/json", "user": userName, "pwd": newPassword } };
+            let response = await makeAPIRequest(environment.sqlBaseUri + 'staffs/updatepwd', null, headers);
+            dispatch(setIsLoading({ isLoading: false }));
+            if (response) {
+                navigation.replace("Login");
+                setCurrentState("UPDATE")
+            } else {
+                Toast.show("Not able to update password", { duration: Toast.durations.SHORT, backgroundColor: GlobalColors.error });
+            }
+        }
+
+    };
+
+    useEffect(() => {
+        let interval: any;
+        if (timer > 0 && timer <= 60) {
+          interval = setInterval(() => {
+            setTimer(prevTimer => prevTimer - 1);
+          }, 1000);
+        }
+        return () => clearInterval(interval);
+      }, [timer]);
 
     return (
         <View style={GlobalStyles.whiteContainer}>
@@ -71,14 +126,18 @@ const ForgotPassword = ({ navigation }: any) => {
                         />
                     </View> :
                     currentState == "OTP" ?
-                        <View style={{ width: "60%" }}>
+                        <View style={{ width: "70%" }}>
                             <Feather name="check-circle" size={30} color={GlobalColors.blueLight} style={styles.icon} />
                             <Text style={{ marginBottom: 10, fontWeight: 'bold', fontSize: FontSize.heading }}>Verification</Text>
                             <Text style={{ marginBottom: 35 }}>Enter the OTP we sent you</Text>
-                            <OTPInput numberOfDigits={4} onOtpChange={onOtpChange} />
-                            <View style={{ alignItems: 'center', marginTop: 50 }}>
-                                <Text style={{ marginBottom: 10, fontSize: FontSize.small, color: 'gray' }}>Didn't receive OTP ?</Text>
-                                <Text style={{ color: GlobalColors.blue }} onPress={() => { }}>Resend</Text>
+                            <OTPInput numberOfDigits={6} onOtpChange={onOtpChange} />
+                            <View style={{ alignItems: 'center', marginTop: 50, marginBottom: 10 }}>
+                                {timer == 0 ? <>
+                                    <Text style={{ marginBottom: 10, fontSize: FontSize.small, color: 'gray' }}>Didn't receive OTP ?</Text>
+                                <Text style={{ color: GlobalColors.blue }} onPress={() => {resendOTP()}}>Resend</Text>
+                                </> : 
+                                <Text style={{color: 'gray', fontSize: FontSize.regular}}>{`Resend in 00:${timer}`}</Text>}
+                                
                             </View>
                         </View> :
                         <View style={{ width: "60%" }}>
@@ -92,14 +151,15 @@ const ForgotPassword = ({ navigation }: any) => {
 
             }
 
-            <TouchableOpacity style={{ width: "70%" }}
+            <Text style={{ fontSize: FontSize.small, color: GlobalColors.error }}>{error}</Text>
+            <TouchableOpacity style={[{ width: "70%" }, currentState == "OTP" ? { marginTop: 30 } : { marginTop: 80 }]}
                 onPress={async () => {
                     currentState == "USERNAME" ? await checkUserName() : currentState == "OTP" ? await checkOtp() : await updatePassword();
                 }}
             >
                 <LinearGradient
                     colors={GradientButtonColor}
-                    style={[styles.button, currentState == "OTP" ? { marginTop: 30 } : { marginTop: 80 }]}
+                    style={styles.button}
                     start={{ y: 0.0, x: 0.0 }}
                     end={{ y: 0.0, x: 1.0 }}
                 >

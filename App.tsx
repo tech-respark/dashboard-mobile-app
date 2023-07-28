@@ -1,4 +1,4 @@
-import InitialNavigationRoutes from './screens/initialScreens/InitialNavigationRoutes';
+import InitialNavigationRoutes from './screens/login/InitialNavigationRoutes';
 import { Provider } from 'react-redux';
 import { store } from './redux/Store';
 
