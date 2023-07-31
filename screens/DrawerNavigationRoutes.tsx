@@ -1,101 +1,67 @@
-import React from 'react';
-import {createStackNavigator} from '@react-navigation/stack';
-import {createDrawerNavigator} from '@react-navigation/drawer';
-import { GlobalStyles } from '../Styles/Styles';
-import { Text, View } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import POSMainScreen from './pos/PosMain';
+import BackOfficeMainScreen from './backOffice/BackOfficeMain';
+import { FontSize, GlobalColors } from '../Styles/GlobalStyleConfigs';
+import { useAppDispatch, useAppSelector } from '../redux/Hooks';
+import { setIsLoading } from '../redux/state/UIStates';
+import { getCurrentBranchId, makeAPIRequest } from '../utils/Helper';
+import { environment } from '../utils/Constants';
+import { selectTenantId, setConfig } from '../redux/state/UserStates';
 
-// Import Screens
-// import HomeScreen from './DrawerScreens/HomeScreen';
-// import SettingsScreen from './DrawerScreens/SettingsScreen';
-// import CustomSidebarMenu from './Components/CustomSidebarMenu';
-// import NavigationDrawerHeader from './Components/NavigationDrawerHeader';
+const Drawer = createDrawerNavigator();
 
-// const Stack = createStackNavigator();
-// const Drawer = createDrawerNavigator();
+const DrawerNavigationRoutes = ({ navigation }: any) => {
+  const dispatch = useAppDispatch();
 
-// const homeScreenStack = ({navigation}) => {
-//   return (
-//     <Stack.Navigator initialRouteName="HomeScreen">
-//       <Stack.Screen
-//         name="HomeScreen"
-//         component={HomeScreen}
-//         options={{
-//           title: 'Home', //Set Header Title
-//           headerLeft: () => (
-//             <NavigationDrawerHeader navigationProps={navigation} />
-//           ),
-//           headerStyle: {
-//             backgroundColor: '#307ecc', //Set Header color
-//           },
-//           headerTintColor: '#fff', //Set Header text color
-//           headerTitleStyle: {
-//             fontWeight: 'bold', //Set Header text style
-//           },
-//         }}
-//       />
-//     </Stack.Navigator>
-//   );
-// };
+  const storeId = getCurrentBranchId();
+  const tenantId = useAppSelector(selectTenantId);
 
-// const settingScreenStack = ({navigation}) => {
-//   return (
-//     <Stack.Navigator
-//       initialRouteName="SettingsScreen"
-//       screenOptions={{
-//         headerLeft: () => (
-//           <NavigationDrawerHeader navigationProps={navigation} />
-//         ),
-//         headerStyle: {
-//           backgroundColor: '#307ecc', //Set Header color
-//         },
-//         headerTintColor: '#fff', //Set Header text color
-//         headerTitleStyle: {
-//           fontWeight: 'bold', //Set Header text style
-//         },
-//       }}>
-//       <Stack.Screen
-//         name="SettingsScreen"
-//         component={SettingsScreen}
-//         options={{
-//           title: 'Settings', //Set Header Title
-//         }}
-//       />
-//     </Stack.Navigator>
-//   );
-// };
+  const [mainMenuOptions, setMainMenuOptions] = useState<string[]>([]);
+  const [showDrawer, setShowDrawer] = useState<boolean>(false);
+  const [showUserProfile, setShowUserProfile] = useState<boolean>(false);
 
-const DrawerNavigatorRoutes = ({navigation}: any) => {
+  const getUserConfig = async() => {
+    dispatch(setIsLoading({ isLoading: true }));
+    let url = environment.documentBaseUri+`stores`;
+    url += tenantId ? `/getStoreByTenantAndStoreId?storeId=${storeId}&tenantId=${tenantId}` : `/${storeId}`
+    let response = await makeAPIRequest(url, null, "GET");
+    console.log("HELLO", response);
+    if(response){
+      dispatch(setConfig({configs: response}));
+    }
+    dispatch(setIsLoading({ isLoading: false }));
+  };
+
+  useEffect(() => {
+    getUserConfig();
+  }, [])
+
   return (
-    <View style={GlobalStyles.whiteContainer}>
-        <Text onPress={async() => {
-          await AsyncStorage.removeItem("userData");
-          navigation.replace("Login");
-        }}>HOME</Text>
-    </View>
-    // <Drawer.Navigator
-    //   drawerContentOptions={{
-    //     activeTintColor: '#cee1f2',
-    //     color: '#cee1f2',
-    //     itemStyle: {marginVertical: 5, color: 'white'},
-    //     labelStyle: {
-    //       color: '#d8d8d8',
-    //     },
-    //   }}
-    //   screenOptions={{headerShown: false}}
-    //   drawerContent={CustomSidebarMenu}>
-    //   <Drawer.Screen
-    //     name="homeScreenStack"
-    //     options={{drawerLabel: 'Home Screen'}}
-    //     component={homeScreenStack}
-    //   />
-    //   <Drawer.Screen
-    //     name="settingScreenStack"
-    //     options={{drawerLabel: 'Setting Screen'}}
-    //     component={settingScreenStack}
-    //   />
-    // </Drawer.Navigator>
+    <Drawer.Navigator
+      screenOptions={{
+        headerTitleAlign: "left",
+        headerTitle: () => (
+          <Text style={{fontSize: FontSize.large}}>Back Office</Text>
+        ),
+        headerRight: () => (
+          <TouchableOpacity onPress={() => setShowUserProfile(true)}>
+            <Ionicons name="person-outline" size={25} style={{marginRight: 10}} color={GlobalColors.blue}/>
+          </TouchableOpacity>
+        ),
+      }}
+      initialRouteName='BackOffice'
+    >
+      <Drawer.Screen name="POS" options={{ drawerLabel: 'POS' }} component={POSMainScreen} />
+      <Drawer.Screen
+        name="BackOffice"
+        options={{ drawerLabel: 'Back Office' }}
+        component={BackOfficeMainScreen}
+      />
+    </Drawer.Navigator>
   );
 };
 
-export default DrawerNavigatorRoutes;
+export default DrawerNavigationRoutes;

@@ -17,11 +17,12 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppDispatch, useAppSelector } from '../../redux/Hooks';
 import { GlobalStyles } from '../../Styles/Styles';
-import { makeAPIRequest } from '../../utils/Helper';
+import { getCurrentBranchId, makeAPIRequest } from '../../utils/Helper';
 import { environment } from '../../utils/Constants';
 import { setIsLoading } from '../../redux/state/UIStates';
 import Toast from 'react-native-root-toast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { setCurrentBranch, setStoreIdData, setUserData } from '../../redux/state/UserStates';
 
 const LoginScreen = ({ navigation }: any) => {
   const dispatch = useAppDispatch();
@@ -48,7 +49,12 @@ const LoginScreen = ({ navigation }: any) => {
         Toast.show("Sorry, Account is disabled.", { duration: Toast.durations.LONG, backgroundColor: GlobalColors.error });
       } else {
         AsyncStorage.setItem("userData", JSON.stringify(response)); //now while on splash screen will fetch and save to store
+        let res: {[key: string]: any}[] = await makeAPIRequest(environment.sqlBaseUri+"ssroles/staff/custom/staffid/"+response.tenantId, null, "GET");
+        console.log("PPPP", res);
+        dispatch(setStoreIdData({StoreIdData: res}));
+        res.length > 0 ? dispatch(setCurrentBranch({currentBranch: res[0].name})): null;
         Toast.show("Login successfully", { duration: Toast.durations.SHORT, backgroundColor: GlobalColors.success });
+        dispatch(setUserData({ userData: response, tenantId: response.tenantId}));
         navigation.navigate("DrawerNavigationRoutes");
       }
     } else {

@@ -51,7 +51,7 @@ const ForgotPassword = ({ navigation }: any) => {
         }
         dispatch(setIsLoading({ isLoading: true }));
         const headers: RequestInit = { headers: { 'Content-Type': "application/json", "user": userName } };
-        let response = await makeAPIRequest(environment.sqlBaseUri + 'staffs/resetotp', null, headers);
+        let response = await makeAPIRequest(environment.sqlBaseUri + 'staffs/resetotp', null, "POST", headers);
         response ? setCurrentState("OTP") : Toast.show("This username does not exist!", { duration: Toast.durations.SHORT, backgroundColor: GlobalColors.error });
         dispatch(setIsLoading({ isLoading: false }));
     };
@@ -63,7 +63,7 @@ const ForgotPassword = ({ navigation }: any) => {
         }
         dispatch(setIsLoading({ isLoading: true }));
         const headers: RequestInit = { headers: { 'Content-Type': "application/json", "user": userName, "otp": otpString } };
-        let response = await makeAPIRequest(environment.sqlBaseUri + 'staffs/verifyotp', null, headers);
+        let response = await makeAPIRequest(environment.sqlBaseUri + 'staffs/verifyotp', null, "POST", headers);
         response ? setCurrentState("UPDATE") : Toast.show("Incorrect OTP", { duration: Toast.durations.SHORT, backgroundColor: GlobalColors.error });
         dispatch(setIsLoading({ isLoading: false }));
     };
@@ -72,7 +72,7 @@ const ForgotPassword = ({ navigation }: any) => {
         setTimer(60);
         dispatch(setIsLoading({ isLoading: true }));
         const headers: RequestInit = { headers: { 'Content-Type': "application/json", "user": userName } };
-        let response = await makeAPIRequest(environment.sqlBaseUri + 'staffs/resetotp', null, headers);
+        let response = await makeAPIRequest(environment.sqlBaseUri + 'staffs/resetotp', null, "POST", headers);
         dispatch(setIsLoading({ isLoading: false }));
         response ? Toast.show("OTP sent", { duration: Toast.durations.SHORT, backgroundColor: GlobalColors.success }) :
             Toast.show("Failed to send OTP", { duration: Toast.durations.SHORT, backgroundColor: GlobalColors.error });
@@ -87,7 +87,7 @@ const ForgotPassword = ({ navigation }: any) => {
             dispatch(setIsLoading({ isLoading: true }));
             await sleep(500);
             const headers: RequestInit = { headers: { 'Content-Type': "application/json", "user": userName, "pwd": newPassword } };
-            let response = await makeAPIRequest(environment.sqlBaseUri + 'staffs/updatepwd', null, headers);
+            let response = await makeAPIRequest(environment.sqlBaseUri + 'staffs/updatepwd', null, "POST", headers);
             dispatch(setIsLoading({ isLoading: false }));
             if (response) {
                 navigation.replace("Login");

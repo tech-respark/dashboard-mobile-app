@@ -1,0 +1,671 @@
+{
+    "id": "633ae8759440ce2625b22a85",
+    "store": "pune",
+    "tenant": "dev",
+    "storeId": 6,
+    "tenantId": 3,
+    "minOrderValue": 36,
+    "startTime": "10:30",
+    "closureTime": "23:30",
+    "weeklyOff": "Sun",
+    "orderingOn": true,
+    "deliveryOn": true,
+    "preOrdering": false,
+    "recieveOnlinePayment": true,
+    "cod": true,
+    "genderConfig": "female",
+    "showServicesPdp": true,
+    "readOnlyMenu": false,
+    "socialLinks": [
+      {
+        "name": "instagram",
+        "url": "https://www.instagram.com/resparksoftware/?igshid=YmMyMTA2M2Y%3D",
+        "index": 1,
+        "iconPath": null,
+        "active": true
+      },
+      {
+        "name": "facebook",
+        "url": "https://www.facebook.com/Respark-100971102401653/",
+        "index": 2,
+        "iconPath": null,
+        "active": true
+      },
+      {
+        "name": "whatsapp",
+        "url": "https://wa.me/+919175099232",
+        "index": 3,
+        "iconPath": null,
+        "active": true
+      },
+      {
+        "name": "youtube",
+        "url": "https://www.youtube.com/channel/UCgijQymM6p-AgrXFDTBbIiw",
+        "index": 4,
+        "iconPath": null,
+        "active": true
+      },
+      {
+        "name": "google",
+        "url": "",
+        "index": 2,
+        "iconPath": null,
+        "active": false
+      }
+    ],
+    "deliveryDisclaimer": "Your order will be delivered within 24 hours. Delivery details will be communicated shortly.",
+    "pickupDisclaimer": "Your item is ready for pickup, kindly collect it from frontdesk.",
+    "pickupOn": true,
+    "txchConfig": [
+      {
+        "id": "638a1c68be89bf552ed75f72",
+        "name": "GST",
+        "value": 18,
+        "active": true,
+        "applicableOn": "delivery,takeway",
+        "type": "PERCENTAGE",
+        "isInclusive": 1,
+        "applyOn": 3,
+        "charge": false
+      },
+      {
+        "id": "641ee8faa9f48f56adbe0198",
+        "name": "sgst",
+        "value": 9,
+        "active": false,
+        "applicableOn": "delivery,takeway",
+        "type": "PERCENTAGE",
+        "isInclusive": 1,
+        "applyOn": 3,
+        "charge": false
+      }
+    ],
+    "genericImages": {
+      "footerBg": [],
+      "loginScreenBg": [],
+      "appBg": [],
+      "hamburgerBg": []
+    },
+    "showProductCategoryGridView": true,
+    "currencySymbol": "₹",
+    "showStoreLocator": true,
+    "storeConfig": {
+      "basicConfig": {
+        "pos": true,
+        "appointment": true,
+        "backoffice": true,
+        "crm": true,
+        "settings": true,
+        "reports": true,
+        "services": true,
+        "products": true,
+        "feedback": true,
+        "loyalty": true,
+        "inventory": true,
+        "membership": true,
+        "packages": true,
+        "centralised_dashboard": true,
+        "delete_orders": true,
+        "advance_and_balance": true,
+        "whatsapp": false,
+        "catalogue": true,
+        "campaign": true
+      },
+      "gupshupConfig": {
+        "active": false,
+        "name": "devourinqa",
+        "key": "hls4eyahadmusklz3oo4vgea8b5tmdsv",
+        "number": "9766626934"
+      },
+      "settingsConfig": {
+        "taxes": true,
+        "decimalLength": 2,
+        "billType": ""
+      },
+      "appointmentConfig": {
+        "active": true,
+        "sendReminders": true,
+        "reminderBeforeDays": "1",
+        "reminderBeforeHrs": "1",
+        "smsForAppointments": true,
+        "showExpertAsSalon": false
+      },
+      "feedbackConfig": {
+        "active": true,
+        "entities": "experts,store",
+        "feedbackUrl": null,
+        "smsOn": false,
+        "emailOn": false,
+        "typeList": [
+          {
+            "name": "Service Quality",
+            "index": 1,
+            "description": "gsfgs",
+            "entity": "expert",
+            "canComment": false,
+            "optional": true,
+            "mandatory": true,
+            "active": true,
+            "typeOptions": [
+              {
+                "name": "Poor",
+                "value": 1,
+                "index": 1,
+                "active": true
+              },
+              {
+                "name": "Below Average",
+                "value": 2,
+                "index": 2,
+                "active": true
+              },
+              {
+                "name": "Average",
+                "value": 3,
+                "index": 3,
+                "active": true
+              },
+              {
+                "name": "Good",
+                "value": 4,
+                "index": 4,
+                "active": true
+              },
+              {
+                "name": "Excellent",
+                "value": 5,
+                "index": 5,
+                "active": true
+              }
+            ]
+          },
+          {
+            "name": "Social Etiquette",
+            "index": 2,
+            "description": "gsfgs",
+            "entity": "expert",
+            "canComment": false,
+            "optional": true,
+            "mandatory": true,
+            "active": true,
+            "typeOptions": [
+              {
+                "name": "Poor",
+                "value": 1,
+                "index": 1,
+                "active": true
+              },
+              {
+                "name": "Below Average",
+                "value": 2,
+                "index": 2,
+                "active": true
+              },
+              {
+                "name": "Average",
+                "value": 3,
+                "index": 3,
+                "active": true
+              },
+              {
+                "name": "Good",
+                "value": 4,
+                "index": 4,
+                "active": true
+              },
+              {
+                "name": "Excellent",
+                "value": 5,
+                "index": 5,
+                "active": true
+              }
+            ]
+          },
+          {
+            "name": "Personalhg",
+            "index": 3,
+            "description": "gsfgs",
+            "entity": "expert",
+            "canComment": false,
+            "optional": false,
+            "mandatory": false,
+            "active": false,
+            "typeOptions": [
+              {
+                "name": "Poor",
+                "value": 1,
+                "index": 1,
+                "active": false
+              },
+              {
+                "name": "Below Average",
+                "value": 2,
+                "index": 2,
+                "active": false
+              },
+              {
+                "name": "Average",
+                "value": 3,
+                "index": 3,
+                "active": false
+              },
+              {
+                "name": "Good",
+                "value": 4,
+                "index": 4,
+                "active": false
+              },
+              {
+                "name": "Excellent",
+                "value": 5,
+                "index": 5,
+                "active": false
+              }
+            ]
+          },
+          {
+            "name": "Remark",
+            "index": 4,
+            "description": "gsfgs",
+            "entity": "store",
+            "canComment": true,
+            "optional": false,
+            "mandatory": false,
+            "active": true,
+            "typeOptions": []
+          },
+          {
+            "name": "Personal",
+            "index": 3,
+            "description": "gsfgs",
+            "entity": "expert",
+            "canComment": false,
+            "optional": false,
+            "mandatory": false,
+            "active": false,
+            "typeOptions": [
+              {
+                "name": "Poor",
+                "value": 1,
+                "index": 1,
+                "active": false
+              },
+              {
+                "name": "Below Average",
+                "value": 2,
+                "index": 2,
+                "active": false
+              },
+              {
+                "name": "Average",
+                "value": 3,
+                "index": 3,
+                "active": false
+              },
+              {
+                "name": "Good",
+                "value": 4,
+                "index": 4,
+                "active": false
+              },
+              {
+                "name": "Excellent",
+                "value": 5,
+                "index": 5,
+                "active": false
+              }
+            ]
+          },
+          {
+            "name": "sdsdsd",
+            "description": "",
+            "entity": "expert",
+            "canComment": false,
+            "optional": true,
+            "mandatory": false,
+            "active": true,
+            "typeOptions": [
+              {
+                "name": "Poor",
+                "value": 1,
+                "index": 1,
+                "active": true
+              },
+              {
+                "name": "Below Average",
+                "value": 2,
+                "index": 2,
+                "active": true
+              },
+              {
+                "name": "Average",
+                "value": 3,
+                "index": 3,
+                "active": true
+              },
+              {
+                "name": "Good",
+                "value": 4,
+                "index": 4,
+                "active": true
+              },
+              {
+                "name": "Excellent",
+                "value": 5,
+                "index": 5,
+                "active": true
+              }
+            ],
+            "index": 6
+          },
+          {
+            "name": "Test",
+            "description": "",
+            "entity": "expert",
+            "canComment": false,
+            "optional": true,
+            "mandatory": false,
+            "active": true,
+            "typeOptions": [
+              {
+                "name": "Poor",
+                "value": 1,
+                "index": 1,
+                "active": true
+              },
+              {
+                "name": "Below Average",
+                "value": 2,
+                "index": 2,
+                "active": true
+              },
+              {
+                "name": "Average",
+                "value": 3,
+                "index": 3,
+                "active": true
+              },
+              {
+                "name": "Good",
+                "value": 4,
+                "index": 4,
+                "active": true
+              },
+              {
+                "name": "Excellent",
+                "value": 5,
+                "index": 5,
+                "active": true
+              }
+            ],
+            "index": 7
+          },
+          {
+            "name": "testtax",
+            "description": "",
+            "entity": "expert",
+            "canComment": false,
+            "optional": true,
+            "mandatory": false,
+            "active": false,
+            "typeOptions": [
+              {
+                "name": "Poor",
+                "value": 1,
+                "index": 1,
+                "active": true
+              },
+              {
+                "name": "Below Average",
+                "value": 2,
+                "index": 2,
+                "active": true
+              },
+              {
+                "name": "Average",
+                "value": 3,
+                "index": 3,
+                "active": true
+              },
+              {
+                "name": "Good",
+                "value": 4,
+                "index": 4,
+                "active": true
+              },
+              {
+                "name": "Excellent",
+                "value": 5,
+                "index": 5,
+                "active": true
+              }
+            ],
+            "index": 8
+          }
+        ]
+      },
+      "sparkConfig": {
+        "sliderDuration": 1000,
+        "sliderInterval": 5000,
+        "showProductInGridView": true,
+        "showThumbnailsOnPDP": false,
+        "showAddButtonOnProductCard": true,
+        "copyrightContent": "Copyright @2022",
+        "fontStyle": "poppins-regular",
+        "color": {
+          "female": "#dcb533",
+          "male": "#4088f4"
+        },
+        "textColor": {
+          "female": "#000",
+          "male": "#000"
+        },
+        "userConfig": {
+          "userRegPopupReq": true,
+          "userRegMandatory": false,
+          "genderSelectionMandatory": false,
+          "showGender": true,
+          "showEmail": true,
+          "emailMandatory": false,
+          "popupHeading": "We will use your information to send offers and promotions",
+          "showAddress": true,
+          "addressMandatory": false,
+          "areaMandatory": false,
+          "cityMandatory": false,
+          "showDob": true,
+          "showAnniversaryDate": true
+        },
+        "quoteRequest": true,
+        "filterConfig": {
+          "service": {
+            "active": true,
+            "priceRange": true,
+            "sortingConfig": {
+              "active": true,
+              "highPrice": false,
+              "lowPrice": false,
+              "discount": false,
+              "latest": false,
+              "oldest": false
+            }
+          },
+          "product": {
+            "active": true,
+            "priceRange": true,
+            "sortingConfig": {
+              "active": true,
+              "highPrice": true,
+              "lowPrice": true,
+              "discount": true,
+              "latest": true,
+              "oldest": true
+            }
+          }
+        }
+      },
+      "discountConfig": {
+        "active": true,
+        "maxFixDiscount": "100",
+        "maxPerDiscount": "10"
+      },
+      "accessControl": [
+        {
+          "active": true,
+          "id": 1,
+          "uiComponent": "appointment",
+          "uiName": "Appointment",
+          "bitValue": 13,
+          "activeValue": true
+        },
+        {
+          "active": true,
+          "id": 2,
+          "uiComponent": "backoffice",
+          "uiName": "Backoffice",
+          "bitValue": 5,
+          "activeValue": true
+        },
+        {
+          "active": true,
+          "id": 3,
+          "uiComponent": "crm",
+          "uiName": "CRM",
+          "bitValue": 5,
+          "activeValue": true
+        },
+        {
+          "active": true,
+          "id": 4,
+          "uiComponent": "settings",
+          "uiName": "Settings",
+          "bitValue": 13,
+          "activeValue": true
+        },
+        {
+          "active": true,
+          "id": 5,
+          "uiComponent": "pos",
+          "uiName": "POS",
+          "bitValue": 5,
+          "activeValue": true
+        },
+        {
+          "active": true,
+          "id": 6,
+          "uiComponent": "reports",
+          "uiName": "Reports",
+          "bitValue": 5,
+          "activeValue": true
+        },
+        {
+          "active": 1,
+          "id": 7,
+          "uiComponent": "staff_mgt",
+          "uiName": "Staff Management",
+          "bitValue": 5,
+          "activeValue": true
+        },
+        {
+          "active": 1,
+          "id": 8,
+          "uiComponent": "access_control",
+          "uiName": "Access Control",
+          "bitValue": 5,
+          "activeValue": true
+        },
+        {
+          "active": 1,
+          "id": 9,
+          "uiComponent": "delete_order",
+          "uiName": "Delete Order",
+          "bitValue": 5,
+          "activeValue": true
+        },
+        {
+          "active": 1,
+          "id": 10,
+          "uiComponent": "delete_appointment",
+          "uiName": "Delete Appointment",
+          "bitValue": 5,
+          "activeValue": true
+        },
+        {
+          "active": true,
+          "id": 11,
+          "uiComponent": "loyalty",
+          "uiName": "Loyalty",
+          "bitValue": 5,
+          "activeValue": true
+        },
+        {
+          "active": true,
+          "id": 12,
+          "uiComponent": "inventory",
+          "uiName": "Inventory",
+          "bitValue": 5,
+          "activeValue": true
+        },
+        {
+          "active": true,
+          "id": 13,
+          "uiComponent": "centralised_dashboard",
+          "uiName": "Centralised Dashboard",
+          "bitValue": 4,
+          "activeValue": false
+        },
+        {
+          "active": 1,
+          "id": 14,
+          "uiComponent": "expenses_dashboard",
+          "uiName": "Expenses Dashboard",
+          "bitValue": 5,
+          "activeValue": true
+        },
+        {
+          "active": 1,
+          "id": 15,
+          "uiComponent": "edit_bill",
+          "uiName": "Edit Bill",
+          "bitValue": 0,
+          "activeValue": true
+        }
+      ],
+      "storeLocations": []
+    },
+    "showProductInGridView": true,
+    "alphaCodeForOrder": "K&S/23-24/",
+    "decimalPlaces": 3,
+    "codForDeliveryOrders": false,
+    "loyaltyConfig": {
+      "id": 1,
+      "name": "",
+      "active": true,
+      "amountOnOrder": 0,
+      "percentOnOrderService": 1,
+      "pointsPer100rsService": 2,
+      "rupeesPerPointService": 1,
+      "minPointsReqToAvailService": 1,
+      "maxPointsAvailedService": 1,
+      "percentOnOrderProduct": 1,
+      "pointsPer100rsProduct": 1,
+      "rupeesPerPointProduct": 1,
+      "minPointsReqToAvailProduct": 1,
+      "maxPointsAvailedProduct": 1,
+      "percentOnOrderAll": 0,
+      "pointsPer100rsAll": 0,
+      "rupeesPerPointAll": 0,
+      "minPointsReqToAvailAll": 0,
+      "maxPointsAvailedAll": 0,
+      "typeForEarn": 1,
+      "typeForRedeem": 1,
+      "maxDaysToRenewed": 100,
+      "storeId": 6,
+      "tenantId": 3,
+      "createdOn": "2023-04-14T04:59:29.243+00:00",
+      "modifiedOn": "2023-04-14T04:59:29.243+00:00",
+      "reminderBeforeDays": 0
+    },
+    "productListHeading": null,
+    "serviceListHeading": null,
+    "showProductPdp": true
+  }

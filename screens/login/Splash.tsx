@@ -13,7 +13,9 @@ const SplashScreen = ({ navigation }: any) => {
       setAnimating(false);
       let userData = await AsyncStorage.getItem('userData');
       if (userData != null) {
-        dispatch(setUserData({ userData: JSON.parse(userData) }));
+        console.log("FIrst", userData);
+        let data: {[key: string]: any} = JSON.parse(userData) ?? {};
+        dispatch(setUserData({ userData: data, tenantId: data.tenantId}));
         navigation.replace("DrawerNavigationRoutes");
       } else {
         navigation.replace("Login");
