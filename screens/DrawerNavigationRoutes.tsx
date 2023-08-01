@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { createDrawerNavigator } from '@react-navigation/drawer';
+import { DrawerContentScrollView, createDrawerNavigator } from '@react-navigation/drawer';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import POSMainScreen from './pos/PosMain';
@@ -10,6 +10,8 @@ import { setIsLoading } from '../redux/state/UIStates';
 import { makeAPIRequest } from '../utils/Helper';
 import { environment } from '../utils/Constants';
 import { selectBranchId, selectTenantId, setConfig } from '../redux/state/UserStates';
+import CustomDrawerContent from '../components/SideDrawer';
+import UserProfileBottomSheet from '../components/UserProfileBottomSheet';
 
 const Drawer = createDrawerNavigator();
 
@@ -40,6 +42,7 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
   }, [])
 
   return (
+    <>
     <Drawer.Navigator
       screenOptions={{
         headerTitleAlign: "left",
@@ -52,15 +55,18 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
           </TouchableOpacity>
         ),
       }}
-      initialRouteName='BackOffice'
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      initialRouteName='Backoffice'
     >
       <Drawer.Screen name="POS" options={{ drawerLabel: 'POS' }} component={POSMainScreen} />
       <Drawer.Screen
-        name="BackOffice"
-        options={{ drawerLabel: 'Back Office' }}
+        name="Backoffice"
+        options={{ drawerLabel: 'Backoffice' }}
         component={BackOfficeMainScreen}
       />
     </Drawer.Navigator>
+    <UserProfileBottomSheet/>
+    </>
   );
 };
 
