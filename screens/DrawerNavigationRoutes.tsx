@@ -7,16 +7,16 @@ import BackOfficeMainScreen from './backOffice/BackOfficeMain';
 import { FontSize, GlobalColors } from '../Styles/GlobalStyleConfigs';
 import { useAppDispatch, useAppSelector } from '../redux/Hooks';
 import { setIsLoading } from '../redux/state/UIStates';
-import { getCurrentBranchId, makeAPIRequest } from '../utils/Helper';
+import { makeAPIRequest } from '../utils/Helper';
 import { environment } from '../utils/Constants';
-import { selectTenantId, setConfig } from '../redux/state/UserStates';
+import { selectBranchId, selectTenantId, setConfig } from '../redux/state/UserStates';
 
 const Drawer = createDrawerNavigator();
 
 const DrawerNavigationRoutes = ({ navigation }: any) => {
   const dispatch = useAppDispatch();
 
-  const storeId = getCurrentBranchId();
+  const storeId = useAppSelector(selectBranchId);
   const tenantId = useAppSelector(selectTenantId);
 
   const [mainMenuOptions, setMainMenuOptions] = useState<string[]>([]);
