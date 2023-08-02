@@ -1,6 +1,6 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { DrawerContentScrollView, createDrawerNavigator } from '@react-navigation/drawer';
-import { Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import POSMainScreen from './pos/PosMain';
 import BackOfficeMainScreen from './backOffice/BackOfficeMain';
@@ -12,6 +12,7 @@ import { environment } from '../utils/Constants';
 import { selectBranchId, selectTenantId, setConfig } from '../redux/state/UserStates';
 import CustomDrawerContent from '../components/SideDrawer';
 import UserProfileBottomSheet from '../components/UserProfileBottomSheet';
+import BottomSheet from '@gorhom/bottom-sheet';
 
 const Drawer = createDrawerNavigator();
 
@@ -21,20 +22,31 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
   const storeId = useAppSelector(selectBranchId);
   const tenantId = useAppSelector(selectTenantId);
 
-  const [mainMenuOptions, setMainMenuOptions] = useState<string[]>([]);
-  const [showDrawer, setShowDrawer] = useState<boolean>(false);
-  const [showUserProfile, setShowUserProfile] = useState<boolean>(false);
+  const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const snapPoints = ['1%', '40%'];
 
-  const getUserConfig = async() => {
+  const getUserConfig = async () => {
     dispatch(setIsLoading({ isLoading: true }));
-    let url = environment.documentBaseUri+`stores`;
+    let url = environment.documentBaseUri + `stores`;
     url += tenantId ? `/getStoreByTenantAndStoreId?storeId=${storeId}&tenantId=${tenantId}` : `/${storeId}`
     let response = await makeAPIRequest(url, null, "GET");
     console.log("HELLO", response);
-    if(response){
-      dispatch(setConfig({configs: response}));
+    if (response) {
+      dispatch(setConfig({ configs: response }));
     }
     dispatch(setIsLoading({ isLoading: false }));
+  };
+  const handleSheetChanges = (index: number) => {
+    if (index === 0) {
+      setIsSheetOpen(false);
+    }
+  };
+  const handleSheetClose = () => {
+    if (bottomSheetRef.current) {
+      bottomSheetRef.current.close();
+      setIsSheetOpen(false);
+    }
   };
 
   useEffect(() => {
@@ -42,32 +54,81 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
   }, [])
 
   return (
-    <>
-    <Drawer.Navigator
-      screenOptions={{
-        headerTitleAlign: "left",
-        headerTitle: () => (
-          <Text style={{fontSize: FontSize.large}}>Back Office</Text>
-        ),
-        headerRight: () => (
-          <TouchableOpacity onPress={() => setShowUserProfile(true)}>
-            <Ionicons name="person-outline" size={25} style={{marginRight: 10}} color={GlobalColors.blue}/>
-          </TouchableOpacity>
-        ),
-      }}
-      drawerContent={(props) => <CustomDrawerContent {...props} />}
-      initialRouteName='Backoffice'
-    >
-      <Drawer.Screen name="POS" options={{ drawerLabel: 'POS' }} component={POSMainScreen} />
-      <Drawer.Screen
-        name="Backoffice"
-        options={{ drawerLabel: 'Backoffice' }}
-        component={BackOfficeMainScreen}
-      />
-    </Drawer.Navigator>
-    <UserProfileBottomSheet/>
-    </>
+    <View style={{ flex: 1 }}>
+      <View style={[styles.mainContent, { opacity: isSheetOpen ? 0.5 : 1, pointerEvents: isSheetOpen ? 'none' : 'auto' }]}>
+        <Drawer.Navigator
+          screenOptions={{
+            headerTitleAlign: "left",
+            headerTitle: () => (
+              <Text style={{ fontSize: FontSize.large }}>Back Office</Text>
+            ),
+            headerRight: () => (
+              <TouchableOpacity
+                onPress={() => {
+                  if (bottomSheetRef.current) {
+                    bottomSheetRef.current.snapToIndex(1);
+                    setIsSheetOpen(true);
+                  }
+                }}
+              >
+                <Ionicons
+                  name="person-outline"
+                  size={25}
+                  style={{ marginRight: 10 }}
+                  color={GlobalColors.blue}
+                />
+              </TouchableOpacity>
+            ),
+          }}
+          drawerContent={(props) => <CustomDrawerContent {...props} />}
+          initialRouteName="Backoffice"
+        >
+          <Drawer.Screen name="POS" options={{ drawerLabel: 'POS' }} component={POSMainScreen} />
+          <Drawer.Screen
+            name="Backoffice"
+            options={{ drawerLabel: 'Backoffice' }}
+            component={BackOfficeMainScreen}
+          />
+        </Drawer.Navigator>
+      </View>
+      <BottomSheet
+        ref={bottomSheetRef}
+        snapPoints={snapPoints}
+        style={styles.bottomSheet}
+        handleIndicatorStyle={styles.handleIndicator}
+        onChange={handleSheetChanges}
+      >
+        <UserProfileBottomSheet handleSheetClose={handleSheetClose} navigation={navigation} />
+      </BottomSheet>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  mainContent: {
+    flex: 1,
+    backgroundColor: 'white',
+  },
+  bottomSheet: {
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    backgroundColor: 'transparent',
+    ...Platform.select({
+      android: {
+        elevation: 5,
+      },
+      ios: {
+        shadowColor: 'black',
+        shadowOffset: { width: 0, height: -5 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+      },
+    }),
+
+  },
+  handleIndicator: {
+    backgroundColor: 'transparent',
+  },
+});
 
 export default DrawerNavigationRoutes;
