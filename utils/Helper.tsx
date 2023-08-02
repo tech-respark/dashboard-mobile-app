@@ -8,7 +8,6 @@ export const makeAPIRequest = async (url: string, body?: any, method: string = "
   body ? options.body = JSON.stringify(body) : null;
   let response;
     try {
-      console.log("THE URL: ", url)
       response = await fetch(url, options);
       if(response.status != 200 || response.headers.get('content-length') === '0'){
         return null;

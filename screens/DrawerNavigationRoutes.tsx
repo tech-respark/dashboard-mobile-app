@@ -13,12 +13,15 @@ import { selectBranchId, selectTenantId, setConfig } from '../redux/state/UserSt
 import CustomDrawerContent from '../components/SideDrawer';
 import UserProfileBottomSheet from '../components/UserProfileBottomSheet';
 import BottomSheet from '@gorhom/bottom-sheet';
+import AppointmentMain from './appointment/AppointmentMain';
+import CrmMain from './crm/CrmMain';
+import { useRoute } from '@react-navigation/native';
 
 const Drawer = createDrawerNavigator();
 
 const DrawerNavigationRoutes = ({ navigation }: any) => {
   const dispatch = useAppDispatch();
-
+  const route = useRoute()
   const storeId = useAppSelector(selectBranchId);
   const tenantId = useAppSelector(selectTenantId);
 
@@ -31,7 +34,6 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
     let url = environment.documentBaseUri + `stores`;
     url += tenantId ? `/getStoreByTenantAndStoreId?storeId=${storeId}&tenantId=${tenantId}` : `/${storeId}`
     let response = await makeAPIRequest(url, null, "GET");
-    console.log("HELLO", response);
     if (response) {
       dispatch(setConfig({ configs: response }));
     }
@@ -57,10 +59,10 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
     <View style={{ flex: 1 }}>
       <View style={[styles.mainContent, { opacity: isSheetOpen ? 0.5 : 1, pointerEvents: isSheetOpen ? 'none' : 'auto' }]}>
         <Drawer.Navigator
-          screenOptions={{
-            headerTitleAlign: "left",
+          screenOptions={({ route }) => ({
+            headerTitleAlign: 'left',
             headerTitle: () => (
-              <Text style={{ fontSize: FontSize.large }}>Back Office</Text>
+              <Text style={{ fontSize: FontSize.large }}>{route.name}</Text>
             ),
             headerRight: () => (
               <TouchableOpacity
@@ -79,16 +81,15 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
                 />
               </TouchableOpacity>
             ),
-          }}
+          })}
           drawerContent={(props) => <CustomDrawerContent {...props} />}
           initialRouteName="Backoffice"
         >
           <Drawer.Screen name="POS" options={{ drawerLabel: 'POS' }} component={POSMainScreen} />
-          <Drawer.Screen
-            name="Backoffice"
-            options={{ drawerLabel: 'Backoffice' }}
-            component={BackOfficeMainScreen}
-          />
+          <Drawer.Screen name="Appointment" options={{ drawerLabel: 'Appointment' }} component={AppointmentMain} />
+          <Drawer.Screen name="Backoffice" options={{ drawerLabel: 'Backoffice' }} component={BackOfficeMainScreen} />
+          <Drawer.Screen name="CRM" options={{ drawerLabel: 'CRM' }} component={CrmMain} />
+
         </Drawer.Navigator>
       </View>
       <BottomSheet

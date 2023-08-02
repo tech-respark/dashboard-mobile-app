@@ -6,6 +6,7 @@ import HomePage from "./homepage/HomePage";
 import Services from "./services/Services";
 import Product from "./product/Product";
 import StaffManagement from "./staffMgmt/StaffManagement";
+import ServicesNavigation from "./services/ServicesNavigation";
 
 const Stack = createStackNavigator();
 
@@ -23,7 +24,7 @@ const BackOfficeMainScreen = ({ navigation }: any) => {
             case "Home Page":
                 return <HomePage />
             case "Services":
-                return <Services />
+                return <ServicesNavigation />
             case "Product":
                 return <Product />
             case "Staff Mgmt":
