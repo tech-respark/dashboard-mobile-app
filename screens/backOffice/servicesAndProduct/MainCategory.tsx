@@ -9,20 +9,20 @@ import { setIsLoading } from "../../../redux/state/UIStates";
 import Toast from "react-native-root-toast";
 import CategoryList from "./CategoryList";
 
-const Services = ({ navigation }: any) => {
+const MainCategory = ({ navigation,type }: any) => {
     const dispatch = useAppDispatch();
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
 
     const [categoryList, setCategoryList] = useState<{ [key: string]: any }[]>([]);
 
-    const getServiceCategoryData = async () => {
+    const getCategoryData = async () => {
         dispatch(setIsLoading({ isLoading: true }));
-        const url = environment.documentBaseUri + `/stores/getServiceCategoriesByTenantAndStore?tenantId=${tenantId}&storeId=${storeId}`;
+        const subDomain = (type=='service') ? "getServiceCategoriesByTenantAndStore" : "getProductCategoriesByTenantAndStore";
+        const url = environment.documentBaseUri + `stores/${subDomain}?tenantId=${tenantId}&storeId=${storeId}`;
         let response = await makeAPIRequest(url, null, "GET");
         dispatch(setIsLoading({ isLoading: false }));
         if (response) {
-            //wil save to store later
             setCategoryList(response);
         } else {
             Toast.show("No Data Found");
@@ -31,9 +31,9 @@ const Services = ({ navigation }: any) => {
 
     const onTextClickHandler = (item: {[key: string]: any}) => {
         if(item.categoryList.length > 0){
-            navigation.navigate("SubCategory", {selectedItem: item})
+            navigation.navigate("SubCategory", {selectedItem: item, type: type})
         }else if(item.itemList.length > 0){
-            navigation.navigate("ItemList", {selectedItem: item, routeName: item.name})
+            navigation.navigate("ItemList", {selectedItem: item, routeName: item.name, type: type})
         }
     };
 
@@ -42,7 +42,7 @@ const Services = ({ navigation }: any) => {
     const addNew = () => { };
 
     useEffect(() => {
-        getServiceCategoryData();
+        getCategoryData();
     }, []);
 
     return (
@@ -54,4 +54,4 @@ const Services = ({ navigation }: any) => {
 };
 
 
-export default Services;
+export default MainCategory;

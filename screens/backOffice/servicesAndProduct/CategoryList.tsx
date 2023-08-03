@@ -9,9 +9,10 @@ type CategoryListType = {
     onTextClickHandler: (item: { [key: string]: any }) => void,
     buttonClickHandler: () => void,
     editItemHandler: (item: { [key: string]: any }) => void,
-    buttonText: string
+    buttonText: string,
+    type?: string
 }
-const CategoryList: FC<CategoryListType> = ({ dataList, onTextClickHandler, buttonClickHandler, editItemHandler, buttonText }) => {
+const CategoryList: FC<CategoryListType> = ({ dataList, onTextClickHandler, buttonClickHandler, editItemHandler, buttonText, type }) => {
     return (
         <>
             {
@@ -19,10 +20,14 @@ const CategoryList: FC<CategoryListType> = ({ dataList, onTextClickHandler, butt
                     <ScrollView style={{ marginBottom: 0 }}>
                         {dataList.map((item: any, index: number) => (
                             <View key={index} style={styles.itemView}>
-                                <Text style={[{ fontSize: FontSize.regular }, item.active ? {}: {color: 'gray'}]} onPress={()=>{onTextClickHandler(item)}}>{item.name}</Text>
+                                <Text style={[{ fontSize: FontSize.regular, maxWidth: '70%' }, item.active ? {}: {color: 'gray'}]} onPress={()=>{onTextClickHandler(item)}}>{item.name}</Text>
+                                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                {type==="product" && <Text style={{marginHorizontal: 10}}>₹{Math.round(item.price)}</Text>}
                                 <TouchableOpacity onPress={() => editItemHandler(item)}>
-                                    <FontAwesome5 name="edit" size={20} style={{ marginRight: 10 }} color={GlobalColors.blueLight} />
+                                    <FontAwesome5 name="edit" size={20} style={{ marginRight: 5 }} color={GlobalColors.blueLight} />
                                 </TouchableOpacity>
+                                </View>
+                                
                             </View>
                         ))}
                     </ScrollView>

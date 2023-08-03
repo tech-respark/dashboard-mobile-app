@@ -8,6 +8,9 @@ import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 const ItemList = ({ navigation, route }: any) => {
     const selectedItem = route.params.selectedItem;
     const routeName = route.params.routeName;
+    const type = route.params.type;
+    console.log("##@#@", type, selectedItem);
+
     const [searchText, setSearchText] = useState<string>('');
     const [filteredItems, setFilteredItems] = useState<{ [key: string]: any }[]>(selectedItem.itemList);
 
@@ -50,7 +53,7 @@ const ItemList = ({ navigation, route }: any) => {
                     onChangeText={onSearchChange}
                 />
             </View>
-            <CategoryList dataList={filteredItems} onTextClickHandler={editCategory} editItemHandler={editCategory} buttonClickHandler={addNew} buttonText="Add Service" />
+            <CategoryList dataList={filteredItems} onTextClickHandler={editCategory} editItemHandler={editCategory} buttonClickHandler={addNew} buttonText="Add Service" type={type}/>
         </View>
     );
 };

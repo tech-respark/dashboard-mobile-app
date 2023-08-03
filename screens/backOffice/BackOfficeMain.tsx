@@ -3,10 +3,8 @@ import { View } from "react-native";
 import SwipeablePills from "../../components/SwipablePills";
 import { createStackNavigator } from "@react-navigation/stack";
 import HomePage from "./homepage/HomePage";
-import Services from "./services/Services";
-import Product from "./product/Product";
 import StaffManagement from "./staffMgmt/StaffManagement";
-import ServicesNavigation from "./services/ServicesNavigation";
+import CategoryNavigation from "./servicesAndProduct/CategoryNavigation";
 
 const Stack = createStackNavigator();
 
@@ -19,14 +17,14 @@ const BackOfficeMainScreen = ({ navigation }: any) => {
         setSelectedPill(pill);
     };
 
-    const renderSelectedPillView = () => {
-        switch (selectedPill) {
+    const renderSelectedPillView = (pill: any) => {
+        switch (pill) {
             case "Home Page":
                 return <HomePage />
             case "Services":
-                return <ServicesNavigation />
+                return <CategoryNavigation type={"service"} navigation={navigation}/>
             case "Product":
-                return <Product />
+                return <CategoryNavigation type={"product"} navigation={navigation}/>
             case "Staff Mgmt":
                 return <StaffManagement />
         }
@@ -35,7 +33,7 @@ const BackOfficeMainScreen = ({ navigation }: any) => {
     return (
         <View style={{ flex: 1, backgroundColor: '#fff' }}>
             <SwipeablePills pills={pillsData} selectedPill={selectedPill} onSelectPill={onSelectedPillChange} />
-            {renderSelectedPillView()}
+            {renderSelectedPillView(selectedPill)}
         </View>
     )
 };

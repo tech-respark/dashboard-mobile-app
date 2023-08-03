@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
-const AddNew = () => {
+const AddNew = ({navigation, type}: any) => {
     return (
         <View>
             <Text>Hello</Text>

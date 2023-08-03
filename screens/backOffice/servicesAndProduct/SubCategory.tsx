@@ -7,7 +7,7 @@ import CategoryList from "./CategoryList";
 const SubCategory = ({ navigation, route }: any) => {
     const selectedItem = route.params.selectedItem;
     const onTextClickHandler = (item: {[key: string]: any}) => {
-        navigation.navigate("ItemList", {selectedItem: item, routeName: selectedItem.name+' / '+ item.name});
+        navigation.navigate("ItemList", {selectedItem: item, routeName: selectedItem.name+' / '+ item.name, type: route.params.type});
     };
 
     const editCategory = () => {};
