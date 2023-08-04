@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Text, View } from "react-native";
-import { FontSize } from "../../../Styles/GlobalStyleConfigs";
+import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import { environment } from "../../../utils/Constants";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { selectBranchId, selectTenantId } from "../../../redux/state/UserStates";
@@ -25,7 +25,7 @@ const MainCategory = ({ navigation,type }: any) => {
         if (response) {
             setCategoryList(response);
         } else {
-            Toast.show("No Data Found");
+            Toast.show("No Data Found", {backgroundColor: GlobalColors.error});
         }
     };
 

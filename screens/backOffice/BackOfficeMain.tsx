@@ -3,7 +3,7 @@ import { View } from "react-native";
 import SwipeablePills from "../../components/SwipablePills";
 import { createStackNavigator } from "@react-navigation/stack";
 import HomePage from "./homepage/HomePage";
-import StaffManagement from "./staffMgmt/StaffManagement";
+import StaffManagement from "./staffMgmt/StaffManagementNavigation";
 import CategoryNavigation from "./servicesAndProduct/CategoryNavigation";
 
 const Stack = createStackNavigator();

@@ -20,14 +20,13 @@ const CategoryList: FC<CategoryListType> = ({ dataList, onTextClickHandler, butt
                     <ScrollView style={{ marginBottom: 0 }}>
                         {dataList.map((item: any, index: number) => (
                             <View key={index} style={styles.itemView}>
-                                <Text style={[{ fontSize: FontSize.regular, maxWidth: '70%' }, item.active ? {}: {color: 'gray'}]} onPress={()=>{onTextClickHandler(item)}}>{item.name}</Text>
-                                <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                                {type==="product" && <Text style={{marginHorizontal: 10}}>₹{Math.round(item.price)}</Text>}
-                                <TouchableOpacity onPress={() => editItemHandler(item)}>
-                                    <FontAwesome5 name="edit" size={20} style={{ marginRight: 5 }} color={GlobalColors.blueLight} />
-                                </TouchableOpacity>
+                                <Text style={[{ fontSize: FontSize.regular, maxWidth: '70%' }, item.active ? {} : { color: 'gray' }]} onPress={() => { onTextClickHandler(item) }}>{item.name}</Text>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    {type === "product" && <Text style={{ marginHorizontal: 10 }}>₹{Math.round(item.price)}</Text>}
+                                    <TouchableOpacity onPress={() => editItemHandler(item)}>
+                                        <FontAwesome5 name="edit" size={20} style={{ marginRight: 5 }} color={GlobalColors.blueLight} />
+                                    </TouchableOpacity>
                                 </View>
-                                
                             </View>
                         ))}
                     </ScrollView>
@@ -36,8 +35,8 @@ const CategoryList: FC<CategoryListType> = ({ dataList, onTextClickHandler, butt
                         <Text style={{ textAlign: 'center', fontSize: FontSize.large }}>No Data Found</Text>
                     </View>
             }
-            <TouchableOpacity style={{ marginHorizontal: 40, marginBottom: 20 }}
-                onPress={() => {buttonClickHandler}}
+            <TouchableOpacity style={{ marginHorizontal: 40, marginBottom: 30 }}
+                onPress={() => { buttonClickHandler }}
             >
                 <LinearGradient
                     colors={GradientButtonColor}
@@ -66,7 +65,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between'
     },
     loginButton: {
-        padding: 8,
+        padding: 10,
         borderRadius: 20,
         flexDirection: 'row',
         justifyContent: 'center',

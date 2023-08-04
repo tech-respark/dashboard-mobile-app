@@ -9,7 +9,6 @@ const ItemList = ({ navigation, route }: any) => {
     const selectedItem = route.params.selectedItem;
     const routeName = route.params.routeName;
     const type = route.params.type;
-    console.log("##@#@", type, selectedItem);
 
     const [searchText, setSearchText] = useState<string>('');
     const [filteredItems, setFilteredItems] = useState<{ [key: string]: any }[]>(selectedItem.itemList);
