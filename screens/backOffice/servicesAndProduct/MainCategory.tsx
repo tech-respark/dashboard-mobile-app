@@ -46,7 +46,7 @@ const MainCategory = ({ navigation,type }: any) => {
     }, []);
 
     return (
-        <View style={{ padding: 10, flex: 1 }}>
+        <View style={{ padding: 10, flex: 1, backgroundColor: '#fff' }}>
             <Text style={{ fontSize: FontSize.large, fontWeight: 'bold', padding: 5 }}>Category</Text>
             <CategoryList dataList={categoryList} onTextClickHandler={onTextClickHandler} editItemHandler={editCategory} buttonClickHandler={addNew} buttonText="Add New"/>
         </View>

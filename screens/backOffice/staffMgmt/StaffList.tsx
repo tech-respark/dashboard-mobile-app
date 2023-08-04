@@ -25,7 +25,6 @@ const StaffList = ({ navigation }: any) => {
         dispatch(setIsLoading({ isLoading: true }));
         let url = environment.sqlBaseUri + `staffs/${tenantId}/${storeId}`;
         let responseStaff = await makeAPIRequest(url, null, "GET");
-        console.log("@##@$$$$$$", responseStaff)
         url = environment.sqlBaseUri + `ssroles/${tenantId}`;
         let responseRoles = await makeAPIRequest(url, null, "GET");
         dispatch(setIsLoading({ isLoading: false }));
@@ -44,7 +43,7 @@ const StaffList = ({ navigation }: any) => {
     }, [isFocused]);
 
     return (
-        <>
+        <View style={{flex: 1, backgroundColor: '#fff'}}>
             {
                 staffList.length > 0 ?
                     <ScrollView style={{ marginBottom: 0, padding: 10 }}>
@@ -76,7 +75,7 @@ const StaffList = ({ navigation }: any) => {
                     <Text style={styles.addNewText}>Create New</Text>
                 </LinearGradient>
             </TouchableOpacity>
-        </>
+        </View>
     )
 };
 

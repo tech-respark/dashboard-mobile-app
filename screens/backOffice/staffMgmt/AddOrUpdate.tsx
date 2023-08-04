@@ -87,7 +87,7 @@ const AddOrUpdate = ({ navigation, route }: any) => {
             return
         }
         dispatch(setIsLoading({ isLoading: true }));
-        //TODO : maybe need to call one more API for role // update staff role 
+        //TODO : ssroles API call can be avoided if role is not changed
         const url = environment.sqlBaseUri + "staffs";
         let roleId = rolesData.find((role: any) => role.name === selectedRole)?.id;
         let requestBody: { [key: string]: any } = {
@@ -107,7 +107,7 @@ const AddOrUpdate = ({ navigation, route }: any) => {
             "tenantId": tenantId,
             "username": username,
         };
-        if(selectedStaff){
+        if (selectedStaff) {
             requestBody["id"] = selectedStaff.id;
             requestBody["weeklyOff"] = weeklyOff;
         }
@@ -115,14 +115,14 @@ const AddOrUpdate = ({ navigation, route }: any) => {
         let roleResponse = await getRoleMapping(roleId, response.id);
         dispatch(setIsLoading({ isLoading: false }));
         if (response && roleResponse) {
-            Toast.show("Updated Successfully !!", { backgroundColor: GlobalColors.success });
+            Toast.show("Updated Successfully", { backgroundColor: GlobalColors.success });
             navigation.goBack();
         } else {
-            Toast.show("Failed to Update !!", { backgroundColor: GlobalColors.error });
+            Toast.show("Failed to Update", { backgroundColor: GlobalColors.error });
         }
     };
 
-    const getRoleMapping = async(roleId: number, staffId: number): Promise<boolean> => {
+    const getRoleMapping = async (roleId: number, staffId: number): Promise<boolean> => {
         let requestBody = [{
             "active": active ? 1 : 0,
             "roleId": roleId,
@@ -130,10 +130,10 @@ const AddOrUpdate = ({ navigation, route }: any) => {
             "storeId": storeId,
             "tenantId": tenantId
         }];
-        let response = await makeAPIRequest(environment.sqlBaseUri+ "ssroles", requestBody, "POST");
+        let response = await makeAPIRequest(environment.sqlBaseUri + "ssroles", requestBody, "POST");
         return response ? true : false;
     };
-    
+
 
     const getRoleOfStaff = async () => {
         dispatch(setIsLoading({ isLoading: true }));
@@ -196,7 +196,7 @@ const AddOrUpdate = ({ navigation, route }: any) => {
                         dropdownTextHighlightStyle={styles.selectedOption}
                     >
                         <View style={styles.roleSelectRect}>
-                            <Text>{selectedRole}</Text>
+                            <Text style={{textTransform: 'capitalize'}}>{selectedRole}</Text>
                             <Ionicons name="chevron-down" size={20} style={{ marginLeft: 5, color: GlobalColors.blue }} />
                         </View>
                     </ModalDropdown>
@@ -354,19 +354,18 @@ const styles = StyleSheet.create({
         marginRight: 15,
         borderRadius: 5
     },
-    dropdownText: {
-        fontSize: 16,
-        color: 'black',
-    },
     dropdownContainer: {
         marginTop: 10,
-        backgroundColor: "white",
+        width: 150,
+        backgroundColor: GlobalColors.lightGray2
     },
     dropdownOption: {
         fontSize: 16,
         padding: 8,
         textAlign: 'auto',
         flexWrap: 'wrap',
+        backgroundColor: GlobalColors.lightGray2,
+        textTransform: 'capitalize'
     },
     selectedOption: {
         color: 'black'

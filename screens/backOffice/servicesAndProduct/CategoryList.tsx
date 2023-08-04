@@ -1,7 +1,7 @@
 import React, { FC } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { FontSize, GlobalColors, GradientButtonColor } from "../../../Styles/GlobalStyleConfigs";
-import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 
 type CategoryListType = {
@@ -22,7 +22,13 @@ const CategoryList: FC<CategoryListType> = ({ dataList, onTextClickHandler, butt
                             <View key={index} style={styles.itemView}>
                                 <Text style={[{ fontSize: FontSize.regular, maxWidth: '70%' }, item.active ? {} : { color: 'gray' }]} onPress={() => { onTextClickHandler(item) }}>{item.name}</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    {type === "product" && <Text style={{ marginHorizontal: 10 }}>₹{Math.round(item.price)}</Text>}
+                                    {type === "product" && 
+                                    <>
+                                        <Text style={{ marginHorizontal: 10 }}>₹{Math.round(item.price)}</Text>
+                                        <Ionicons name={"add"} size={20} color={GlobalColors.blue} style={{marginRight: 10}}/>
+
+                                    </>
+                                    }
                                     <TouchableOpacity onPress={() => editItemHandler(item)}>
                                         <FontAwesome5 name="edit" size={20} style={{ marginRight: 5 }} color={GlobalColors.blueLight} />
                                     </TouchableOpacity>
