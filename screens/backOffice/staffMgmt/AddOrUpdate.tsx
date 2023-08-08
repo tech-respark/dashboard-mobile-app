@@ -13,21 +13,8 @@ import { selectBranchId, selectTenantId } from "../../../redux/state/UserStates"
 import { makeAPIRequest } from "../../../utils/Helper";
 import WeeklyOffModal from "./WeeklyOffModal";
 import Toast from "react-native-root-toast";
+import RadioButtonGroup from "../../../components/RadioButtonGroup";
 
-const GenderRadioButton = ({ options, selectedOption, onSelect }: any) => {
-    return (
-        <View style={styles.container}>
-            {options.map((option: any) => (
-                <View key={option} style={{ flexDirection: 'row' }}>
-                    <TouchableOpacity style={styles.radioInnerCircle} onPress={() => onSelect(option)}>
-                        {selectedOption === option && <View style={styles.selectedRadioInnerCircle} />}
-                    </TouchableOpacity>
-                    <Text style={{ fontWeight: '300', color: 'gray' }}>{option}</Text>
-                </View>
-            ))}
-        </View>
-    );
-};
 
 const AddOrUpdate = ({ navigation, route }: any) => {
     const dispatch = useAppDispatch();
@@ -180,7 +167,7 @@ const AddOrUpdate = ({ navigation, route }: any) => {
                 </View>
 
                 <Text style={{ fontWeight: '300', marginTop: 20, marginHorizontal: 5 }}>Gender</Text>
-                <GenderRadioButton
+                <RadioButtonGroup
                     options={genderOptions}
                     selectedOption={gender}
                     onSelect={handleGenderSelect}
@@ -382,27 +369,5 @@ const styles = StyleSheet.create({
         borderColor: 'lightgray',
         marginVertical: 10
     },
-    container: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '90%',
-        justifyContent: 'space-evenly',
-        marginVertical: 5
-    },
-    radioInnerCircle: {
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: GlobalColors.blue,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 5,
-    },
-    selectedRadioInnerCircle: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        backgroundColor: GlobalColors.blue,
-    }
+    
 });

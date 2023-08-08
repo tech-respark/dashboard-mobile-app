@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 import { FontSize, GlobalColors, GradientButtonColor } from "../../../Styles/GlobalStyleConfigs";
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import UpdateProductStockModal from "./updateProductStockModal";
 
 type CategoryListType = {
     dataList: { [key: string]: any }[],
@@ -10,9 +11,10 @@ type CategoryListType = {
     buttonClickHandler: () => void,
     editItemHandler: (item: { [key: string]: any }) => void,
     buttonText: string,
-    type?: string
+    type: string,
+    topLevelObject?: { [key: string]: any }
 }
-const CategoryList: FC<CategoryListType> = ({ dataList, onTextClickHandler, buttonClickHandler, editItemHandler, buttonText, type }) => {
+const CategoryList: FC<CategoryListType> = ({ dataList, onTextClickHandler, buttonClickHandler, editItemHandler, buttonText, type, topLevelObject }) => {
     return (
         <>
             {
@@ -22,12 +24,10 @@ const CategoryList: FC<CategoryListType> = ({ dataList, onTextClickHandler, butt
                             <View key={index} style={styles.itemView}>
                                 <Text style={[{ fontSize: FontSize.regular, maxWidth: '70%' }, item.active ? {} : { color: 'gray' }]} onPress={() => { onTextClickHandler(item) }}>{item.name}</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    {type === "product" && 
-                                    <>
-                                        <Text style={{ marginHorizontal: 10 }}>₹{Math.round(item.price)}</Text>
-                                        <Ionicons name={"add"} size={20} color={GlobalColors.blue} style={{marginRight: 10}}/>
-
-                                    </>
+                                    {
+                                        item.price ? <Text style={{ marginHorizontal: 10 }}>₹{Math.round(item.price)}</Text> : <></>
+                                    }
+                                    {(type === "product" && item.variation)  ? <UpdateProductStockModal selectedProduct={item} topLevelObject={topLevelObject ?? {}} /> : <></>
                                     }
                                     <TouchableOpacity onPress={() => editItemHandler(item)}>
                                         <FontAwesome5 name="edit" size={20} style={{ marginRight: 5 }} color={GlobalColors.blueLight} />
@@ -42,7 +42,7 @@ const CategoryList: FC<CategoryListType> = ({ dataList, onTextClickHandler, butt
                     </View>
             }
             <TouchableOpacity style={{ marginHorizontal: 40, marginBottom: 30 }}
-                onPress={() => { buttonClickHandler }}
+                onPress={buttonClickHandler}
             >
                 <LinearGradient
                     colors={GradientButtonColor}

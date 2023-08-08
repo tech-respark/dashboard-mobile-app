@@ -31,15 +31,19 @@ const MainCategory = ({ navigation,type }: any) => {
 
     const onTextClickHandler = (item: {[key: string]: any}) => {
         if(item.categoryList.length > 0){
-            navigation.navigate("SubCategory", {selectedItem: item, type: type})
+            navigation.navigate("SubCategory", {selectedItem: item, type: type, topLevelObject: item})
         }else if(item.itemList.length > 0){
-            navigation.navigate("ItemList", {selectedItem: item, routeName: item.name, type: type})
+            navigation.navigate("ItemList", {selectedItem: item, routeName: item.name, type: type, topLevelObject: item})
         }
     };
 
-    const editCategory = () => {};
+    const editCategory = (item: {[key: string]: any}) => {
+        navigation.navigate("AddNewOrEdit", {type: type, isAddNew: false, item: item, categoryId: item.id});
+    };
 
-    const addNew = () => { };
+    const addNew = () => { 
+        navigation.navigate("AddNewOrEdit", {type: type, isAddNew: true});
+    };
 
     useEffect(() => {
         getCategoryData();
@@ -48,7 +52,7 @@ const MainCategory = ({ navigation,type }: any) => {
     return (
         <View style={{ padding: 10, flex: 1, backgroundColor: '#fff' }}>
             <Text style={{ fontSize: FontSize.large, fontWeight: 'bold', padding: 5 }}>Category</Text>
-            <CategoryList dataList={categoryList} onTextClickHandler={onTextClickHandler} editItemHandler={editCategory} buttonClickHandler={addNew} buttonText="Add New"/>
+            <CategoryList dataList={categoryList} onTextClickHandler={onTextClickHandler} editItemHandler={editCategory} buttonClickHandler={addNew} buttonText="Add New" type={type}/>
         </View>
     )
 };

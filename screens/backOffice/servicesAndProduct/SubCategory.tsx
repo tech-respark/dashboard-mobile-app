@@ -7,12 +7,16 @@ import CategoryList from "./CategoryList";
 const SubCategory = ({ navigation, route }: any) => {
     const selectedItem = route.params.selectedItem;
     const onTextClickHandler = (item: {[key: string]: any}) => {
-        navigation.navigate("ItemList", {selectedItem: item, routeName: selectedItem.name+' / '+ item.name, type: route.params.type});
+        navigation.navigate("ItemList", {selectedItem: item, routeName: selectedItem.name+' / '+ item.name, type: route.params.type, topLevelObject: route.params.topLevelObject});
     };
 
-    const editCategory = () => {};
+    const editCategory = (item: {[key: string]: any}) => {
+        navigation.navigate("AddNewOrEdit", {type: route.params.type, isAddNew: false, item: item, categoryId: selectedItem.id, subCategoryId: item.id});
+    };
 
-    const addNew = () => { };
+    const addNew = () => { 
+        navigation.navigate("AddNewOrEdit", {type: route.params.type, isAddNew: true});
+    };
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -33,7 +37,7 @@ const SubCategory = ({ navigation, route }: any) => {
 
     return (
         <View style={{flex: 1, backgroundColor: "#fff"}}>
-            <CategoryList dataList={selectedItem.categoryList} onTextClickHandler={onTextClickHandler} editItemHandler={editCategory} buttonClickHandler={addNew} buttonText="Add New"/>
+            <CategoryList dataList={selectedItem.categoryList} onTextClickHandler={onTextClickHandler} editItemHandler={editCategory} buttonClickHandler={addNew} buttonText="Add New" type={route.params.type}/>
         </View>
     );
 };

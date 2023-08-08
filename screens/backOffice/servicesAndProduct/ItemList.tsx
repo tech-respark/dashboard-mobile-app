@@ -6,6 +6,7 @@ import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 
 
 const ItemList = ({ navigation, route }: any) => {
+    const topLevelObject = route.params.topLevelObject;
     const selectedItem = route.params.selectedItem;
     const routeName = route.params.routeName;
     const type = route.params.type;
@@ -52,7 +53,7 @@ const ItemList = ({ navigation, route }: any) => {
                     onChangeText={onSearchChange}
                 />
             </View>
-            <CategoryList dataList={filteredItems} onTextClickHandler={editCategory} editItemHandler={editCategory} buttonClickHandler={addNew} buttonText="Add Service" type={type}/>
+            <CategoryList dataList={filteredItems} onTextClickHandler={editCategory} editItemHandler={editCategory} buttonClickHandler={addNew} buttonText="Add Service" type={type} topLevelObject={topLevelObject}/>
         </View>
     );
 };
