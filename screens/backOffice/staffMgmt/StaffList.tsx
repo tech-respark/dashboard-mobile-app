@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
-import { selectBranchId, selectTenantId } from "../../../redux/state/UserStates";
+import { selectBranchId, selectStaffData, selectTenantId } from "../../../redux/state/UserStates";
 import { setIsLoading } from "../../../redux/state/UIStates";
 import { environment } from "../../../utils/Constants";
 import { makeAPIRequest } from "../../../utils/Helper";
@@ -17,15 +17,16 @@ const StaffList = ({ navigation }: any) => {
     const dispatch = useAppDispatch();
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
+    const responseStaff = useAppSelector(selectStaffData);
 
     const [staffList, setStaffList] = useState<{ [key: string]: any }[]>([]);
     const [rolesData, setRolesData] = useState<{ [key: string]: any }[]>([]);
 
     const getStaffList = async () => {
         dispatch(setIsLoading({ isLoading: true }));
-        let url = environment.sqlBaseUri + `staffs/${tenantId}/${storeId}`;
-        let responseStaff = await makeAPIRequest(url, null, "GET");
-        url = environment.sqlBaseUri + `ssroles/${tenantId}`;
+        // let url = environment.sqlBaseUri + `staffs/${tenantId}/${storeId}`;
+        // let responseStaff = await makeAPIRequest(url, null, "GET");
+        let url = environment.sqlBaseUri + `ssroles/${tenantId}`;
         let responseRoles = await makeAPIRequest(url, null, "GET");
         dispatch(setIsLoading({ isLoading: false }));
         if (responseStaff && responseRoles) {

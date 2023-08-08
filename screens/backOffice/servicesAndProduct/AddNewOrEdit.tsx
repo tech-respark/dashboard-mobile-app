@@ -9,7 +9,8 @@ import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { setIsLoading } from "../../../redux/state/UIStates";
 import { makeAPIRequest } from "../../../utils/Helper";
 import { environment } from "../../../utils/Constants";
-import { selectBranchId, selectTenantId } from "../../../redux/state/UserStates";
+import { selectBranchId, selectStaffData, selectTenantId } from "../../../redux/state/UserStates";
+import ModalDropdown from 'react-native-modal-dropdown';
 
 const AddNewOrEdit = ({ navigation, route }: any) => {
     const dispatch = useAppDispatch();
@@ -18,7 +19,9 @@ const AddNewOrEdit = ({ navigation, route }: any) => {
     const genderOptions: string[] = ["Both", "Male", "Female"];
     const isAddNew = route.params.isAddNew;
     const type = route.params.type;
-    const currentItem = route.params.item;
+    const staffList = useAppSelector(selectStaffData);
+    const staffsNameList = staffList!.map(item => `${item.firstName} ${item.lastName}`);
+
 
     const [isActive, setIsActive] = useState<boolean>(false);
     const [name, setName] = useState<string>("");
@@ -61,14 +64,32 @@ const AddNewOrEdit = ({ navigation, route }: any) => {
             setShowExpertSection(false)
         } else {
             setShowExpertSection(true);
-            let uniqueExperts: { [key: string]: any } = {}
+            const uniqueExperts: { [key: string]: any } = {};
             data.itemList.forEach((item: any) => {
                 item["experts"].forEach((expert: any) => {
                     uniqueExperts[expert.id] = expert;
                 });
             });
-            setExperts(Object.values(uniqueExperts));
+            const temp = Object.values(uniqueExperts);
+            const matchingObjects: { [key: string]: any }[] = [];
+            temp.forEach((expert: any) => {
+                const matchingDataItem = staffList!.find((fullData: any) => fullData.id === expert.id);
+                if (matchingDataItem) {
+                    matchingObjects.push(matchingDataItem);
+                }
+            });
+            setExperts(matchingObjects);
         }
+    };
+
+    const handleStaffSelect = (index: number) => {
+        let expertObject = staffList![index];
+        experts.some(expert => expert.id === expertObject.id) ? null : setExperts(prevExperts => [...prevExperts, expertObject]);
+    };
+
+    const removeExpert = (item: any) => {
+        const updatedExperts = experts.filter(expert => expert.id !== item.id);
+        setExperts(updatedExperts);
     };
 
     useEffect(() => {
@@ -137,11 +158,27 @@ const AddNewOrEdit = ({ navigation, route }: any) => {
                         <Text style={{ fontSize: FontSize.medium, paddingVertical: 5 }}>Experts</Text>
                         <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
                             {experts.map((item: any) => (
-                                <View style={styles.pillView}>
-                                    <Text>{item.name}</Text>
-                                    <Ionicons name={"close"} size={15} color={GlobalColors.blue} style={{marginHorizontal: 2}}/>
+                                <View style={styles.pillView} key={item.id}>
+                                    <Text>{item.firstName} {item.lastName}</Text>
+                                    <Ionicons name={"close"} size={15} color={GlobalColors.blue} style={{ marginHorizontal: 2 }} onPress={() => {
+                                        removeExpert(item);
+                                    }} />
                                 </View>
                             ))}
+                        </View>
+                        <View style={{ width: '50%' }}>
+                            <ModalDropdown
+                                options={staffsNameList}
+                                onSelect={handleStaffSelect}
+                                dropdownStyle={[styles.dropdownContainer, { height: 40 * staffsNameList.length }]}
+                                dropdownTextStyle={styles.dropdownOption}
+                                dropdownTextHighlightStyle={styles.selectedOption}
+                            >
+                                <View style={styles.addExpertView}>
+                                    <Text style={{ fontSize: FontSize.medium }}>Add Expert</Text>
+                                    <Ionicons name="chevron-down" size={20} style={{ marginLeft: 5, color: GlobalColors.blue }}/>
+                                </View>
+                            </ModalDropdown>
                         </View>
                     </View>
                 }
@@ -232,8 +269,32 @@ const styles = StyleSheet.create({
         backgroundColor: GlobalColors.lightGray2,
         borderColor: GlobalColors.blue,
         alignItems: 'center'
+    },
+    dropdownContainer: {
+        marginTop: 10,
+        width: 150,
+        backgroundColor: GlobalColors.lightGray2
+    },
+    dropdownOption: {
+        fontSize: 16,
+        padding: 8,
+        textAlign: 'auto',
+        flexWrap: 'wrap',
+        backgroundColor: GlobalColors.lightGray2,
+        textTransform: 'capitalize'
+    },
+    selectedOption: {
+        color: 'black'
+    },
+    addExpertView: {
+        margin: 10,
+        flexDirection: 'row',
+        borderRadius: 20,
+        borderWidth: 1.5,
+        borderColor: GlobalColors.blue,
+        padding: 5,
+        justifyContent: 'space-evenly'
     }
-
 });
 
 export default AddNewOrEdit;
