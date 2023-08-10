@@ -11,6 +11,7 @@ import { makeAPIRequest } from "../../../utils/Helper";
 import { environment } from "../../../utils/Constants";
 import { selectBranchId, selectStaffData, selectTenantId } from "../../../redux/state/UserStates";
 import ModalDropdown from 'react-native-modal-dropdown';
+import UploadImageField from "../../../components/UploadImageField";
 
 const AddNewOrEdit = ({ navigation, route }: any) => {
     const dispatch = useAppDispatch();
@@ -30,6 +31,12 @@ const AddNewOrEdit = ({ navigation, route }: any) => {
     const [experts, setExperts] = useState<{ [key: string]: any }[]>([]);
     const [showExpertsSection, setShowExpertSection] = useState<boolean>(false);
 
+    const [bothIcon, setBothIcon] = useState<any>("");
+    const [femaleIcon, setFemaleIcon] = useState<any>("");
+    const [maleIcon, setMaleIcon] = useState<any>("");
+
+    const [displayImageObjects, setDisplayImageObjects] = useState<{[key: string]: any}[]>([]);
+
     useLayoutEffect(() => {
         navigation.setOptions({
             headerTitle: isAddNew ? "New Category" : route.params.item.name,
@@ -46,7 +53,6 @@ const AddNewOrEdit = ({ navigation, route }: any) => {
         dispatch(setIsLoading({ isLoading: true }));
         let url = environment.documentBaseUri + `stores/categories/getAllStoresCategoriesByCategoryId?tenantId=${tenantId}&catId=${route.params.categoryId}`;
         url += route.params.subCategoryId ? `&subCatId=${route.params.subCategoryId}` : '';
-        console.log(url);
         let response = await makeAPIRequest(url, null, "GET");
         dispatch(setIsLoading({ isLoading: false }));
         const responseData = response[storeId!];
@@ -56,6 +62,8 @@ const AddNewOrEdit = ({ navigation, route }: any) => {
             setPosition(String(responseData.index));
             setGender(responseData.group.charAt(0).toUpperCase() + responseData.group.slice(1));
             getExperts(responseData);
+            getImagesIcons(responseData);
+            setDisplayImageObjects(responseData?.imagePaths || []);
         }
     };
 
@@ -82,6 +90,19 @@ const AddNewOrEdit = ({ navigation, route }: any) => {
         }
     };
 
+    const getImagesIcons = (data: any) => {
+        data.icons.forEach((item: any) => {
+            if(item.group == "both"){
+                setBothIcon(item.imagePath);
+            }else if(item.group == "female"){
+                setFemaleIcon(item.imagePath);
+            }else if(item.group == "male"){
+                setMaleIcon(item.imagePath);
+            }
+        })      
+
+    };
+
     const handleStaffSelect = (index: number) => {
         let expertObject = staffList![index];
         experts.some(expert => expert.id === expertObject.id) ? null : setExperts(prevExperts => [...prevExperts, expertObject]);
@@ -92,8 +113,14 @@ const AddNewOrEdit = ({ navigation, route }: any) => {
         setExperts(updatedExperts);
     };
 
+    const setAddNewData = () => {
+        
+    };
+
     useEffect(() => {
-        (type === "service" && !isAddNew) ? getCategoryInformation() : null;
+        if(type == "service"){
+            isAddNew ? setAddNewData() : getCategoryInformation();
+        }
     }, []);
     return (
         <View style={{ flex: 1 }}>
@@ -124,6 +151,7 @@ const AddNewOrEdit = ({ navigation, route }: any) => {
 
                     <View style={[styles.rowView, { width: '50%' }]}>
                         <Text>Position</Text>
+                        <Text style={{ color: 'red' }}>*</Text>
                         <TextInput
                             style={[styles.textInput,]}
                             placeholder=""
@@ -147,11 +175,40 @@ const AddNewOrEdit = ({ navigation, route }: any) => {
 
                 <View style={styles.sectionView}>
                     <Text style={{ fontSize: FontSize.medium, paddingVertical: 5 }}>Icons</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', margin: 10 }}>
+                        <View>
+                            <Text style={{ color: 'gray', fontSize: FontSize.medium }}>Both</Text>
+                            <UploadImageField imageUrl={bothIcon}/>
+                        </View>
+                        <Text>OR</Text>
+                    </View>
+                    <View style={{flexDirection: 'row', width: '100%', justifyContent: 'space-around'}}>
+                        <View>
+                            <Text style={{color: 'gray', fontSize: FontSize.medium }}>Male</Text>
+                            <UploadImageField imageUrl={maleIcon}/>
+                        </View>
+                        <View>
+                            <Text style={{color: 'gray', fontSize: FontSize.medium }}>Female</Text>
+                            <UploadImageField imageUrl={femaleIcon}/>
+                        </View>
+                    </View>
                 </View>
 
 
                 <View style={styles.sectionView}>
                     <Text style={{ fontSize: FontSize.medium, paddingVertical: 5 }}>Display Images</Text>
+                    <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={true}
+                    contentContainerStyle={{ paddingBottom: 10 }}
+                    >
+                        {
+                            displayImageObjects.map((item: any) => (
+                                <UploadImageField imageUrl={item.imagePath} key={item.imagePath}/>
+                            ))
+                        }
+                        <UploadImageField imageUrl={""}/>
+                    </ScrollView>
                 </View>
                 {!isAddNew && type == "service" && showExpertsSection &&
                     <View style={styles.sectionView}>
@@ -176,7 +233,7 @@ const AddNewOrEdit = ({ navigation, route }: any) => {
                             >
                                 <View style={styles.addExpertView}>
                                     <Text style={{ fontSize: FontSize.medium }}>Add Expert</Text>
-                                    <Ionicons name="chevron-down" size={20} style={{ marginLeft: 5, color: GlobalColors.blue }}/>
+                                    <Ionicons name="chevron-down" size={20} style={{ marginLeft: 5, color: GlobalColors.blue }} />
                                 </View>
                             </ModalDropdown>
                         </View>

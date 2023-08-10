@@ -29,7 +29,6 @@ const UpdateProductStockModal: FC<UpdateProductStockModalProp> = ({ selectedProd
     };
 
     const handleVariationValueChange = (variationKey: any, value: string) => {
-        console.log("######", variationKey, value)
         setVariationValues((prevValues) => ({
           ...prevValues,
           [variationKey]: value,
@@ -49,7 +48,6 @@ const UpdateProductStockModal: FC<UpdateProductStockModalProp> = ({ selectedProd
             stock: variationValues[`${selectedProduct.id}${item.id}`]
           }));
         let response = await makeAPIRequest(environment.documentBaseUri+"itemstock", requestBody, "POST");
-        console.log("RESPPONSE", response)
         if(response){
             Toast.show("Updated Successfully", {backgroundColor: GlobalColors.success, opacity: 1})
             toggleModal();
