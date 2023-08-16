@@ -9,7 +9,7 @@ const RadioButtonGroup = ({ options, selectedOption, onSelect }: any) => {
                     <TouchableOpacity style={styles.radioInnerCircle} onPress={() => onSelect(option)}>
                         {selectedOption === option && <View style={styles.selectedRadioInnerCircle} />}
                     </TouchableOpacity>
-                    <Text style={{ fontWeight: '300', color: 'gray' }}>{option}</Text>
+                    <Text style={{ fontWeight: '300', color: 'gray', textTransform: 'capitalize' }}>{option}</Text>
                 </View>
             ))}
         </View>

@@ -11,11 +11,11 @@ const SubCategory = ({ navigation, route }: any) => {
     };
 
     const editCategory = (item: {[key: string]: any}) => {
-        navigation.navigate("AddNewOrEdit", {type: route.params.type, isAddNew: false, item: item, categoryId: selectedItem.id, subCategoryId: item.id});
+        navigation.navigate("AddUpdateCategory", {type: route.params.type, isAddNew: false, categoryLevel: 2, item: item, categoryId: selectedItem.id, categoryName: selectedItem.name, subCategoryId: item.id});
     };
 
     const addNew = () => { 
-        navigation.navigate("AddNewOrEdit", {type: route.params.type, isAddNew: true});
+        navigation.navigate("AddUpdateCategory", {type: route.params.type, isAddNew: true, categoryLevel: 2, categoryId: selectedItem.id, categoryName: selectedItem.name, position: String(selectedItem.categoryList.length+1)});
     };
 
     useLayoutEffect(() => {

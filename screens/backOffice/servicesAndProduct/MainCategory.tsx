@@ -8,8 +8,10 @@ import { makeAPIRequest } from "../../../utils/Helper";
 import { setIsLoading } from "../../../redux/state/UIStates";
 import Toast from "react-native-root-toast";
 import CategoryList from "./CategoryList";
+import { useIsFocused } from "@react-navigation/native";
 
 const MainCategory = ({ navigation,type }: any) => {
+    const isFocused = useIsFocused();
     const dispatch = useAppDispatch();
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
@@ -35,19 +37,24 @@ const MainCategory = ({ navigation,type }: any) => {
         }else if(item.itemList.length > 0){
             navigation.navigate("ItemList", {selectedItem: item, routeName: item.name, type: type, topLevelObject: item})
         }
+        // else{
+        //     navigation.navigate
+        // }
     };
 
     const editCategory = (item: {[key: string]: any}) => {
-        navigation.navigate("AddNewOrEdit", {type: type, isAddNew: false, item: item, categoryId: item.id});
+        navigation.navigate("AddUpdateCategory", {type: type, isAddNew: false, categoryLevel: 1, item: item, categoryId: item.id});
     };
 
     const addNew = () => { 
-        navigation.navigate("AddNewOrEdit", {type: type, isAddNew: true});
+        navigation.navigate("AddUpdateCategory", {type: type, isAddNew: true, categoryLevel: 1, position: String(categoryList.length+1)});
     };
 
     useEffect(() => {
-        getCategoryData();
-    }, []);
+        if(isFocused){
+            getCategoryData();
+        }
+    }, [isFocused]);
 
     return (
         <View style={{ padding: 10, flex: 1, backgroundColor: '#fff' }}>

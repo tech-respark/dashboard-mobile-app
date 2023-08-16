@@ -12,22 +12,24 @@ import { environment } from "../../../utils/Constants";
 import { selectBranchId, selectStaffData, selectTenantId } from "../../../redux/state/UserStates";
 import ModalDropdown from 'react-native-modal-dropdown';
 import UploadImageField from "../../../components/UploadImageField";
+import Toast from "react-native-root-toast";
 
-const AddNewOrEdit = ({ navigation, route }: any) => {
+const AddUpdateCategory = ({ navigation, route }: any) => {
     const dispatch = useAppDispatch();
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
-    const genderOptions: string[] = ["Both", "Male", "Female"];
+    const genderOptions: string[] = ["both", "male", "female"];
     const isAddNew = route.params.isAddNew;
     const type = route.params.type;
+    const categoryLevel = route.params.categoryLevel;
     const staffList = useAppSelector(selectStaffData);
     const staffsNameList = staffList!.map(item => `${item.firstName} ${item.lastName}`);
 
 
     const [isActive, setIsActive] = useState<boolean>(false);
     const [name, setName] = useState<string>("");
-    const [position, setPosition] = useState<string>("");
-    const [gender, setGender] = useState<string>("");
+    const [position, setPosition] = useState<string>(route.params.position ?? "");
+    const [gender, setGender] = useState<string>("both");
     const [experts, setExperts] = useState<{ [key: string]: any }[]>([]);
     const [showExpertsSection, setShowExpertSection] = useState<boolean>(false);
 
@@ -35,11 +37,13 @@ const AddNewOrEdit = ({ navigation, route }: any) => {
     const [femaleIcon, setFemaleIcon] = useState<any>("");
     const [maleIcon, setMaleIcon] = useState<any>("");
 
-    const [displayImageObjects, setDisplayImageObjects] = useState<{[key: string]: any}[]>([]);
+    const [displayImageObjects, setDisplayImageObjects] = useState<{ [key: string]: any }[]>([]);
+
+    console.log("ROUTE: ", route.params)
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerTitle: isAddNew ? "New Category" : route.params.item.name,
+            headerTitle: categoryLevel === 1 ? (isAddNew ? "New Category" : route.params.item.name) : (`${route.params.categoryName} / ${isAddNew ? "New Category" : route.params.item.name}`),
             headerTitleAlign: 'left',
             headerLeft: () => (
                 <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -60,7 +64,7 @@ const AddNewOrEdit = ({ navigation, route }: any) => {
             setIsActive(responseData.active);
             setName(responseData.name);
             setPosition(String(responseData.index));
-            setGender(responseData.group.charAt(0).toUpperCase() + responseData.group.slice(1));
+            setGender(responseData.group);
             getExperts(responseData);
             getImagesIcons(responseData);
             setDisplayImageObjects(responseData?.imagePaths || []);
@@ -92,14 +96,14 @@ const AddNewOrEdit = ({ navigation, route }: any) => {
 
     const getImagesIcons = (data: any) => {
         data.icons.forEach((item: any) => {
-            if(item.group == "both"){
+            if (item.group == "both") {
                 setBothIcon(item.imagePath);
-            }else if(item.group == "female"){
+            } else if (item.group == "female") {
                 setFemaleIcon(item.imagePath);
-            }else if(item.group == "male"){
+            } else if (item.group == "male") {
                 setMaleIcon(item.imagePath);
             }
-        })      
+        })
 
     };
 
@@ -114,11 +118,64 @@ const AddNewOrEdit = ({ navigation, route }: any) => {
     };
 
     const setAddNewData = () => {
-        
+
+    };
+
+    const createRequestBody = () => {
+        let body: { [key: string]: any } = {};
+        let categoryList: { [key: string]: any } = {
+            active: isActive,
+            categoryList: [],
+            days: "All",
+            group: gender,
+            icon: "",
+            icons: [],
+            imagePaths: [],
+            index: Number(position),
+            itemList: [],
+            name: name,
+        };
+        if (!isAddNew) {
+            categoryList["id"] = categoryLevel == 1 ? route.params.categoryId : route.params.subCategoryId 
+        }else{
+            categoryList["type"] = type
+        }
+        body = {
+            case: categoryLevel,
+            category: categoryLevel == 1 ? categoryList : route.params.categoryId,
+            experts: {},
+            status: isAddNew ? "CREATE" : "UPDATE",
+            storeIds: {
+                active: [storeId]
+            },
+            tenantId: String(tenantId)
+        }
+        if(categoryLevel == 2){
+            body["subCategory"] = categoryList
+        }
+        return body;
+    };
+
+    const formSubmit = async () => {
+        if (!name || !position || !gender) {
+            Toast.show("Complete the form", { backgroundColor: GlobalColors.error, opacity: 1 });
+            return
+        }
+        const url = environment.documentBaseUri + 'stores/categories/update';
+        let requestBody = createRequestBody();
+        console.log("BODY: ", requestBody);
+        let response = await makeAPIRequest(url, requestBody, "POST");
+        if (response) {
+            Toast.show("Added Successfully", { backgroundColor: GlobalColors.success, opacity: 1 });
+            navigation.goBack();
+        }
+        else {
+            Toast.show("Encountered Error", { backgroundColor: GlobalColors.error, opacity: 1 });
+        }
     };
 
     useEffect(() => {
-        if(type == "service"){
+        if (type == "service") {
             isAddNew ? setAddNewData() : getCategoryInformation();
         }
     }, []);
@@ -169,7 +226,10 @@ const AddNewOrEdit = ({ navigation, route }: any) => {
                     <RadioButtonGroup
                         options={genderOptions}
                         selectedOption={gender}
-                        onSelect={(val: string) => { setGender(val) }}
+                        onSelect={(val: string) => {
+                            console.log("#######", val)
+                            setGender(val)
+                        }}
                     />
                 </View>
 
@@ -178,19 +238,23 @@ const AddNewOrEdit = ({ navigation, route }: any) => {
                     <View style={{ flexDirection: 'row', alignItems: 'center', margin: 10 }}>
                         <View>
                             <Text style={{ color: 'gray', fontSize: FontSize.medium }}>Both</Text>
-                            <UploadImageField imageUrl={bothIcon}/>
+                            <UploadImageField imageUrl={bothIcon} />
                         </View>
                         <Text>OR</Text>
                     </View>
-                    <View style={{flexDirection: 'row', width: '100%', justifyContent: 'space-around'}}>
-                        <View>
-                            <Text style={{color: 'gray', fontSize: FontSize.medium }}>Male</Text>
-                            <UploadImageField imageUrl={maleIcon}/>
-                        </View>
-                        <View>
-                            <Text style={{color: 'gray', fontSize: FontSize.medium }}>Female</Text>
-                            <UploadImageField imageUrl={femaleIcon}/>
-                        </View>
+                    <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'flex-start' }}>
+                        {gender != "female" &&
+                            <View style={{ marginRight: 10 }}>
+                                <Text style={{ color: 'gray', fontSize: FontSize.medium }}>Male</Text>
+                                <UploadImageField imageUrl={maleIcon} />
+                            </View>
+                        }
+                        {gender != "male" &&
+                            <View>
+                                <Text style={{ color: 'gray', fontSize: FontSize.medium }}>Female</Text>
+                                <UploadImageField imageUrl={femaleIcon} />
+                            </View>
+                        }
                     </View>
                 </View>
 
@@ -198,16 +262,16 @@ const AddNewOrEdit = ({ navigation, route }: any) => {
                 <View style={styles.sectionView}>
                     <Text style={{ fontSize: FontSize.medium, paddingVertical: 5 }}>Display Images</Text>
                     <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={true}
-                    contentContainerStyle={{ paddingBottom: 10 }}
+                        horizontal
+                        showsHorizontalScrollIndicator={true}
+                        contentContainerStyle={{ paddingBottom: 10 }}
                     >
                         {
                             displayImageObjects.map((item: any) => (
-                                <UploadImageField imageUrl={item.imagePath} key={item.imagePath}/>
+                                <UploadImageField imageUrl={item.imagePath} key={item.imagePath} />
                             ))
                         }
-                        <UploadImageField imageUrl={""}/>
+                        <UploadImageField imageUrl={""} />
                     </ScrollView>
                 </View>
                 {!isAddNew && type == "service" && showExpertsSection &&
@@ -251,8 +315,8 @@ const AddNewOrEdit = ({ navigation, route }: any) => {
                     start={{ y: 0.0, x: 0.0 }}
                     end={{ y: 0.0, x: 1.0 }}
                 >
-                    <TouchableOpacity onPress={() => {
-
+                    <TouchableOpacity onPress={async () => {
+                        await formSubmit()
                     }} >
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <Text style={[styles.cancelButtonText, { color: '#fff' }]}>Submit</Text>
@@ -354,5 +418,5 @@ const styles = StyleSheet.create({
     }
 });
 
-export default AddNewOrEdit;
+export default AddUpdateCategory;
 
