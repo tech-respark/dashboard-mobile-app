@@ -15,3 +15,5 @@ export const mainTabsIconsMap: {[key: string]: string} = {
     "Expenses": "logo-euro",
     "Campaign": "golf-outline"
 };
+
+export const genderOptions: string[] = ["both", "male", "female"];

@@ -8,17 +8,16 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { setIsLoading } from "../../../redux/state/UIStates";
 import { makeAPIRequest } from "../../../utils/Helper";
-import { environment } from "../../../utils/Constants";
+import { environment, genderOptions } from "../../../utils/Constants";
 import { selectBranchId, selectStaffData, selectTenantId } from "../../../redux/state/UserStates";
-import ModalDropdown from 'react-native-modal-dropdown';
 import UploadImageField from "../../../components/UploadImageField";
 import Toast from "react-native-root-toast";
+import Dropdown from "../../../components/Dropdown";
 
 const AddUpdateCategory = ({ navigation, route }: any) => {
     const dispatch = useAppDispatch();
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
-    const genderOptions: string[] = ["both", "male", "female"];
     const isAddNew = route.params.isAddNew;
     const type = route.params.type;
     const categoryLevel = route.params.categoryLevel;
@@ -29,7 +28,7 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
     const [isActive, setIsActive] = useState<boolean>(false);
     const [name, setName] = useState<string>("");
     const [position, setPosition] = useState<string>(route.params.position ?? "");
-    const [gender, setGender] = useState<string>("both");
+    const [gender, setGender] = useState<string>(genderOptions[0]);
     const [experts, setExperts] = useState<{ [key: string]: any }[]>([]);
     const [showExpertsSection, setShowExpertSection] = useState<boolean>(false);
 
@@ -38,8 +37,6 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
     const [maleIcon, setMaleIcon] = useState<any>("");
 
     const [displayImageObjects, setDisplayImageObjects] = useState<{ [key: string]: any }[]>([]);
-
-    console.log("ROUTE: ", route.params)
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -136,8 +133,8 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
             name: name,
         };
         if (!isAddNew) {
-            categoryList["id"] = categoryLevel == 1 ? route.params.categoryId : route.params.subCategoryId 
-        }else{
+            categoryList["id"] = categoryLevel == 1 ? route.params.categoryId : route.params.subCategoryId
+        } else {
             categoryList["type"] = type
         }
         body = {
@@ -150,7 +147,7 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
             },
             tenantId: String(tenantId)
         }
-        if(categoryLevel == 2){
+        if (categoryLevel == 2) {
             body["subCategory"] = categoryList
         }
         return body;
@@ -288,18 +285,12 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
                             ))}
                         </View>
                         <View style={{ width: '50%' }}>
-                            <ModalDropdown
-                                options={staffsNameList}
-                                onSelect={handleStaffSelect}
-                                dropdownStyle={[styles.dropdownContainer, { height: 40 * staffsNameList.length }]}
-                                dropdownTextStyle={styles.dropdownOption}
-                                dropdownTextHighlightStyle={styles.selectedOption}
-                            >
+                            <Dropdown data={staffsNameList} onSelect={handleStaffSelect} renderContent={() => (
                                 <View style={styles.addExpertView}>
                                     <Text style={{ fontSize: FontSize.medium }}>Add Expert</Text>
                                     <Ionicons name="chevron-down" size={20} style={{ marginLeft: 5, color: GlobalColors.blue }} />
                                 </View>
-                            </ModalDropdown>
+                            )} />
                         </View>
                     </View>
                 }

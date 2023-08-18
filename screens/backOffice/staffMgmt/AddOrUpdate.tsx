@@ -5,7 +5,6 @@ import { FontSize, GlobalColors, GradientButtonColor } from "../../../Styles/Glo
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import CheckBox from "expo-checkbox";
-import ModalDropdown from 'react-native-modal-dropdown';
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { setIsLoading } from "../../../redux/state/UIStates";
 import { environment } from "../../../utils/Constants";
@@ -14,6 +13,7 @@ import { makeAPIRequest } from "../../../utils/Helper";
 import WeeklyOffModal from "./WeeklyOffModal";
 import Toast from "react-native-root-toast";
 import RadioButtonGroup from "../../../components/RadioButtonGroup";
+import Dropdown from "../../../components/Dropdown";
 
 
 const AddOrUpdate = ({ navigation, route }: any) => {
@@ -76,6 +76,7 @@ const AddOrUpdate = ({ navigation, route }: any) => {
         dispatch(setIsLoading({ isLoading: true }));
         //TODO : ssroles API call can be avoided if role is not changed
         const url = environment.sqlBaseUri + "staffs";
+        console.log(selectedRole, rolesData)
         let roleId = rolesData.find((role: any) => role.name === selectedRole)?.id;
         let requestBody: { [key: string]: any } = {
             "active": active ? 1 : 0,
@@ -98,6 +99,7 @@ const AddOrUpdate = ({ navigation, route }: any) => {
             requestBody["id"] = selectedStaff.id;
             requestBody["weeklyOff"] = weeklyOff;
         }
+        console.log(requestBody);
         let response = await makeAPIRequest(url, requestBody, "POST");
         let roleResponse = await getRoleMapping(roleId, response.id);
         dispatch(setIsLoading({ isLoading: false }));
@@ -175,19 +177,13 @@ const AddOrUpdate = ({ navigation, route }: any) => {
                 <Text style={{ fontWeight: '300', marginTop: 20, marginHorizontal: 5 }}>Select Role</Text>
 
                 <View style={{ flexDirection: 'row', width: '80%', alignItems: 'center', justifyContent: 'space-evenly' }}>
-                    <ModalDropdown
-                        options={rolesOptions}
-                        onSelect={handleRoleSelect}
-                        dropdownStyle={[styles.dropdownContainer, { height: 40 * rolesOptions.length }]}
-                        dropdownTextStyle={styles.dropdownOption}
-                        dropdownTextHighlightStyle={styles.selectedOption}
-                    >
+                    <Dropdown data={rolesOptions} onSelect={setSelectedRole} renderContent={() => (
                         <View style={styles.roleSelectRect}>
-                            <Text style={{textTransform: 'capitalize'}}>{selectedRole}</Text>
+                            <Text style={{ textTransform: 'capitalize' }}>{selectedRole}</Text>
                             <Ionicons name="chevron-down" size={20} style={{ marginLeft: 5, color: GlobalColors.blue }} />
                         </View>
-                    </ModalDropdown>
-
+                    )}>
+                    </Dropdown>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 15 }}>
                         <View style={{ padding: 10 }}>
                             <Text style={{ fontSize: FontSize.regular, fontWeight: '300' }}>Weekly</Text>
@@ -369,5 +365,5 @@ const styles = StyleSheet.create({
         borderColor: 'lightgray',
         marginVertical: 10
     },
-    
+
 });

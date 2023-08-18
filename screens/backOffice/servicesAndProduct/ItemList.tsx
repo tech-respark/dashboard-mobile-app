@@ -22,9 +22,18 @@ const ItemList = ({ navigation, route }: any) => {
         setFilteredItems(filtered);
     };
 
-    const editCategory = (item: { [key: string]: any }) => { };
+    const editCategory = (item: { [key: string]: any }) => {
+        if(type=="service"){
+            navigation.navigate("AddUpdateService", {isAdd: false, selectedItem: item, headerTitle: routeName})
+        }
+     };
 
-    const addNew = () => { };
+    const addNew = () => { 
+        console.log("HELLO iit is here")
+        if(type=="service"){
+            navigation.navigate("AddUpdateService", {isAdd: true, headerTitle: routeName})
+        }
+    };
 
     useLayoutEffect(() => {
         navigation.setOptions({
