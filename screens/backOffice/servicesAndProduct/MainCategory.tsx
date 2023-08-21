@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Text, View } from "react-native";
-import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FontSize, GlobalColors, GradientButtonColor } from "../../../Styles/GlobalStyleConfigs";
 import { environment } from "../../../utils/Constants";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { selectBranchId, selectTenantId } from "../../../redux/state/UserStates";
@@ -9,60 +9,155 @@ import { setIsLoading } from "../../../redux/state/UIStates";
 import Toast from "react-native-root-toast";
 import CategoryList from "./CategoryList";
 import { useIsFocused } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
 
-const MainCategory = ({ navigation,type }: any) => {
+const MainCategory = ({ navigation, type }: any) => {
     const isFocused = useIsFocused();
     const dispatch = useAppDispatch();
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
 
     const [categoryList, setCategoryList] = useState<{ [key: string]: any }[]>([]);
+    const [modalVisible, setModalVisible] = useState<boolean>(false);
+    const [clickedItem, setClickedItem] = useState<{ [key: string]: any }>({});
 
     const getCategoryData = async () => {
         dispatch(setIsLoading({ isLoading: true }));
-        const subDomain = (type=='service') ? "getServiceCategoriesByTenantAndStore" : "getProductCategoriesByTenantAndStore";
+        const subDomain = (type == 'service') ? "getServiceCategoriesByTenantAndStore" : "getProductCategoriesByTenantAndStore";
         const url = environment.documentBaseUri + `stores/${subDomain}?tenantId=${tenantId}&storeId=${storeId}`;
         let response = await makeAPIRequest(url, null, "GET");
         dispatch(setIsLoading({ isLoading: false }));
         if (response) {
             setCategoryList(response);
         } else {
-            Toast.show("No Data Found", {backgroundColor: GlobalColors.error});
+            Toast.show("No Data Found", { backgroundColor: GlobalColors.error });
         }
     };
 
-    const onTextClickHandler = (item: {[key: string]: any}) => {
-        if(item.categoryList.length > 0){
-            navigation.navigate("SubCategory", {selectedItem: item, type: type, topLevelObject: item})
-        }else if(item.itemList.length > 0){
-            navigation.navigate("ItemList", {selectedItem: item, routeName: item.name, type: type, topLevelObject: item})
+    const onTextClickHandler = (item: { [key: string]: any }) => {
+        if (item.categoryList.length > 0) {
+            navigation.navigate("SubCategory", { selectedItem: item, type: type, topLevelObject: item })
+        } else if (item.itemList.length > 0) {
+            navigation.navigate("ItemList", { selectedItem: item, routeName: item.name, type: type, topLevelObject: item, categoryLevel: 1, categoryId: item.id });
         }
-        // else{
-        //     navigation.navigate
-        // }
+        else {
+            setClickedItem(item);
+            setModalVisible(true);
+        }
     };
 
-    const editCategory = (item: {[key: string]: any}) => {
-        navigation.navigate("AddUpdateCategory", {type: type, isAddNew: false, categoryLevel: 1, item: item, categoryId: item.id});
+    const editCategory = (item: { [key: string]: any }) => {
+        navigation.navigate("AddUpdateCategory", { type: type, isAddNew: false, categoryLevel: 1, item: item, categoryId: item.id });
     };
 
-    const addNew = () => { 
-        navigation.navigate("AddUpdateCategory", {type: type, isAddNew: true, categoryLevel: 1, position: String(categoryList.length+1)});
+    const addNew = () => {
+        navigation.navigate("AddUpdateCategory", { type: type, isAddNew: true, categoryLevel: 1, position: String(categoryList.length + 1) });
     };
 
     useEffect(() => {
-        if(isFocused){
+        if (isFocused) {
             getCategoryData();
         }
     }, [isFocused]);
 
     return (
-        <View style={{ padding: 10, flex: 1, backgroundColor: '#fff' }}>
+        <View style={{ padding: 10, flex: 1, backgroundColor: '#fff', opacity: modalVisible ? 0.5 : 1 }}>
             <Text style={{ fontSize: FontSize.large, fontWeight: 'bold', padding: 5 }}>Category</Text>
-            <CategoryList dataList={categoryList} onTextClickHandler={onTextClickHandler} editItemHandler={editCategory} buttonClickHandler={addNew} buttonText="Add New" type={type}/>
-        </View>
+            <CategoryList dataList={categoryList} onTextClickHandler={onTextClickHandler} editItemHandler={editCategory} buttonClickHandler={addNew} buttonText="Add New" type={type} />
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(!modalVisible);
+                }}>
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        <Text>There is no Subcategory or Item added to</Text>
+                        <Text style={{ fontSize: FontSize.large, fontWeight: "bold", marginTop: 5, marginBottom: 5 }}>{clickedItem.name}</Text>
+                        <LinearGradient
+                            colors={GradientButtonColor}
+                            style={styles.cancelButtom}
+                            start={{ y: 0.0, x: 0.0 }}
+                            end={{ y: 0.0, x: 1.0 }}
+                        >
+                            <TouchableOpacity onPress={() => {
+                                navigation.navigate("AddUpdateCategory", { type: type, isAddNew: true, categoryLevel: 2, categoryId: clickedItem.id, categoryName: clickedItem.name, position: String(clickedItem.categoryList.length + 1) });
+                                setModalVisible(false);
+                            }} >
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Text style={[styles.cancelButtonText, { color: '#fff' }]}>Add Subcategory</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </LinearGradient>
+                        <LinearGradient
+                            colors={GradientButtonColor}
+                            style={styles.cancelButtom}
+                            start={{ y: 0.0, x: 0.0 }}
+                            end={{ y: 0.0, x: 1.0 }}
+                        >
+                            <TouchableOpacity onPress={() => {
+                                if (type == "service") {
+                                    navigation.navigate("AddUpdateService", { isAdd: true, headerTitle: clickedItem.name, position: "1", categoryLevel: 1, categoryId: clickedItem.id });
+                                    setModalVisible(false);
+                                }
+                            }} >
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Text style={[styles.cancelButtonText, { color: '#fff' }]}>Add Item</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </LinearGradient>
+                        <TouchableOpacity onPress={() => { setModalVisible(false) }} style={[styles.cancelButtom, { alignItems: 'center' }]}>
+                            <Text style={[styles.cancelButtonText, { color: GlobalColors.blue }]}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal >
+        </View >
     )
 };
+
+const styles = StyleSheet.create({
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 22,
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 25,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    buttons: {
+        flexDirection: "row",
+        width: "100%",
+        backgroundColor: 'red'
+    },
+    cancelButtom: {
+        borderWidth: 1,
+        paddingVertical: 8,
+        borderRadius: 20,
+        borderColor: GlobalColors.blue,
+        marginVertical: 10,
+        width: 200,
+        alignItems: 'center'
+    },
+    cancelButtonText:
+    {
+        fontSize: FontSize.medium,
+    },
+});
 
 
 export default MainCategory;

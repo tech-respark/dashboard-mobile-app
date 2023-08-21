@@ -119,7 +119,6 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
     };
 
     const createRequestBody = () => {
-        let body: { [key: string]: any } = {};
         let categoryList: { [key: string]: any } = {
             active: isActive,
             categoryList: [],
@@ -137,7 +136,7 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
         } else {
             categoryList["type"] = type
         }
-        body = {
+        let body: { [key: string]: any } = {
             case: categoryLevel,
             category: categoryLevel == 1 ? categoryList : route.params.categoryId,
             experts: {},
@@ -160,7 +159,6 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
         }
         const url = environment.documentBaseUri + 'stores/categories/update';
         let requestBody = createRequestBody();
-        console.log("BODY: ", requestBody);
         let response = await makeAPIRequest(url, requestBody, "POST");
         if (response) {
             Toast.show("Added Successfully", { backgroundColor: GlobalColors.success, opacity: 1 });

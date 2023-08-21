@@ -12,12 +12,16 @@ interface Props {
   data: string[];
   onSelect: (item: string) => void;
   renderContent: () => React.ReactElement<any, any>;
+  optionWidth?: number;
+  setX?: number
 }
 
-const Dropdown: FC<Props> = ({ data, onSelect, renderContent }) => {
+const Dropdown: FC<Props> = ({ data, onSelect, renderContent, optionWidth, setX=100 }) => {
   const DropdownButton = useRef(null);
   const [visible, setVisible] = useState(false);
   const [dropdownTop, setDropdownTop] = useState(0);
+  const [dropdownLeft, setDropdownLeft] = useState(0);
+  
 
   const toggleDropdown = (): void => {
     visible ? setVisible(false) : openDropdown();
@@ -26,6 +30,7 @@ const Dropdown: FC<Props> = ({ data, onSelect, renderContent }) => {
   const openDropdown = (): void => {
     DropdownButton.current.measure((_fx, _fy, _w, h, _px, py) => {
       setDropdownTop(py + h);
+      setDropdownLeft(_px + _w - setX);
     });
     setVisible(true);
   };
@@ -36,7 +41,7 @@ const Dropdown: FC<Props> = ({ data, onSelect, renderContent }) => {
   };
 
   const renderItem = ({ item }: any) => (
-    <TouchableOpacity style={styles.item} onPress={() => onItemPress(item)}>
+    <TouchableOpacity style={[styles.item, optionWidth ? {width: optionWidth}: {}]} onPress={() => onItemPress(item)}>
       <Text style={{textTransform: 'capitalize'}}>{item}</Text>
     </TouchableOpacity>
   );
@@ -48,7 +53,7 @@ const Dropdown: FC<Props> = ({ data, onSelect, renderContent }) => {
           style={styles.overlay}
           onPress={() => setVisible(false)}
         >
-          <View style={[styles.dropdown, { top: dropdownTop }]}>
+          <View style={[styles.dropdown, { top: dropdownTop, left: dropdownLeft }]}>
             <FlatList
               data={data}
               renderItem={renderItem}
@@ -74,7 +79,6 @@ const Dropdown: FC<Props> = ({ data, onSelect, renderContent }) => {
 const styles = StyleSheet.create({
   dropdown: {
     position: 'absolute',
-    marginLeft: 25,
     backgroundColor: '#fff',
     shadowColor: '#000000',
     shadowRadius: 4,

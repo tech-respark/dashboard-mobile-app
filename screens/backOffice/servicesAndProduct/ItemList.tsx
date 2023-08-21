@@ -24,14 +24,13 @@ const ItemList = ({ navigation, route }: any) => {
 
     const editCategory = (item: { [key: string]: any }) => {
         if(type=="service"){
-            navigation.navigate("AddUpdateService", {isAdd: false, selectedItem: item, headerTitle: routeName})
+            navigation.navigate("AddUpdateService", {isAdd: false, clickedItem: item, headerTitle: routeName, ...route.params})
         }
      };
 
     const addNew = () => { 
-        console.log("HELLO iit is here")
         if(type=="service"){
-            navigation.navigate("AddUpdateService", {isAdd: true, headerTitle: routeName})
+            navigation.navigate("AddUpdateService", {isAdd: true, headerTitle: routeName, position: String(selectedItem.itemList.length+1), ...route.params})
         }
     };
 

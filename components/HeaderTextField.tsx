@@ -4,25 +4,29 @@ import { FontSize, GlobalColors } from "../Styles/GlobalStyleConfigs";
 
 type TextFieldWithBorderHeaderProps = {
     value: string,
-    setValue: (val: string) => void,
+    setValue?: (val: string) => void,
+    setValueWithIndex? : (val: string, index: number) => void;
+    index? : number,
     header: string,
+    width?: number,
     showSymbol: boolean
 }
-const TextFieldWithBorderHeader: FC<TextFieldWithBorderHeaderProps> = ({ value, setValue, header, showSymbol }) => {
+const TextFieldWithBorderHeader: FC<TextFieldWithBorderHeaderProps> = ({ value, setValue, header, showSymbol, index, setValueWithIndex, width }) => {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, {width: width ?? "40%"}]}>
         <View style={styles.header}>
           <Text style={styles.headerText}>{header}</Text>
         </View>
         <View style={styles.inputContainer}>
-            <Text style={{fontSize: FontSize.medium}}>₹</Text>
+          {showSymbol && <Text style={{fontSize: FontSize.medium}}>₹</Text>}
           <TextInput
             style={styles.textInput}
             placeholder=""
             value={value}
             placeholderTextColor="lightgray"
             underlineColorAndroid="transparent"
-            onChangeText={(val) => setValue(val)}
+            onChangeText={(val) => {
+              index != undefined ? setValueWithIndex!(val, index!) : setValue!(val)}}
           />
         </View>
       </View>
