@@ -7,7 +7,7 @@ import RadioButtonGroup from "../../../components/RadioButtonGroup";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { setIsLoading } from "../../../redux/state/UIStates";
-import { makeAPIRequest } from "../../../utils/Helper";
+import { getCategoryData, makeAPIRequest } from "../../../utils/Helper";
 import { environment, genderOptions } from "../../../utils/Constants";
 import { selectBranchId, selectStaffData, selectTenantId } from "../../../redux/state/UserStates";
 import UploadImageField from "../../../components/UploadImageField";
@@ -114,10 +114,6 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
         setExperts(updatedExperts);
     };
 
-    const setAddNewData = () => {
-
-    };
-
     const createRequestBody = () => {
         let categoryList: { [key: string]: any } = {
             active: isActive,
@@ -157,11 +153,14 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
             Toast.show("Complete the form", { backgroundColor: GlobalColors.error, opacity: 1 });
             return
         }
+        dispatch(setIsLoading({ isLoading: true }));
         const url = environment.documentBaseUri + 'stores/categories/update';
         let requestBody = createRequestBody();
-        let response = await makeAPIRequest(url, requestBody, "POST");
+        let response = await makeAPIRequest(url, requestBody, "POST", !isAddNew);
+        dispatch(setIsLoading({ isLoading: false }));
         if (response) {
             Toast.show("Added Successfully", { backgroundColor: GlobalColors.success, opacity: 1 });
+            categoryLevel == 2 ? getCategoryData(type, tenantId!, storeId!, dispatch) : null;
             navigation.goBack();
         }
         else {
@@ -170,10 +169,9 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
     };
 
     useEffect(() => {
-        if (type == "service") {
-            isAddNew ? setAddNewData() : getCategoryInformation();
-        }
+            isAddNew ? null : getCategoryInformation();
     }, []);
+    
     return (
         <View style={{ flex: 1 }}>
             <ScrollView style={styles.container}>

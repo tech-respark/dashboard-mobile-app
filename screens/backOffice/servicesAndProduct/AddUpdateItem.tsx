@@ -14,7 +14,7 @@ import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { selectBranchId, selectTenantId } from "../../../redux/state/UserStates";
 import { setIsLoading } from "../../../redux/state/UIStates";
 
-const AddUpdateService = ({ navigation, route }: any) => {
+const AddUpdateItem = ({ navigation, route }: any) => {
 
     const dispatch = useAppDispatch();
     const storeId = useAppSelector(selectBranchId);
@@ -24,29 +24,32 @@ const AddUpdateService = ({ navigation, route }: any) => {
     const headerTitle = route.params.headerTitle;
     const categoryLevel = route.params.categoryLevel;
 
-    const durationOptions: {[key: string]: string[]} = {"Minute(s)": ["0", "15", "30", "45", "60", "75", "90"], "Hour(s)": ["1", "2", "3", "4", "5"]};
+    const durationOptions: { [key: string]: string[] } = { "Minute(s)": ["0", "15", "30", "45", "60", "75", "90"], "Hour(s)": ["1", "2", "3", "4", "5"] };
     const durationTypesOptions = ["Minute(s)", "Hour(s)"];
 
     const [isActive, setIsActive] = useState<boolean>(true);
     const [name, setName] = useState<string>("");
     const [position, setPosition] = useState<string>(route.params.position ?? "");
-    // const [gender, setGender] = useState<string>(genderOptions[0]);
     const [hideFromCatalogue, setHideFromCatalogue] = useState<boolean>(false);
     const [price, setPrice] = useState<string>("0");
     const [salePrice, setSalePrice] = useState<string>("0");
     const [durationType, setDurationType] = useState<string>(durationTypesOptions[0]);
     const [duration, setDuration] = useState<string>("");
-    const [serviceTag, setServiceTag] = useState<string>("");
+    const [tag, setTag] = useState<string>("");
     const [videoLink, setVideoLink] = useState<string>("");
     const [benefits, setBenefits] = useState<string>("");
     const [description, setDescription] = useState<string[]>([""]);
     const [displayImages, setDisplayImages] = useState<{ [key: string]: any }[]>([]);
 
+    const [variations, SetVariations] = useState<{ [key: string]: any }[]>([]);
+    const [ingredients, setIngredients] = useState<string>("");
+    const [usage, setUsage] = useState<string>("");
+
 
     useEffect(() => {
         setDuration(durationOptions[durationType][0]);
     }, [durationType]);
-    
+
     useLayoutEffect(() => {
         navigation.setOptions({
             headerTitle: `${headerTitle} / ${isAdd ? 'New Item' : route.params.clickedItem.name}`,
@@ -72,7 +75,7 @@ const AddUpdateService = ({ navigation, route }: any) => {
         });
     };
 
-    const createRequestBody = (): {[key: string]: any} => {
+    const createRequestBody = (): { [key: string]: any } => {
         let itemData: { [key: string]: any } = {
             active: isActive,
             benefits: benefits,
@@ -88,7 +91,7 @@ const AddUpdateService = ({ navigation, route }: any) => {
             imagePaths: [],
             index: position,
             ingredients: "",
-            name: name, 
+            name: name,
             price: price,
             salePrice: salePrice,
             variations: [],
@@ -101,11 +104,11 @@ const AddUpdateService = ({ navigation, route }: any) => {
             itemData["type"] = "service"
         }
         let body: { [key: string]: any } = {
-            case: categoryLevel+3,
+            case: categoryLevel + 3,
             category: route.params.categoryId,
             item: itemData,
             status: isAdd ? "CREATE" : "UPDATE",
-            storeIds: {active: [storeId]},
+            storeIds: { active: [storeId] },
             tenantId: String(tenantId)
         }
         if (categoryLevel == 2) {
@@ -114,14 +117,14 @@ const AddUpdateService = ({ navigation, route }: any) => {
         return body;
     };
 
-    const submitHandler = async() => {
-        if(!name){
-            Toast.show("Complete the form", {backgroundColor: GlobalColors.error, opacity: 1})
+    const submitHandler = async () => {
+        if (!name) {
+            Toast.show("Complete the form", { backgroundColor: GlobalColors.error, opacity: 1 })
             return;
         }
-        dispatch(setIsLoading({isLoading: true}));
-        let response = await makeAPIRequest(environment.documentBaseUri+"stores/categories/items/update", createRequestBody(), "POST");
-        dispatch(setIsLoading({isLoading: false}));
+        dispatch(setIsLoading({ isLoading: true }));
+        let response = await makeAPIRequest(environment.documentBaseUri + "stores/categories/items/update", createRequestBody(), "POST");
+        dispatch(setIsLoading({ isLoading: false }));
         if (response) {
             Toast.show("Added Successfully", { backgroundColor: GlobalColors.success, opacity: 1 });
             navigation.goBack();
@@ -143,7 +146,7 @@ const AddUpdateService = ({ navigation, route }: any) => {
             setName(responseData.name);
             setPosition(String(responseData.index));
             setDuration(responseData.duration);
-            responseData.durationType  ? setDurationType(responseData.durationType == "min" ? durationTypesOptions[0]: durationTypesOptions[1]) : null;
+            responseData.durationType ? setDurationType(responseData.durationType == "min" ? durationTypesOptions[0] : durationTypesOptions[1]) : null;
             setDisplayImages(responseData?.imagePaths || []);
             setHideFromCatalogue(responseData.hideFromCatalogue);
             setPrice(String(responseData.price));
@@ -155,7 +158,15 @@ const AddUpdateService = ({ navigation, route }: any) => {
         }
     };
 
-    useEffect(()=>{
+    const addVariation = () => {
+        SetVariations([...variations, { active: true, group: null, index: variations.length, name: "", price: 0, salePrice: 0, variations: [] }]);
+    };
+
+    const setVariationName = () => { };
+    const setVariationPrice = () => { };
+    const setVariationSalePrice = () => { };
+
+    useEffect(() => {
         !isAdd ? getItemInformation() : null;
     }, [])
 
@@ -200,77 +211,92 @@ const AddUpdateService = ({ navigation, route }: any) => {
                         </View>
 
                     </View>
-                    <View style={[styles.rowView, { justifyContent: 'space-between' }]}>
-                        <Dropdown data={durationOptions[durationType]} onSelect={setDuration} optionWidth={100} renderContent={() => (
-                            <>
-                                <Text style={styles.dropdownHeading}>Duration</Text>
-                                <View style={styles.inputContainer}>
-                                    <Text style={{ fontSize: FontSize.medium }}>{duration}</Text>
-                                    <Ionicons name="chevron-down" size={20} />
-                                </View>
-                            </>
-                        )} />
-                        <Dropdown data={durationTypesOptions} onSelect={setDurationType} optionWidth={100} renderContent={() => (
-                            <>
-                                <Text style={styles.dropdownHeading}>Duration Type</Text>
-                                <View style={[styles.inputContainer, { width: 150 }]}>
-                                    <Text style={{ fontSize: FontSize.medium }}>{durationType}</Text>
-                                    <Ionicons name="chevron-down" size={20} />
-                                </View>
-                            </>
-                        )} />
-                    </View>
+                    {route.params.type == "service" &&
+                        <View style={[styles.rowView, { justifyContent: 'space-around' }]}>
+                            <Dropdown data={durationOptions[durationType]} onSelect={setDuration} optionWidth={100} renderContent={() => (
+                                <>
+                                    <Text style={styles.dropdownHeading}>Duration</Text>
+                                    <View style={styles.inputContainer}>
+                                        <Text style={{ fontSize: FontSize.medium }}>{duration}</Text>
+                                        <Ionicons name="chevron-down" size={20} />
+                                    </View>
+                                </>
+                            )} />
+                            <Dropdown data={durationTypesOptions} onSelect={setDurationType} optionWidth={100} renderContent={() => (
+                                <>
+                                    <Text style={styles.dropdownHeading}>Duration Type</Text>
+                                    <View style={[styles.inputContainer, { width: 150 }]}>
+                                        <Text style={{ fontSize: FontSize.medium }}>{durationType}</Text>
+                                        <Ionicons name="chevron-down" size={20} />
+                                    </View>
+                                </>
+                            )} />
+                        </View>
+                    }
                 </View>
                 <View style={styles.sectionView}>
-                <View style={{ flexDirection: "row", alignItems: 'center', paddingTop: 10 }}>
-                            <Text>Hide From Catalogue</Text>
-                            <Switch
-                                style={styles.switch}
-                                trackColor={{ false: '', true: GlobalColors.blue }}
-                                onValueChange={() => { setHideFromCatalogue(!hideFromCatalogue) }}
-                                value={hideFromCatalogue}
-                            />
-                        </View>
-                </View>
-                {/* <View style={styles.sectionView}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                        <Text style={{ fontSize: FontSize.medium, paddingVertical: 5 }}>Group</Text>
-                        <View style={{ flexDirection: "row", alignItems: 'center', paddingTop: 10 }}>
-                            <Text>Hide From Catalogue</Text>
-                            <Switch
-                                style={styles.switch}
-                                trackColor={{ false: '', true: GlobalColors.blue }}
-                                onValueChange={() => { setHideFromCatalogue(!hideFromCatalogue) }}
-                                value={hideFromCatalogue}
-                            />
-                        </View>
+                    <View style={{ flexDirection: "row", alignItems: 'center', paddingTop: 10 }}>
+                        <Text style={{ fontSize: FontSize.medium }}>Hide From Catalogue</Text>
+                        <Switch
+                            style={styles.switch}
+                            trackColor={{ false: '', true: GlobalColors.blue }}
+                            onValueChange={() => { setHideFromCatalogue(!hideFromCatalogue) }}
+                            value={hideFromCatalogue}
+                        />
                     </View>
-                    <RadioButtonGroup
-                        options={genderOptions}
-                        selectedOption={gender}
-                        onSelect={(val: string) => {
-                            setGender(val)
-                        }}
-                    />
-                </View> */}
+                </View>
+                {route.params.type == "product" &&
+                    <View style={styles.sectionView}>
+                        <View style={{ flexDirection: "row", alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Text style={{ fontSize: FontSize.medium, paddingVertical: 5 }}>Variation</Text>
+                            <View style={{ flexDirection: "row", alignItems: "center", marginHorizontal: 10 }}>
+                                <Text style={{ color: GlobalColors.blue }}>Add</Text>
+                                <LinearGradient
+                                    colors={GradientButtonColor}
+                                    style={styles.roundAddButton}
+                                    start={{ y: 0.0, x: 0.0 }}
+                                    end={{ y: 0.0, x: 1.0 }}
+                                >
+                                    <Ionicons name="add" size={25} color={"#fff"} onPress={addVariation} />
+                                </LinearGradient>
+                            </View>
+                        </View>
 
-                <View style={styles.sectionView}>
-                    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-around" }}>
-                        <TextFieldWithBorderHeader value={price} setValue={setPrice} header={"Price"} showSymbol={true} />
-                        <TextFieldWithBorderHeader value={salePrice} setValue={setSalePrice} header={"Sale Price"} showSymbol={true} />
+                        {variations.map((item, index) => (
+                            <View style={{ marginVertical: 10, borderBottomWidth: 0.5, borderColor: "lightgray", paddingBottom: 20 }}>
+                                <Text style={{ marginVertical: 8 }}>Variation {index + 1}</Text>
+                                <View style={{ width: "100%", paddingLeft: 20 }}>
+                                    <TextFieldWithBorderHeader value={item.name} setValueWithIndex={setVariationName} header={"Name"} showSymbol={false} width={300} />
+                                    <View style={{ flexDirection: "row", marginTop: 5 }}>
+                                        <TextFieldWithBorderHeader value={item.price} setValueWithIndex={setVariationPrice} header={"Price"} showSymbol={true} width={120} />
+                                        <View style={{ marginLeft: 60 }}>
+                                            <TextFieldWithBorderHeader value={item.salePrice} setValueWithIndex={setVariationSalePrice} header={"SalePrice"} showSymbol={true} width={120} />
+                                        </View>
+                                    </View>
+                                </View>
+                            </View>
+                        ))}
                     </View>
-                </View>
+                }
+                {route.params.type == "service" &&
+                    <View style={styles.sectionView}>
+                        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-around" }}>
+                            <TextFieldWithBorderHeader value={price} setValue={setPrice} header={"Price"} showSymbol={true} />
+                            <TextFieldWithBorderHeader value={salePrice} setValue={setSalePrice} header={"Sale Price"} showSymbol={true} />
+                        </View>
+                    </View>
+                }
 
                 <View style={styles.sectionView}>
                     <View style={{ marginBottom: 10 }}>
-                        <Text>Service Tag</Text>
+                        <Text>{route.params.type == "setvice" ? "Service" : "Product"} Tag</Text>
                         <TextInput
                             style={styles.textInput}
                             placeholder=""
-                            value={serviceTag}
+                            value={tag}
                             placeholderTextColor="lightgray"
                             underlineColorAndroid="transparent"
-                            onChangeText={(val) => { setServiceTag(val) }}
+                            onChangeText={(val) => { setTag(val) }}
                         />
                     </View>
                     <View style={{ marginBottom: 10 }}>
@@ -300,6 +326,39 @@ const AddUpdateService = ({ navigation, route }: any) => {
                         </View>
                     </View>
 
+                    {route.params.type == "product" &&
+                        <>
+                            <View style={{ marginBottom: 10 }}>
+                                <Text>Ingredients</Text>
+                                <View style={[styles.textInput, { height: 100 }]}>
+                                    <TextInput
+                                        placeholder=""
+                                        multiline
+                                        numberOfLines={10}
+                                        value={ingredients}
+                                        placeholderTextColor="lightgray"
+                                        underlineColorAndroid="transparent"
+                                        onChangeText={(val) => { setIngredients(val) }}
+                                    />
+                                </View>
+                            </View>
+                            <View style={{ marginBottom: 10 }}>
+                                <Text>Usage Instructions</Text>
+                                <View style={[styles.textInput, { height: 100 }]}>
+                                    <TextInput
+                                        placeholder=""
+                                        multiline
+                                        numberOfLines={10}
+                                        value={usage}
+                                        placeholderTextColor="lightgray"
+                                        underlineColorAndroid="transparent"
+                                        onChangeText={(val) => { setUsage(val) }}
+                                    />
+                                </View>
+                            </View>
+                        </>
+                    }
+
                     <View style={{ marginRight: 10, marginTop: 10 }}>
                         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
                             <Text style={{ fontSize: FontSize.medium, paddingVertical: 5, fontWeight: "bold" }}>Description</Text>
@@ -309,8 +368,8 @@ const AddUpdateService = ({ navigation, route }: any) => {
                                 start={{ y: 0.0, x: 0.0 }}
                                 end={{ y: 0.0, x: 1.0 }}
                             >
-                                <Ionicons name="add" size={25} color={"#fff"} onPress={() => { 
-                                    if(description[description.length-1]){
+                                <Ionicons name="add" size={25} color={"#fff"} onPress={() => {
+                                    if (description[description.length - 1]) {
                                         setDescription(prevDescriptions => [...prevDescriptions, ""]);
                                     }
                                 }} />
@@ -318,17 +377,17 @@ const AddUpdateService = ({ navigation, route }: any) => {
                         </View>
                         {description.map((item: string, index: number) => (
                             <View key={index} style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
-                                <TextFieldWithBorderHeader value={item} setValueWithIndex={updateDescriptionAtIndex} header={`Description ${index + 1}`} showSymbol={false} width={300} index={index}/>
-                                <TouchableOpacity style={{ backgroundColor: GlobalColors.error, padding: 2, borderRadius: 20, marginLeft: 10 }} 
-                                onPress={() => {
-                                    if(index != 0){
-                                    setDescription(prevDescriptions => {
-                                        const updatedDescriptions = [...prevDescriptions];
-                                        updatedDescriptions.splice(index, 1);
-                                        return updatedDescriptions;
-                                      });
-                                    }
-                                }}>
+                                <TextFieldWithBorderHeader value={item} setValueWithIndex={updateDescriptionAtIndex} header={`Description ${index + 1}`} showSymbol={false} width={300} index={index} />
+                                <TouchableOpacity style={{ backgroundColor: GlobalColors.error, padding: 2, borderRadius: 20, marginLeft: 10 }}
+                                    onPress={() => {
+                                        if (index != 0) {
+                                            setDescription(prevDescriptions => {
+                                                const updatedDescriptions = [...prevDescriptions];
+                                                updatedDescriptions.splice(index, 1);
+                                                return updatedDescriptions;
+                                            });
+                                        }
+                                    }}>
                                     <Ionicons name="close" size={20} color={"#fff"} />
                                 </TouchableOpacity>
                             </View>
@@ -351,24 +410,8 @@ const AddUpdateService = ({ navigation, route }: any) => {
                         <UploadImageField imageUrl={""} />
                     </ScrollView>
                 </View>
-                {/* <View style={styles.sectionView}>
-                    <View style={{ flexDirection: "row", alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Text style={{ fontSize: FontSize.medium, paddingVertical: 5 }}>Variation</Text>
-                        <View style={{ flexDirection: "row", alignItems: "center", marginHorizontal: 10 }}>
-                            <Text style={{ color: GlobalColors.blue }}>Add</Text>
-                            <LinearGradient
-                                colors={GradientButtonColor}
-                                style={styles.roundAddButton}
-                                start={{ y: 0.0, x: 0.0 }}
-                                end={{ y: 0.0, x: 1.0 }}
-                            >
-                                <Ionicons name="add" size={25} color={"#fff"} onPress={()=> {}}/>
-                            </LinearGradient>
-                        </View>
-                    </View>
-                </View> */}
             </ScrollView>
-            <SubmitCancelButtons cancelHandler={()=> {navigation.goBack()}} cancelText="Cancel" submitHandler={submitHandler} submitText="Submit" />
+            <SubmitCancelButtons cancelHandler={() => { navigation.goBack() }} cancelText="Cancel" submitHandler={submitHandler} submitText="Submit" />
         </View>
     )
 };
@@ -417,4 +460,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default AddUpdateService;
+export default AddUpdateItem;

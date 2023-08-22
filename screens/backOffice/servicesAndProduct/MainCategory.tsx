@@ -4,35 +4,23 @@ import { FontSize, GlobalColors, GradientButtonColor } from "../../../Styles/Glo
 import { environment } from "../../../utils/Constants";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { selectBranchId, selectTenantId } from "../../../redux/state/UserStates";
-import { makeAPIRequest } from "../../../utils/Helper";
+import { getCategoryData, makeAPIRequest } from "../../../utils/Helper";
 import { setIsLoading } from "../../../redux/state/UIStates";
 import Toast from "react-native-root-toast";
 import CategoryList from "./CategoryList";
 import { useIsFocused } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
+import { selectCategoriesData, setCategoriesData } from "../../../redux/state/BackOfficeStates";
 
 const MainCategory = ({ navigation, type }: any) => {
     const isFocused = useIsFocused();
     const dispatch = useAppDispatch();
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
+    const categoryList = useAppSelector(selectCategoriesData);
 
-    const [categoryList, setCategoryList] = useState<{ [key: string]: any }[]>([]);
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [clickedItem, setClickedItem] = useState<{ [key: string]: any }>({});
-
-    const getCategoryData = async () => {
-        dispatch(setIsLoading({ isLoading: true }));
-        const subDomain = (type == 'service') ? "getServiceCategoriesByTenantAndStore" : "getProductCategoriesByTenantAndStore";
-        const url = environment.documentBaseUri + `stores/${subDomain}?tenantId=${tenantId}&storeId=${storeId}`;
-        let response = await makeAPIRequest(url, null, "GET");
-        dispatch(setIsLoading({ isLoading: false }));
-        if (response) {
-            setCategoryList(response);
-        } else {
-            Toast.show("No Data Found", { backgroundColor: GlobalColors.error });
-        }
-    };
 
     const onTextClickHandler = (item: { [key: string]: any }) => {
         if (item.categoryList.length > 0) {
@@ -54,11 +42,17 @@ const MainCategory = ({ navigation, type }: any) => {
         navigation.navigate("AddUpdateCategory", { type: type, isAddNew: true, categoryLevel: 1, position: String(categoryList.length + 1) });
     };
 
+    // useEffect(() => {
+    //     console.log("Data changed", categoryList[0]);
+    // }, [categoryList]);
+
     useEffect(() => {
         if (isFocused) {
-            getCategoryData();
+            getCategoryData(type, tenantId!, storeId!, dispatch);
         }
     }, [isFocused]);
+
+
 
     return (
         <View style={{ padding: 10, flex: 1, backgroundColor: '#fff', opacity: modalVisible ? 0.5 : 1 }}>
@@ -98,7 +92,7 @@ const MainCategory = ({ navigation, type }: any) => {
                         >
                             <TouchableOpacity onPress={() => {
                                 if (type == "service") {
-                                    navigation.navigate("AddUpdateService", { isAdd: true, headerTitle: clickedItem.name, position: "1", categoryLevel: 1, categoryId: clickedItem.id });
+                                    navigation.navigate("AddUpdateItem", { isAdd: true, headerTitle: clickedItem.name, position: "1", categoryLevel: 1, categoryId: clickedItem.id });
                                     setModalVisible(false);
                                 }
                             }} >

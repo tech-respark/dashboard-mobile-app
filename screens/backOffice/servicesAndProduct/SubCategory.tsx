@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useLayoutEffect } from "react";
+import React, { useEffect, useLayoutEffect } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import CategoryList from "./CategoryList";
@@ -17,6 +17,10 @@ const SubCategory = ({ navigation, route }: any) => {
     const addNew = () => { 
         navigation.navigate("AddUpdateCategory", {type: route.params.type, isAddNew: true, categoryLevel: 2, categoryId: selectedItem.id, categoryName: selectedItem.name, position: String(selectedItem.categoryList.length+1)});
     };
+
+    // useEffect(()=>{
+    //         console.log("Inside subCategory Data is", route.params)
+    // }, [route])
 
     useLayoutEffect(() => {
         navigation.setOptions({

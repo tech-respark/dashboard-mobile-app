@@ -23,15 +23,11 @@ const ItemList = ({ navigation, route }: any) => {
     };
 
     const editCategory = (item: { [key: string]: any }) => {
-        if(type=="service"){
-            navigation.navigate("AddUpdateService", {isAdd: false, clickedItem: item, headerTitle: routeName, ...route.params})
-        }
+        navigation.navigate("AddUpdateItem", {isAdd: false, clickedItem: item, headerTitle: routeName, type: type,  ...route.params})
      };
 
     const addNew = () => { 
-        if(type=="service"){
-            navigation.navigate("AddUpdateService", {isAdd: true, headerTitle: routeName, position: String(selectedItem.itemList.length+1), ...route.params})
-        }
+        navigation.navigate("AddUpdateItem", {isAdd: true, headerTitle: routeName, type: type, position: String(selectedItem.itemList.length+1), ...route.params})
     };
 
     useLayoutEffect(() => {
@@ -61,7 +57,7 @@ const ItemList = ({ navigation, route }: any) => {
                     onChangeText={onSearchChange}
                 />
             </View>
-            <CategoryList dataList={filteredItems} onTextClickHandler={editCategory} editItemHandler={editCategory} buttonClickHandler={addNew} buttonText="Add Service" type={type} topLevelObject={topLevelObject}/>
+            <CategoryList dataList={filteredItems} onTextClickHandler={editCategory} editItemHandler={editCategory} buttonClickHandler={addNew} buttonText={`Add ${type=="service" ? "Service" : "Product" }`} type={type} topLevelObject={topLevelObject}/>
         </View>
     );
 };

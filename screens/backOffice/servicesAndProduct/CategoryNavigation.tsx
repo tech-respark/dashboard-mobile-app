@@ -4,7 +4,7 @@ import SubCategory from "./SubCategory";
 import ItemList from "./ItemList";
 import MainCategory from "./MainCategory";
 import AddUpdateCategory from "./AddUpdateCategory";
-import AddUpdateService from "./AddUpdateService";
+import AddUpdateItem from "./AddUpdateItem";
 
 const Stack = createStackNavigator();
 
@@ -25,7 +25,7 @@ const CategoryNavigation = ({navigation, type}:any) => {
           <Stack.Screen name="AddUpdateCategory" component={AddUpdateCategory}/>
           <Stack.Screen name="SubCategory" component={SubCategory} />
           <Stack.Screen name="ItemList" component={ItemList}/>
-          <Stack.Screen name="AddUpdateService" component={AddUpdateService} />
+          <Stack.Screen name="AddUpdateItem" component={AddUpdateItem} />
         </Stack.Navigator>
     )
 };

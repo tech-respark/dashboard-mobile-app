@@ -1,15 +1,19 @@
+import Toast from "react-native-root-toast";
 import { useAppDispatch, useAppSelector } from "../redux/Hooks";
 import { AppDispatch } from "../redux/Store";
+import { setCategoriesData } from "../redux/state/BackOfficeStates";
+import { setIsLoading } from "../redux/state/UIStates";
 import { selectCurrentBranch, selectStoreData, setCurrentBranch, setStoreIdData } from "../redux/state/UserStates";
 import { environment } from "./Constants";
+import { GlobalColors } from "../Styles/GlobalStyleConfigs";
 
-export const makeAPIRequest = async (url: string, body?: any, method: string = "POST", options: RequestInit = { headers: { 'Content-Type': "application/json" } }): Promise<any> => {
+export const makeAPIRequest = async (url: string, body?: any, method: string = "POST", allowEmptyRes: boolean=false, options: RequestInit = { headers: { 'Content-Type': "application/json" } }): Promise<any> => {
   options.method = method;  
   body ? options.body = JSON.stringify(body) : null;
   let response;
     try {
       response = await fetch(url, options);
-      if(response.status != 200 || response.headers.get('content-length') === '0'){
+      if(response.status != 200 || (!allowEmptyRes && response.headers.get('content-length') === '0')){
         return null;
       } 
     } catch (error) {
@@ -35,3 +39,18 @@ export const makeAPIRequest = async (url: string, body?: any, method: string = "
       dispatch(setCurrentBranch({ currentBranch: res[0].name }));
     }
   };
+
+  export const getCategoryData = async (type: string, tenantId: number, storeId: number, dispatch: AppDispatch) => {
+    console.log("INSIDE MAIN DATA CALL ");
+    dispatch(setIsLoading({ isLoading: true }));
+    const subDomain = (type == 'service') ? "getServiceCategoriesByTenantAndStore" : "getProductCategoriesByTenantAndStore";
+    const url = environment.documentBaseUri + `stores/${subDomain}?tenantId=${tenantId}&storeId=${storeId}`;
+    let response = await makeAPIRequest(url, null, "GET");
+    dispatch(setIsLoading({ isLoading: false }));
+    if (response) {
+        // setCategoryList(response);
+        dispatch(setCategoriesData({categoriesData: response}));
+    } else {
+        Toast.show("No Data Found", { backgroundColor: GlobalColors.error });
+    }
+};
