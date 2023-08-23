@@ -1,20 +1,23 @@
 import { FC } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { ColorValue, StyleSheet, Text, TextInput, View } from "react-native";
 import { FontSize, GlobalColors } from "../Styles/GlobalStyleConfigs";
 
 type TextFieldWithBorderHeaderProps = {
     value: string,
     setValue?: (val: string) => void,
     setValueWithIndex? : (val: string, index: number) => void;
+    setValueWithIndexAndType?: (val: string, index: number, type: string) => void;
+    type? : string,
     index? : number,
     header: string,
     width?: number,
-    showSymbol: boolean
+    showSymbol: boolean,
+    headerBackground?: ColorValue,
 }
-const TextFieldWithBorderHeader: FC<TextFieldWithBorderHeaderProps> = ({ value, setValue, header, showSymbol, index, setValueWithIndex, width }) => {
+const TextFieldWithBorderHeader: FC<TextFieldWithBorderHeaderProps> = ({ value, setValue, header, showSymbol, index, setValueWithIndex, width, headerBackground="#fff", setValueWithIndexAndType, type }) => {
     return (
       <View style={[styles.container, {width: width ?? "40%"}]}>
-        <View style={styles.header}>
+        <View style={[styles.header, {backgroundColor: headerBackground}]}>
           <Text style={styles.headerText}>{header}</Text>
         </View>
         <View style={styles.inputContainer}>
@@ -26,7 +29,7 @@ const TextFieldWithBorderHeader: FC<TextFieldWithBorderHeaderProps> = ({ value, 
             placeholderTextColor="lightgray"
             underlineColorAndroid="transparent"
             onChangeText={(val) => {
-              index != undefined ? setValueWithIndex!(val, index!) : setValue!(val)}}
+              index == undefined ? setValue!(val) : (type == undefined ? setValueWithIndex!(val, index!)  : setValueWithIndexAndType!(val, index, type))}}
           />
         </View>
       </View>
@@ -40,7 +43,6 @@ const styles = StyleSheet.create({
       width: "40%"
     },
     header: {
-      backgroundColor: '#fff',
       justifyContent: 'center',
       alignItems: 'center',
       position: 'absolute',

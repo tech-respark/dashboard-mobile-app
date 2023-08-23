@@ -86,22 +86,22 @@ const AddUpdateItem = ({ navigation, route }: any) => {
             experts: [],
             group: "both",
             hideFromCatalogue: hideFromCatalogue,
-            howToUse: "",
-            iTag: serviceTag,
+            howToUse: usage,
+            iTag: tag,
             imagePaths: [],
             index: position,
-            ingredients: "",
+            ingredients: ingredients,
             name: name,
             price: price,
             salePrice: salePrice,
-            variations: [],
+            variations: variations,
             videoLink: videoLink,
             description: description.join("|")
         };
         if (!isAdd) {
             itemData["id"] = route.params.clickedItem.id
         } else {
-            itemData["type"] = "service"
+            itemData["type"] = route.params.type
         }
         let body: { [key: string]: any } = {
             case: categoryLevel + 3,
@@ -151,10 +151,13 @@ const AddUpdateItem = ({ navigation, route }: any) => {
             setHideFromCatalogue(responseData.hideFromCatalogue);
             setPrice(String(responseData.price));
             setSalePrice(String(responseData.salePrice));
-            setServiceTag(responseData.iTag);
+            setTag(responseData.iTag);
             setVideoLink(responseData.videoLink);
             setBenefits(responseData.benefits);
+            setIngredients(responseData.ingredients);
+            setUsage(responseData.howToUse);
             setDescription(responseData.description.split("|"));
+            SetVariations(responseData.variations);
         }
     };
 
@@ -162,9 +165,15 @@ const AddUpdateItem = ({ navigation, route }: any) => {
         SetVariations([...variations, { active: true, group: null, index: variations.length, name: "", price: 0, salePrice: 0, variations: [] }]);
     };
 
-    const setVariationName = () => { };
-    const setVariationPrice = () => { };
-    const setVariationSalePrice = () => { };
+    const setVariationData = (val: string, index: number, type: string) => { 
+        const updatedVariations = [...variations];
+        updatedVariations[index] = {
+          ...updatedVariations[index],
+          [type]: type == "name" ? val : Number(val),
+        };
+        SetVariations(updatedVariations);
+    };
+  
 
     useEffect(() => {
         !isAdd ? getItemInformation() : null;
@@ -245,6 +254,14 @@ const AddUpdateItem = ({ navigation, route }: any) => {
                         />
                     </View>
                 </View>
+                {(route.params.type == "service" || variations.length == 0) &&
+                    <View style={styles.sectionView}>
+                        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-around" }}>
+                            <TextFieldWithBorderHeader value={price} setValue={setPrice} header={"Price"} showSymbol={true} />
+                            <TextFieldWithBorderHeader value={salePrice} setValue={setSalePrice} header={"Sale Price"} showSymbol={true} />
+                        </View>
+                    </View>
+                }
                 {route.params.type == "product" &&
                     <View style={styles.sectionView}>
                         <View style={{ flexDirection: "row", alignItems: 'center', justifyContent: 'space-between' }}>
@@ -263,14 +280,23 @@ const AddUpdateItem = ({ navigation, route }: any) => {
                         </View>
 
                         {variations.map((item, index) => (
-                            <View style={{ marginVertical: 10, borderBottomWidth: 0.5, borderColor: "lightgray", paddingBottom: 20 }}>
+                            <View style={{ marginVertical: 10, borderBottomWidth: 0.5, borderColor: "lightgray", paddingBottom: 20, backgroundColor: GlobalColors.lightGray2, borderRadius: 5, paddingHorizontal: 5 }}>
+                                <View style={{flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginVertical: 5}}>
                                 <Text style={{ marginVertical: 8 }}>Variation {index + 1}</Text>
+                                <Ionicons name="close" size={25} color={GlobalColors.error} onPress={()=>{
+                                        SetVariations(prevVariation => {
+                                            const updatedVariation = [...prevVariation];
+                                            updatedVariation.splice(index, 1);
+                                            return updatedVariation;
+                                        });
+                                }}/>
+                                </View>
                                 <View style={{ width: "100%", paddingLeft: 20 }}>
-                                    <TextFieldWithBorderHeader value={item.name} setValueWithIndex={setVariationName} header={"Name"} showSymbol={false} width={300} />
+                                    <TextFieldWithBorderHeader value={item.name} setValueWithIndexAndType={setVariationData} header={"Name"} showSymbol={false} width={300} headerBackground={GlobalColors.lightGray2} index={index} type={"name"}/>
                                     <View style={{ flexDirection: "row", marginTop: 5 }}>
-                                        <TextFieldWithBorderHeader value={item.price} setValueWithIndex={setVariationPrice} header={"Price"} showSymbol={true} width={120} />
+                                        <TextFieldWithBorderHeader value={String(item.price)} setValueWithIndexAndType={setVariationData} header={"Price"} showSymbol={true} width={120} headerBackground={GlobalColors.lightGray2} index={index} type={"price"}/>
                                         <View style={{ marginLeft: 60 }}>
-                                            <TextFieldWithBorderHeader value={item.salePrice} setValueWithIndex={setVariationSalePrice} header={"SalePrice"} showSymbol={true} width={120} />
+                                            <TextFieldWithBorderHeader value={String(item.salePrice)} setValueWithIndexAndType={setVariationData} header={"SalePrice"} showSymbol={true} width={120} headerBackground={GlobalColors.lightGray2} index={index} type={"salePrice"}/>
                                         </View>
                                     </View>
                                 </View>
@@ -278,18 +304,10 @@ const AddUpdateItem = ({ navigation, route }: any) => {
                         ))}
                     </View>
                 }
-                {route.params.type == "service" &&
-                    <View style={styles.sectionView}>
-                        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-around" }}>
-                            <TextFieldWithBorderHeader value={price} setValue={setPrice} header={"Price"} showSymbol={true} />
-                            <TextFieldWithBorderHeader value={salePrice} setValue={setSalePrice} header={"Sale Price"} showSymbol={true} />
-                        </View>
-                    </View>
-                }
 
                 <View style={styles.sectionView}>
                     <View style={{ marginBottom: 10 }}>
-                        <Text>{route.params.type == "setvice" ? "Service" : "Product"} Tag</Text>
+                        <Text>{route.params.type == "service" ? "Service" : "Product"} Tag</Text>
                         <TextInput
                             style={styles.textInput}
                             placeholder=""

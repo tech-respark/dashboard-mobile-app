@@ -15,6 +15,7 @@ type CategoryListType = {
     topLevelObject?: { [key: string]: any }
 }
 const CategoryList: FC<CategoryListType> = ({ dataList, onTextClickHandler, buttonClickHandler, editItemHandler, buttonText, type, topLevelObject }) => {
+    console.log(dataList)
     return (
         <>
             {
@@ -25,9 +26,9 @@ const CategoryList: FC<CategoryListType> = ({ dataList, onTextClickHandler, butt
                                 <Text style={[{ fontSize: FontSize.regular, maxWidth: '70%' }, item.active ? {} : { color: 'gray' }]} onPress={() => { onTextClickHandler(item) }}>{item.name}</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                     {
-                                        item.price ? <Text style={{ marginHorizontal: 10 }}>₹{Math.round(item.price)}</Text> : <></>
+                                        (item.price != null && item.variations.length == 0) ? <Text style={{ marginHorizontal: 10 }}>₹{Math.round(item.price)}</Text> : <></>
                                     }
-                                    {(type === "product" && item.variation)  ? <UpdateProductStockModal selectedProduct={item} topLevelObject={topLevelObject ?? {}} /> : <></>
+                                    {(type === "product" && item.variations && item.variations.length > 0 )  ? <UpdateProductStockModal selectedProduct={item} topLevelObject={topLevelObject ?? {}} /> : <></>
                                     }
                                     <TouchableOpacity onPress={() => editItemHandler(item)}>
                                         <FontAwesome5 name="edit" size={20} style={{ marginRight: 5 }} color={GlobalColors.blueLight} />
