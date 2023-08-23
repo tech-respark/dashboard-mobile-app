@@ -1,18 +1,20 @@
-import React, { useLayoutEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import CategoryList from "./CategoryList";
 import { Ionicons } from "@expo/vector-icons";
 import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
+import { selectCategoriesData } from "../../../redux/state/BackOfficeStates";
+import { useAppSelector } from "../../../redux/Hooks";
 
 
 const ItemList = ({ navigation, route }: any) => {
     const topLevelObject = route.params.topLevelObject;
-    const selectedItem = route.params.selectedItem;
     const routeName = route.params.routeName;
     const type = route.params.type;
-
+    const categoryList = useAppSelector(selectCategoriesData);
+    const [selectedItem, setSelectedItem] = useState<{[key: string]: any}>({});
     const [searchText, setSearchText] = useState<string>('');
-    const [filteredItems, setFilteredItems] = useState<{ [key: string]: any }[]>(selectedItem.itemList);
+    const [filteredItems, setFilteredItems] = useState<{ [key: string]: any }[]>([]);
 
     const onSearchChange = (text: string) => {
         setSearchText(text);
@@ -45,7 +47,17 @@ const ItemList = ({ navigation, route }: any) => {
                 </TouchableOpacity>
             ),
         });
-    }, [navigation]);
+    }, [navigation, selectedItem]);
+
+    useEffect(()=> {
+        let newItem = categoryList[route.params.index];
+        if(route.params.categoryLevel == 2){
+            newItem = newItem["categoryList"][route.params.index2];
+        }
+        setSelectedItem(newItem);
+        setFilteredItems(newItem.itemList);
+        setSearchText('');
+    }, [categoryList]);
 
     return (
         <View style={{ flex: 1, backgroundColor: "#fff" }}>

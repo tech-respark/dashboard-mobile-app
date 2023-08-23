@@ -67,7 +67,6 @@ const UpdateProductStockModal: FC<UpdateProductStockModalProp> = ({ selectedProd
           }));
           let response = await makeAPIRequest(environment.documentBaseUri + "itemstockbyitemid", requestBody, "POST");
           if (response) {
-            console.log(response);
             Object.entries(response).forEach(([key, value]) => {
               handleVariationValueChange(key, String(value));
             });

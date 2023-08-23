@@ -9,7 +9,7 @@ import Dropdown from "../../../components/Dropdown";
 import UploadImageField from "../../../components/UploadImageField";
 import SubmitCancelButtons from "../../../components/SubmitCancelButtons";
 import Toast from "react-native-root-toast";
-import { makeAPIRequest } from "../../../utils/Helper";
+import { getCategoryData, makeAPIRequest } from "../../../utils/Helper";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { selectBranchId, selectTenantId } from "../../../redux/state/UserStates";
 import { setIsLoading } from "../../../redux/state/UIStates";
@@ -127,6 +127,7 @@ const AddUpdateItem = ({ navigation, route }: any) => {
         dispatch(setIsLoading({ isLoading: false }));
         if (response) {
             Toast.show("Added Successfully", { backgroundColor: GlobalColors.success, opacity: 1 });
+            getCategoryData(route.params.type, tenantId!, storeId!, dispatch);
             navigation.goBack();
         }
         else {

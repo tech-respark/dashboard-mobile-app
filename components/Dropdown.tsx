@@ -10,7 +10,7 @@ import {
 
 interface Props {
   data: string[];
-  onSelect: (item: string) => void;
+  onSelect: (item: string, index?: number) => void;
   renderContent: () => React.ReactElement<any, any>;
   optionWidth?: number;
   setX?: number
@@ -35,13 +35,13 @@ const Dropdown: FC<Props> = ({ data, onSelect, renderContent, optionWidth, setX=
     setVisible(true);
   };
 
-  const onItemPress = (item: any): void => {
-    onSelect(item);
+  const onItemPress = (item: any, index: number): void => {
+    onSelect(item, index);
     setVisible(false);
   };
 
-  const renderItem = ({ item }: any) => (
-    <TouchableOpacity style={[styles.item, optionWidth ? {width: optionWidth}: {}]} onPress={() => onItemPress(item)}>
+  const renderItem = ({ item, index }: any) => (
+    <TouchableOpacity style={[styles.item, optionWidth ? {width: optionWidth}: {}]} onPress={() => onItemPress(item, index)}>
       <Text style={{textTransform: 'capitalize'}}>{item}</Text>
     </TouchableOpacity>
   );

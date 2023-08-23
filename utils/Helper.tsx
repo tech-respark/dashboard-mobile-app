@@ -41,14 +41,12 @@ export const makeAPIRequest = async (url: string, body?: any, method: string = "
   };
 
   export const getCategoryData = async (type: string, tenantId: number, storeId: number, dispatch: AppDispatch) => {
-    console.log("INSIDE MAIN DATA CALL ");
     dispatch(setIsLoading({ isLoading: true }));
     const subDomain = (type == 'service') ? "getServiceCategoriesByTenantAndStore" : "getProductCategoriesByTenantAndStore";
     const url = environment.documentBaseUri + `stores/${subDomain}?tenantId=${tenantId}&storeId=${storeId}`;
     let response = await makeAPIRequest(url, null, "GET");
     dispatch(setIsLoading({ isLoading: false }));
     if (response) {
-        // setCategoryList(response);
         dispatch(setCategoriesData({categoriesData: response}));
     } else {
         Toast.show("No Data Found", { backgroundColor: GlobalColors.error });

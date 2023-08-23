@@ -4,10 +4,11 @@ import { FontSize, GlobalColors, GradientButtonColor } from "../../../Styles/Glo
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import UpdateProductStockModal from "./updateProductStockModal";
+import { ProgressBar } from "react-native-paper";
 
 type CategoryListType = {
     dataList: { [key: string]: any }[],
-    onTextClickHandler: (item: { [key: string]: any }) => void,
+    onTextClickHandler: (item: { [key: string]: any }, index: number) => void,
     buttonClickHandler: () => void,
     editItemHandler: (item: { [key: string]: any }) => void,
     buttonText: string,
@@ -15,20 +16,20 @@ type CategoryListType = {
     topLevelObject?: { [key: string]: any }
 }
 const CategoryList: FC<CategoryListType> = ({ dataList, onTextClickHandler, buttonClickHandler, editItemHandler, buttonText, type, topLevelObject }) => {
-    console.log(dataList)
+
     return (
         <>
-            {
-                dataList.length > 0 ?
+            {dataList ?
+                (dataList.length > 0 ?
                     <ScrollView style={{ marginBottom: 0 }}>
                         {dataList.map((item: any, index: number) => (
                             <View key={index} style={styles.itemView}>
-                                <Text style={[{ fontSize: FontSize.regular, maxWidth: '70%' }, item.active ? {} : { color: 'gray' }]} onPress={() => { onTextClickHandler(item) }}>{item.name}</Text>
+                                <Text style={[{ fontSize: FontSize.regular, maxWidth: '70%' }, item.active ? {} : { color: 'gray' }]} onPress={() => { onTextClickHandler(item, index) }}>{item.name}</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                     {
-                                        (item.price != null && item.variations.length == 0) ? <Text style={{ marginHorizontal: 10 }}>₹{Math.round(item.price)}</Text> : <></>
+                                        (item.price != null && (item.variations.length == 0 || type == "service")) ? <Text style={{ marginHorizontal: 10 }}>₹{Math.round(item.price)}</Text> : <></>
                                     }
-                                    {(type === "product" && item.variations && item.variations.length > 0 )  ? <UpdateProductStockModal selectedProduct={item} topLevelObject={topLevelObject ?? {}} /> : <></>
+                                    {(type === "product" && item.variations && item.variations.length > 0) ? <UpdateProductStockModal selectedProduct={item} topLevelObject={topLevelObject ?? {}} /> : <></>
                                     }
                                     <TouchableOpacity onPress={() => editItemHandler(item)}>
                                         <FontAwesome5 name="edit" size={20} style={{ marginRight: 5 }} color={GlobalColors.blueLight} />
@@ -40,7 +41,11 @@ const CategoryList: FC<CategoryListType> = ({ dataList, onTextClickHandler, butt
                     :
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                         <Text style={{ textAlign: 'center', fontSize: FontSize.large }}>No Data Found</Text>
-                    </View>
+                    </View>)
+                :
+                <View>
+                    <ProgressBar />
+                </View>
             }
             <TouchableOpacity style={{ marginHorizontal: 40, marginBottom: 30 }}
                 onPress={buttonClickHandler}

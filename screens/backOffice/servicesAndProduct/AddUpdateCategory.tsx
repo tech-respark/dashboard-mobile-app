@@ -7,7 +7,7 @@ import RadioButtonGroup from "../../../components/RadioButtonGroup";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { setIsLoading } from "../../../redux/state/UIStates";
-import { getCategoryData, makeAPIRequest } from "../../../utils/Helper";
+import { getCategoryData, makeAPIRequest, sleep } from "../../../utils/Helper";
 import { environment, genderOptions } from "../../../utils/Constants";
 import { selectBranchId, selectStaffData, selectTenantId } from "../../../redux/state/UserStates";
 import UploadImageField from "../../../components/UploadImageField";
@@ -24,12 +24,14 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
     const staffList = useAppSelector(selectStaffData);
     const staffsNameList = staffList!.map(item => `${item.firstName} ${item.lastName}`);
 
-
     const [isActive, setIsActive] = useState<boolean>(false);
     const [name, setName] = useState<string>("");
     const [position, setPosition] = useState<string>(route.params.position ?? "");
     const [gender, setGender] = useState<string>(genderOptions[0]);
     const [experts, setExperts] = useState<{ [key: string]: any }[]>([]);
+    const [addedExperts, setAddedExperts] = useState<{ [key: string]: any }[]>([]);
+    const [deletedExperts, setDeletedExperts] = useState<{ [key: string]: any }[]>([]);
+
     const [showExpertsSection, setShowExpertSection] = useState<boolean>(false);
 
     const [bothIcon, setBothIcon] = useState<any>("");
@@ -104,27 +106,27 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
 
     };
 
-    const handleStaffSelect = (index: number) => {
+    const handleStaffSelect = (expertName: string, index: number) => {
         let expertObject = staffList![index];
         experts.some(expert => expert.id === expertObject.id) ? null : setExperts(prevExperts => [...prevExperts, expertObject]);
+        setAddedExperts(prevExperts => [...prevExperts, expertObject]);
     };
 
     const removeExpert = (item: any) => {
         const updatedExperts = experts.filter(expert => expert.id !== item.id);
         setExperts(updatedExperts);
+        setDeletedExperts(prevExperts => [...prevExperts, item]);
     };
 
     const createRequestBody = () => {
         let categoryList: { [key: string]: any } = {
             active: isActive,
-            categoryList: [],
             days: "All",
             group: gender,
             icon: "",
             icons: [],
             imagePaths: [],
             index: Number(position),
-            itemList: [],
             name: name,
         };
         if (!isAddNew) {
@@ -145,6 +147,13 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
         if (categoryLevel == 2) {
             body["subCategory"] = categoryList
         }
+        if(addedExperts.length > 0){
+            body["experts"]["add"] = addedExperts; 
+        }
+        if(deletedExperts.length > 0){
+            body["experts"]["delete"] = deletedExperts;
+        }
+        console.log(body);
         return body;
     };
 
@@ -220,7 +229,6 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
                         options={genderOptions}
                         selectedOption={gender}
                         onSelect={(val: string) => {
-                            console.log("#######", val)
                             setGender(val)
                         }}
                     />

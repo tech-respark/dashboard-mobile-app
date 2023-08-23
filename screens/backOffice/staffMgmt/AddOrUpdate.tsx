@@ -76,7 +76,6 @@ const AddOrUpdate = ({ navigation, route }: any) => {
         dispatch(setIsLoading({ isLoading: true }));
         //TODO : ssroles API call can be avoided if role is not changed
         const url = environment.sqlBaseUri + "staffs";
-        console.log(selectedRole, rolesData)
         let roleId = rolesData.find((role: any) => role.name === selectedRole)?.id;
         let requestBody: { [key: string]: any } = {
             "active": active ? 1 : 0,
@@ -99,7 +98,6 @@ const AddOrUpdate = ({ navigation, route }: any) => {
             requestBody["id"] = selectedStaff.id;
             requestBody["weeklyOff"] = weeklyOff;
         }
-        console.log(requestBody);
         let response = await makeAPIRequest(url, requestBody, "POST");
         let roleResponse = await getRoleMapping(roleId, response.id);
         dispatch(setIsLoading({ isLoading: false }));

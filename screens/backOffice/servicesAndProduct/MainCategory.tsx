@@ -22,11 +22,11 @@ const MainCategory = ({ navigation, type }: any) => {
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [clickedItem, setClickedItem] = useState<{ [key: string]: any }>({});
 
-    const onTextClickHandler = (item: { [key: string]: any }) => {
+    const onTextClickHandler = (item: { [key: string]: any }, index: number) => {
         if (item.categoryList.length > 0) {
-            navigation.navigate("SubCategory", { selectedItem: item, type: type, topLevelObject: item })
+            navigation.navigate("SubCategory", { type: type, topLevelObject: item, index: index })
         } else if (item.itemList.length > 0) {
-            navigation.navigate("ItemList", { selectedItem: item, routeName: item.name, type: type, topLevelObject: item, categoryLevel: 1, categoryId: item.id });
+            navigation.navigate("ItemList", { routeName: item.name, type: type, topLevelObject: item, categoryLevel: 1, categoryId: item.id, index: index });
         }
         else {
             setClickedItem(item);
@@ -41,10 +41,6 @@ const MainCategory = ({ navigation, type }: any) => {
     const addNew = () => {
         navigation.navigate("AddUpdateCategory", { type: type, isAddNew: true, categoryLevel: 1, position: String(categoryList.length + 1) });
     };
-
-    // useEffect(() => {
-    //     console.log("Data changed", categoryList[0]);
-    // }, [categoryList]);
 
     useEffect(() => {
         if (isFocused) {
