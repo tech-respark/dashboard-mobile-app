@@ -2,34 +2,55 @@ import React, { FC, useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { FontSize, GlobalColors } from "../Styles/GlobalStyleConfigs";
 import { Ionicons } from "@expo/vector-icons";
-import ImagePicker from 'react-native-image-picker';
+import * as ImagePicker from 'expo-image-picker';
+import { useAppSelector } from "../redux/Hooks";
+import { selectTenantId } from "../redux/state/UserStates";
+import { makeAPIRequest } from "../utils/Helper";
+import { environment } from "../utils/Constants";
 
 
 type UploadImageFieldProps = {
-    imageUrl: string
+    imageUrl: string,
+    handleImageClick?: () => void;
 };
 
-const UploadImageField: FC<UploadImageFieldProps> = ({ imageUrl }) => {
+const UploadImageField: FC<UploadImageFieldProps> = ({ imageUrl, handleImageClick }) => {
+    // const [image, setImage] = useState(imageUrl);    
+    // const tenantId = useAppSelector(selectTenantId);
 
-    const handleImageClick = () => {
-        // if (!imageUrl) {
-        //   ImagePicker.showImagePicker(
-        //     {
-        //       title: 'Select Image',
-        //       mediaType: 'photo',
-        //       quality: 0.5,
-        //     },
-        //     (response) => {
-        //       if (!response.didCancel && !response.error) {
-        //         setImageUrl(response.uri);
-        //       }
-        //     }
-        //   );
-        // } else {
-        //   // Handle image edit or delete logic
-        //   // For example, show a modal with edit/delete options
-        // }
-      };
+    // const handleImageClick = async() => {
+    // let result = await ImagePicker.launchImageLibraryAsync({
+    //     mediaTypes: ImagePicker.MediaTypeOptions.All,
+    //     allowsEditing: true,
+    //     aspect: [4, 3],
+    //     quality: 1,
+    //   });
+  
+    //   console.log(result);
+  
+    //   if (!result.canceled) {
+    //     setImage(result.assets[0].uri);
+
+    //     const imageFile = new File([result.assets[0].uri], 'image.jpg');
+
+    //     const formData = new FormData();
+    //     formData.append('id', String(tenantId));
+    //     formData.append('type', 'curatedcategory');
+    //     formData.append('file', imageFile);
+    //     console.log(formData);
+
+    //     let response2 = await fetch(environment.documentBaseUri+'s3/uploadwithtype', {
+    //         method: "POST",
+    //         body: formData,
+    //         headers: {'Content-Type': 'application/json'}
+    //         }
+    //     );
+    //     console.log("Status", response2.status)
+    //     let data = await response2.text()
+    //     console.log("DATA", data)
+    //   }
+      
+    //   };    
 
     return (
         <View>

@@ -13,6 +13,7 @@ import { selectBranchId, selectStaffData, selectTenantId } from "../../../redux/
 import UploadImageField from "../../../components/UploadImageField";
 import Toast from "react-native-root-toast";
 import Dropdown from "../../../components/Dropdown";
+import * as ImagePicker from 'expo-image-picker';
 
 const AddUpdateCategory = ({ navigation, route }: any) => {
     const dispatch = useAppDispatch();
@@ -106,8 +107,19 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
 
     };
 
-    const handleStaffSelect = (expertName: string, index: number) => {
-        let expertObject = staffList![index];
+    const handleImageClick = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+        return result.canceled ? "" : result.assets[0].uri;
+    };
+
+
+    const handleStaffSelect = (expertName: string, index?: number) => {
+        let expertObject = staffList![index!];
         experts.some(expert => expert.id === expertObject.id) ? null : setExperts(prevExperts => [...prevExperts, expertObject]);
         setAddedExperts(prevExperts => [...prevExperts, expertObject]);
     };
@@ -147,10 +159,10 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
         if (categoryLevel == 2) {
             body["subCategory"] = categoryList
         }
-        if(addedExperts.length > 0){
-            body["experts"]["add"] = addedExperts; 
+        if (addedExperts.length > 0) {
+            body["experts"]["add"] = addedExperts;
         }
-        if(deletedExperts.length > 0){
+        if (deletedExperts.length > 0) {
             body["experts"]["delete"] = deletedExperts;
         }
         console.log(body);
@@ -178,9 +190,9 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
     };
 
     useEffect(() => {
-            isAddNew ? null : getCategoryInformation();
+        isAddNew ? null : getCategoryInformation();
     }, []);
-    
+
     return (
         <View style={{ flex: 1 }}>
             <ScrollView style={styles.container}>
@@ -239,7 +251,9 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
                     <View style={{ flexDirection: 'row', alignItems: 'center', margin: 10 }}>
                         <View>
                             <Text style={{ color: 'gray', fontSize: FontSize.medium }}>Both</Text>
-                            <UploadImageField imageUrl={bothIcon} />
+                            <UploadImageField imageUrl={bothIcon} handleImageClick={async () => {
+                                setBothIcon(await handleImageClick())
+                            }} />
                         </View>
                         <Text>OR</Text>
                     </View>
@@ -247,13 +261,17 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
                         {gender != "female" &&
                             <View style={{ marginRight: 10 }}>
                                 <Text style={{ color: 'gray', fontSize: FontSize.medium }}>Male</Text>
-                                <UploadImageField imageUrl={maleIcon} />
+                                <UploadImageField imageUrl={maleIcon} handleImageClick={async() => {
+                                    setMaleIcon(await handleImageClick())
+                                }} />
                             </View>
                         }
                         {gender != "male" &&
                             <View>
                                 <Text style={{ color: 'gray', fontSize: FontSize.medium }}>Female</Text>
-                                <UploadImageField imageUrl={femaleIcon} />
+                                <UploadImageField imageUrl={femaleIcon} handleImageClick={async() => {
+                                    setFemaleIcon(await handleImageClick())
+                                }} />
                             </View>
                         }
                     </View>
@@ -272,7 +290,10 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
                                 <UploadImageField imageUrl={item.imagePath} key={item.imagePath} />
                             ))
                         }
-                        <UploadImageField imageUrl={""} />
+                        <UploadImageField imageUrl={""} handleImageClick={async() => {
+                            let newImage = await handleImageClick();
+                            setDisplayImageObjects(prevObjects => [...prevObjects, { "imagePath":  newImage}])
+                        }} />
                     </ScrollView>
                 </View>
                 {!isAddNew && type == "service" && showExpertsSection &&
