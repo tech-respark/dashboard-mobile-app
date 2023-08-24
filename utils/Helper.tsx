@@ -7,48 +7,67 @@ import { selectCurrentBranch, selectStoreData, setCurrentBranch, setStoreIdData 
 import { environment } from "./Constants";
 import { GlobalColors } from "../Styles/GlobalStyleConfigs";
 
-export const makeAPIRequest = async (url: string, body?: any, method: string = "POST", allowEmptyRes: boolean=false, options: RequestInit = { headers: { 'Content-Type': "application/json" } }): Promise<any> => {
-  options.method = method;  
+export const makeAPIRequest = async (url: string, body?: any, method: string = "POST", allowEmptyRes: boolean = false, options: RequestInit = { headers: { 'Content-Type': "application/json" } }): Promise<any> => {
+  options.method = method;
   body ? options.body = JSON.stringify(body) : null;
   let response;
-    try {
-      response = await fetch(url, options);
-      if(response.status != 200 || (!allowEmptyRes && response.headers.get('content-length') === '0')){
-        return null;
-      } 
-    } catch (error) {
-      console.log(error);
+  try {
+    response = await fetch(url, options);
+    if (response.status != 200 || (!allowEmptyRes && response.headers.get('content-length') === '0')) {
       return null;
     }
-    try{
-      response = await response.json();
-    }catch(error){
-      console.log("Not able to parse JSON");
-    }
-    return response;
-  };
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+  try {
+    response = await response.json();
+  } catch (error) {
+    console.log("Not able to parse JSON");
+  }
+  return response;
+};
 
-  export const sleep = (milliseconds: number) => {
-    return new Promise((resolve) => setTimeout(resolve, milliseconds));
-  };
-
-  export const getBranchesAndStoreId = async (staffId: number, dispatch: AppDispatch) => {
-    let res: { [key: string]: any }[] = await makeAPIRequest(environment.sqlBaseUri + "ssroles/staff/custom/staffid/" + staffId, null, "GET");
-    if (res.length > 0) {
-      dispatch(setStoreIdData({ StoreIdData: res }));
-      dispatch(setCurrentBranch({ currentBranch: res[0].name }));
+export const uploadImageAPI = async (uri: string, body: any) => {
+  let options = {
+    method: "POST",
+    headers: { 'Content-Type': 'application/json' },
+    body: body
+  }
+  let response = null;
+  try {
+    let response = await fetch(uri, options);
+    if (response.status != 200) {
+      return response;
     }
-  };
+    return await response.text();
+  } catch (error) {
+    console.log("Internal Error");
+  }
+  return response;
+}
 
-  export const getCategoryData = async (type: string, tenantId: number, storeId: number, dispatch: AppDispatch) => {
-    dispatch(setIsLoading({ isLoading: true }));
-    const subDomain = (type == 'service') ? "getServiceCategoriesByTenantAndStore" : "getProductCategoriesByTenantAndStore";
-    const url = environment.documentBaseUri + `stores/${subDomain}?tenantId=${tenantId}&storeId=${storeId}`;
-    let response = await makeAPIRequest(url, null, "GET");
-    dispatch(setIsLoading({ isLoading: false }));
-    if (response) {
-        dispatch(setCategoriesData({categoriesData: response}));
-    } else {
-        Toast.show("No Data Found", { backgroundColor: GlobalColors.error });
-    }
+export const sleep = (milliseconds: number) => {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+};
+
+export const getBranchesAndStoreId = async (staffId: number, dispatch: AppDispatch) => {
+  let res: { [key: string]: any }[] = await makeAPIRequest(environment.sqlBaseUri + "ssroles/staff/custom/staffid/" + staffId, null, "GET");
+  if (res.length > 0) {
+    dispatch(setStoreIdData({ StoreIdData: res }));
+    dispatch(setCurrentBranch({ currentBranch: res[0].name }));
+  }
+};
+
+export const getCategoryData = async (type: string, tenantId: number, storeId: number, dispatch: AppDispatch) => {
+  dispatch(setIsLoading({ isLoading: true }));
+  const subDomain = (type == 'service') ? "getServiceCategoriesByTenantAndStore" : "getProductCategoriesByTenantAndStore";
+  const url = environment.documentBaseUri + `stores/${subDomain}?tenantId=${tenantId}&storeId=${storeId}`;
+  let response = await makeAPIRequest(url, null, "GET");
+  dispatch(setIsLoading({ isLoading: false }));
+  if (response) {
+    dispatch(setCategoriesData({ categoriesData: response }));
+  } else {
+    Toast.show("No Data Found", { backgroundColor: GlobalColors.error });
+  }
 };
