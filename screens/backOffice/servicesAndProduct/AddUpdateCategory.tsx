@@ -170,6 +170,26 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
         });
     };
 
+    const handleImageDelete = (index: number, type: string) => {
+        switch(type){
+            case "both": 
+                setBothIcon({});
+                newUploadIcon[0] = false;
+                break;
+            case "male": 
+                setMaleIcon({});
+                newUploadIcon[1] = false;
+                break;
+            case "female": 
+                setFemaleIcon({});
+                newUploadIcon[2] = false;
+                break;
+            case "display": 
+            setDisplayImageObjects(prev => {const updatedObjects = [...prev];updatedObjects.splice(index, 1);return updatedObjects;});
+
+        }
+    };
+
     const handleStaffSelect = (expertName: string, index?: number) => {
         let expertObject = staffList![index!];
         experts.some(expert => expert.id === expertObject.id) ? null : setExperts(prevExperts => [...prevExperts, expertObject]);
@@ -311,7 +331,7 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
                                 let url = await handleImageClick();
                                 setBothIcon(createImageObject("both", url));
                                 newUploadIcon[0] = true;
-                            }} />
+                            }}  type="both" handleImageDelete={handleImageDelete}/>
                         </View>
                         <Text>OR</Text>
                     </View>
@@ -322,7 +342,7 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
                                 <UploadImageField imageUrl={maleIcon.imagePath} handleImageClick={async () => {
                                     setMaleIcon(createImageObject("male", await handleImageClick()));
                                     newUploadIcon[1] = true;
-                                }} />
+                                }} type="male" handleImageDelete={handleImageDelete}/>
                             </View>
                         }
                         {gender != "male" &&
@@ -331,7 +351,7 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
                                 <UploadImageField imageUrl={femaleIcon.imagePath} handleImageClick={async () => {
                                     setFemaleIcon(createImageObject("female", await handleImageClick()));
                                     newUploadIcon[2] = true;
-                                }} />
+                                }} type="female" handleImageDelete={handleImageDelete}/>
                             </View>
                         }
                     </View>
@@ -346,14 +366,14 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
                         contentContainerStyle={{ paddingBottom: 10 }}
                     >
                         {
-                            displayImageObjects.map((item: any) => (
-                                <UploadImageField imageUrl={item.imagePath} key={item.imagePath} />
+                            displayImageObjects.map((item: any, index: number) => (
+                                <UploadImageField imageUrl={item.imagePath} key={item.imagePath} type="display" handleImageDelete={handleImageDelete} index={index}/>
                             ))
                         }
                         <UploadImageField imageUrl={""} handleImageClick={async () => {
                             let newImage = await handleImageClick();
-                            setDisplayImageObjects(prevObjects => [...prevObjects, createImageObject("display", newImage)]);
                             addedDisplayImagesIndex.push(displayImageObjects.length);
+                            setDisplayImageObjects(prevObjects => [...prevObjects, createImageObject("display", newImage)]);
                         }} />
                     </ScrollView>
                 </View>

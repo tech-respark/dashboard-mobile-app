@@ -12,46 +12,12 @@ import { environment } from "../utils/Constants";
 type UploadImageFieldProps = {
     imageUrl: string,
     handleImageClick?: () => void;
+    handleImageDelete?: (index: number, type: string) => void;
+    index? : number,
+    type?: string
 };
 
-const UploadImageField: FC<UploadImageFieldProps> = ({ imageUrl, handleImageClick }) => {
-    // const [image, setImage] = useState(imageUrl);    
-    // const tenantId = useAppSelector(selectTenantId);
-
-    // const handleImageClick = async() => {
-    // let result = await ImagePicker.launchImageLibraryAsync({
-    //     mediaTypes: ImagePicker.MediaTypeOptions.All,
-    //     allowsEditing: true,
-    //     aspect: [4, 3],
-    //     quality: 1,
-    //   });
-  
-    //   console.log(result);
-  
-    //   if (!result.canceled) {
-    //     setImage(result.assets[0].uri);
-
-    //     const imageFile = new File([result.assets[0].uri], 'image.jpg');
-
-    //     const formData = new FormData();
-    //     formData.append('id', String(tenantId));
-    //     formData.append('type', 'curatedcategory');
-    //     formData.append('file', imageFile);
-    //     console.log(formData);
-
-    //     let response2 = await fetch(environment.documentBaseUri+'s3/uploadwithtype', {
-    //         method: "POST",
-    //         body: formData,
-    //         headers: {'Content-Type': 'application/json'}
-    //         }
-    //     );
-    //     console.log("Status", response2.status)
-    //     let data = await response2.text()
-    //     console.log("DATA", data)
-    //   }
-      
-    //   };    
-
+const UploadImageField: FC<UploadImageFieldProps> = ({ imageUrl, handleImageClick, handleImageDelete, index, type }) => {  
     return (
         <View>
             <TouchableOpacity onPress={handleImageClick}>
@@ -68,7 +34,7 @@ const UploadImageField: FC<UploadImageFieldProps> = ({ imageUrl, handleImageClic
                             <TouchableOpacity onPress={() => console.log('Edit clicked')} style={styles.imageTopIconView}>
                                 <Ionicons name="pencil-outline" size={25}/>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => console.log('Delete clicked')} style={styles.imageTopIconView}>
+                            <TouchableOpacity onPress={()=>handleImageDelete!(index!, type!)} style={styles.imageTopIconView}>
                             <Ionicons name="trash" size={25}/>
                             </TouchableOpacity>
                         </View>
