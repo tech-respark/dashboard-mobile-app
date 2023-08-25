@@ -111,7 +111,7 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
 
     };
 
-    const handleImageClick = async () => {
+    const selectImageFromLocal = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.All,
             allowsEditing: true,
@@ -133,7 +133,36 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
         }
     };
 
-    const uploadImage = async (imageUrl: string) => {
+    const handleImageUploadClick = async (type: string, isUpdate?: boolean, index?: number) => {
+        switch (type) {
+            case "both":
+                setBothIcon(createImageObject("both", await selectImageFromLocal()));
+                newUploadIcon[0] = true;
+                break;
+            case "male":
+                setMaleIcon(createImageObject("male", await selectImageFromLocal()));
+                newUploadIcon[1] = true;
+                break;
+            case "female":
+                setFemaleIcon(createImageObject("female", await selectImageFromLocal()));
+                newUploadIcon[2] = true;
+                break;
+            case "display":
+                let newImage = await selectImageFromLocal();
+                console.log(isUpdate, addedDisplayImagesIndex, index);
+                !addedDisplayImagesIndex.includes(index!) ? addedDisplayImagesIndex.push(displayImageObjects.length) : null;
+                if (isUpdate) {
+                    const updatedObjects = [...displayImageObjects];
+                    updatedObjects[index!] = { ...updatedObjects[index!], imagePath: newImage };
+                    setDisplayImageObjects(updatedObjects);
+                } else {
+                    setDisplayImageObjects(prevObjects => [...prevObjects, createImageObject("display", newImage)]);
+                }
+                break;
+        }
+    };
+
+    const uploadImageToS3 = async (imageUrl: string) => {
         const formData = new FormData();
         formData.append('id', String(tenantId));
         formData.append('type', 'curatedcategory');
@@ -143,20 +172,20 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
         return response;
     };
 
-    const checkImageUpload = async () => {
+    const checkImageToUpload = async () => {
         const iconUploads: { [key: string]: any } = [bothIcon, maleIcon, femaleIcon];
         for (let index = 0; index < newUploadIcon.length; index++) {
             const isUploaded = newUploadIcon[index];
             if (isUploaded) {
                 switch (index) {
                     case 0:
-                        setBothIcon(async prevState => ({ ...prevState, imagePath: await uploadImage(iconUploads[index]) }));
+                        setBothIcon(async prevState => ({ ...prevState, imagePath: await uploadImageToS3(iconUploads[index]) }));
                         break;
                     case 1:
-                        setMaleIcon(async prevState => ({ ...prevState, imagePath: await uploadImage(iconUploads[index]) }));
+                        setMaleIcon(async prevState => ({ ...prevState, imagePath: await uploadImageToS3(iconUploads[index]) }));
                         break;
                     case 2:
-                        setFemaleIcon(async prevState => ({ ...prevState, imagePath: await uploadImage(iconUploads[index]) }));
+                        setFemaleIcon(async prevState => ({ ...prevState, imagePath: await uploadImageToS3(iconUploads[index]) }));
                         break;
                     default:
                         break;
@@ -165,28 +194,27 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
         }
         addedDisplayImagesIndex.map(async (index: number) => {
             const updatedObjects = [...displayImageObjects];
-            updatedObjects[index] = { ...updatedObjects[index], imagePath: await uploadImage(iconUploads[index]) };
+            updatedObjects[index] = { ...updatedObjects[index], imagePath: await uploadImageToS3(iconUploads[index]) };
             setDisplayImageObjects(updatedObjects);
         });
     };
 
     const handleImageDelete = (index: number, type: string) => {
-        switch(type){
-            case "both": 
+        switch (type) {
+            case "both":
                 setBothIcon({});
                 newUploadIcon[0] = false;
                 break;
-            case "male": 
+            case "male":
                 setMaleIcon({});
                 newUploadIcon[1] = false;
                 break;
-            case "female": 
+            case "female":
                 setFemaleIcon({});
                 newUploadIcon[2] = false;
                 break;
-            case "display": 
-            setDisplayImageObjects(prev => {const updatedObjects = [...prev];updatedObjects.splice(index, 1);return updatedObjects;});
-
+            case "display":
+                setDisplayImageObjects(prev => { const updatedObjects = [...prev]; updatedObjects.splice(index, 1); return updatedObjects; });
         }
     };
 
@@ -250,7 +278,7 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
             return
         }
         dispatch(setIsLoading({ isLoading: true }));
-        await checkImageUpload();
+        await checkImageToUpload();
         const url = environment.documentBaseUri + 'stores/categories/update';
         let requestBody = createRequestBody();
         let response = await makeAPIRequest(url, requestBody, "POST", !isAddNew);
@@ -327,11 +355,7 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
                     <View style={{ flexDirection: 'row', alignItems: 'center', margin: 10 }}>
                         <View>
                             <Text style={{ color: 'gray', fontSize: FontSize.medium }}>Both</Text>
-                            <UploadImageField imageUrl={bothIcon.imagePath} handleImageClick={async () => {
-                                let url = await handleImageClick();
-                                setBothIcon(createImageObject("both", url));
-                                newUploadIcon[0] = true;
-                            }}  type="both" handleImageDelete={handleImageDelete}/>
+                            <UploadImageField imageUrl={bothIcon.imagePath} handleImageUpload={handleImageUploadClick} type="both" handleImageDelete={handleImageDelete} />
                         </View>
                         <Text>OR</Text>
                     </View>
@@ -339,19 +363,13 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
                         {gender != "female" &&
                             <View style={{ marginRight: 10 }}>
                                 <Text style={{ color: 'gray', fontSize: FontSize.medium }}>Male</Text>
-                                <UploadImageField imageUrl={maleIcon.imagePath} handleImageClick={async () => {
-                                    setMaleIcon(createImageObject("male", await handleImageClick()));
-                                    newUploadIcon[1] = true;
-                                }} type="male" handleImageDelete={handleImageDelete}/>
+                                <UploadImageField imageUrl={maleIcon.imagePath} handleImageUpload={handleImageUploadClick} type="male" handleImageDelete={handleImageDelete} />
                             </View>
                         }
                         {gender != "male" &&
                             <View>
                                 <Text style={{ color: 'gray', fontSize: FontSize.medium }}>Female</Text>
-                                <UploadImageField imageUrl={femaleIcon.imagePath} handleImageClick={async () => {
-                                    setFemaleIcon(createImageObject("female", await handleImageClick()));
-                                    newUploadIcon[2] = true;
-                                }} type="female" handleImageDelete={handleImageDelete}/>
+                                <UploadImageField imageUrl={femaleIcon.imagePath} handleImageUpload={handleImageUploadClick} type="female" handleImageDelete={handleImageDelete} />
                             </View>
                         }
                     </View>
@@ -367,14 +385,10 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
                     >
                         {
                             displayImageObjects.map((item: any, index: number) => (
-                                <UploadImageField imageUrl={item.imagePath} key={item.imagePath} type="display" handleImageDelete={handleImageDelete} index={index}/>
+                                <UploadImageField imageUrl={item.imagePath} key={item.imagePath} type="display" handleImageDelete={handleImageDelete} index={index} handleImageUpload={handleImageUploadClick}/>
                             ))
                         }
-                        <UploadImageField imageUrl={""} handleImageClick={async () => {
-                            let newImage = await handleImageClick();
-                            addedDisplayImagesIndex.push(displayImageObjects.length);
-                            setDisplayImageObjects(prevObjects => [...prevObjects, createImageObject("display", newImage)]);
-                        }} />
+                        <UploadImageField imageUrl={""} handleImageUpload={handleImageUploadClick} type="display"/>
                     </ScrollView>
                 </View>
                 {!isAddNew && type == "service" && showExpertsSection &&

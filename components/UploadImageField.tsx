@@ -2,25 +2,20 @@ import React, { FC, useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { FontSize, GlobalColors } from "../Styles/GlobalStyleConfigs";
 import { Ionicons } from "@expo/vector-icons";
-import * as ImagePicker from 'expo-image-picker';
-import { useAppSelector } from "../redux/Hooks";
-import { selectTenantId } from "../redux/state/UserStates";
-import { makeAPIRequest } from "../utils/Helper";
-import { environment } from "../utils/Constants";
 
 
 type UploadImageFieldProps = {
     imageUrl: string,
-    handleImageClick?: () => void;
+    handleImageUpload?: (type: string, isUpdate?: boolean, index?: number) => void;
     handleImageDelete?: (index: number, type: string) => void;
     index? : number,
-    type?: string
+    type?: string,
 };
 
-const UploadImageField: FC<UploadImageFieldProps> = ({ imageUrl, handleImageClick, handleImageDelete, index, type }) => {  
+const UploadImageField: FC<UploadImageFieldProps> = ({ imageUrl, handleImageUpload, handleImageDelete, index, type }) => {  
     return (
         <View>
-            <TouchableOpacity onPress={handleImageClick}>
+            <TouchableOpacity onPress={() => handleImageUpload!(type!)}>
                 <View>
                     {imageUrl ?
                         <Image source={{ uri: imageUrl }} style={styles.imageView} />
@@ -31,7 +26,7 @@ const UploadImageField: FC<UploadImageFieldProps> = ({ imageUrl, handleImageClic
                     }
                     {imageUrl &&
                         <View style={styles.imageTop}>
-                            <TouchableOpacity onPress={() => console.log('Edit clicked')} style={styles.imageTopIconView}>
+                            <TouchableOpacity onPress={() => handleImageUpload!(type!, true, index!)} style={styles.imageTopIconView}>
                                 <Ionicons name="pencil-outline" size={25}/>
                             </TouchableOpacity>
                             <TouchableOpacity onPress={()=>handleImageDelete!(index!, type!)} style={styles.imageTopIconView}>
