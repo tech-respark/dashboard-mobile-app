@@ -87,7 +87,7 @@ const ForgotPassword = ({ navigation }: any) => {
             dispatch(setIsLoading({ isLoading: true }));
             await sleep(500);
             const headers: RequestInit = { headers: { 'Content-Type': "application/json", "user": userName, "pwd": newPassword } };
-            let response = await makeAPIRequest(environment.sqlBaseUri + 'staffs/updatepwd', null, "POST", headers);
+            let response = await makeAPIRequest(environment.sqlBaseUri + 'staffs/updatepwd', null, "POST", false, headers);
             dispatch(setIsLoading({ isLoading: false }));
             if (response) {
                 navigation.replace("Login");

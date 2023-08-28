@@ -21,7 +21,7 @@ const InitialNavigationRoutes = () => {
         <Stack.Navigator initialRouteName="Splash">
           <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
           <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-          <Stack.Screen name="Forgot Password" component={ForgotPassword} options={{ headerShown: false }} />
+          <Stack.Screen name="Forgot Password" component={ForgotPassword} />
           <Stack.Screen name="DrawerNavigationRoutes" component={DrawerNavigationRoutes} options={{headerShown: false}}/>
         </Stack.Navigator>
       </NavigationContainer>
