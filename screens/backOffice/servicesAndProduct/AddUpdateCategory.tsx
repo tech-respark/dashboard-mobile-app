@@ -186,7 +186,7 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
         }
         dispatch(setIsLoading({ isLoading: true }));
         const url = environment.documentBaseUri + 'stores/categories/update';
-        let requestBody = createRequestBody();
+        let requestBody = await createRequestBody();
         let response = await makeAPIRequest(url, requestBody, "POST", !isAddNew);
         dispatch(setIsLoading({ isLoading: false }));
         if (response) {
