@@ -9,10 +9,11 @@ import Dropdown from "../../../components/Dropdown";
 import UploadImageField from "../../../components/UploadImageField";
 import SubmitCancelButtons from "../../../components/SubmitCancelButtons";
 import Toast from "react-native-root-toast";
-import { getCategoryData, makeAPIRequest } from "../../../utils/Helper";
+import { getCategoryData, makeAPIRequest, uploadImageToS3 } from "../../../utils/Helper";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { selectBranchId, selectTenantId } from "../../../redux/state/UserStates";
 import { setIsLoading } from "../../../redux/state/UIStates";
+import IconsAndImages from "./IconsAndImages";
 
 const AddUpdateItem = ({ navigation, route }: any) => {
 
@@ -40,6 +41,7 @@ const AddUpdateItem = ({ navigation, route }: any) => {
     const [benefits, setBenefits] = useState<string>("");
     const [description, setDescription] = useState<string[]>([""]);
     const [displayImages, setDisplayImages] = useState<{ [key: string]: any }[]>([]);
+    let addedDisplayImagesIndex: number[] = [];
 
     const [variations, SetVariations] = useState<{ [key: string]: any }[]>([]);
     const [ingredients, setIngredients] = useState<string>("");
@@ -73,6 +75,14 @@ const AddUpdateItem = ({ navigation, route }: any) => {
             updatedDescriptions[index] = val;
             return updatedDescriptions;
         });
+    };
+
+    const checkImageToUpload = async () => {
+        // addedDisplayImagesIndex.map(async (index: number) => {
+        //     const updatedObjects = [...displayImages];
+        //     updatedObjects[index] = { ...updatedObjects[index], imagePath: await uploadImageToS3(iconUploads[index], tenantId) };
+        //     setDisplayImages(updatedObjects);
+        // });
     };
 
     const createRequestBody = (): { [key: string]: any } => {
@@ -413,22 +423,7 @@ const AddUpdateItem = ({ navigation, route }: any) => {
                         ))}
                     </View>
                 </View>
-
-                <View style={styles.sectionView}>
-                    <Text style={{ fontSize: FontSize.medium, paddingVertical: 5 }}>Display Images</Text>
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={true}
-                        contentContainerStyle={{ paddingBottom: 10 }}
-                    >
-                        {
-                            displayImages.map((item: any) => (
-                                <UploadImageField imageUrl={item.imagePath} key={item.imagePath} />
-                            ))
-                        }
-                        <UploadImageField imageUrl={""} />
-                    </ScrollView>
-                </View>
+                <IconsAndImages showIcons={false} itemName={route.params.clickedItem.name} addedDisplayImagesIndex={addedDisplayImagesIndex} displayImageObjects={displayImages} setDisplayImageObjects={(val)=>setDisplayImages(val)}/>
             </ScrollView>
             <SubmitCancelButtons cancelHandler={() => { navigation.goBack() }} cancelText="Cancel" submitHandler={submitHandler} submitText="Submit" />
         </View>

@@ -31,7 +31,7 @@ export const makeAPIRequest = async (url: string, body?: any, method: string = "
 export const uploadImageAPI = async (uri: string, body: any) => {
   let options = {
     method: "POST",
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'multipart/form-data' },
     body: body
   }
   let response = null;
@@ -70,4 +70,20 @@ export const getCategoryData = async (type: string, tenantId: number, storeId: n
   } else {
     Toast.show("No Data Found", { backgroundColor: GlobalColors.error });
   }
+};
+
+export const uploadImageToS3 = async (imageUrl: string, tenantId?: number) => {
+  console.log("TO be updated URL", imageUrl)
+  const formData = new FormData();
+  formData.append('id', String(tenantId));
+  formData.append('type', 'curatedcategory');
+  formData.append('file', {
+    uri: imageUrl,
+    name: 'image.jpg',
+    type: 'image.jpeg'
+  });
+  let response = await uploadImageAPI(environment.documentBaseUri + 's3/uploadwithtype', formData);
+  !response ? Toast.show("File Upload Error", { backgroundColor: GlobalColors.error, opacity: 1 }) : null;
+  console.log("S3 URL", response);
+  return response;
 };
