@@ -9,7 +9,7 @@ import Dropdown from "../../../components/Dropdown";
 import UploadImageField from "../../../components/UploadImageField";
 import SubmitCancelButtons from "../../../components/SubmitCancelButtons";
 import Toast from "react-native-root-toast";
-import { getCategoryData, makeAPIRequest, uploadImageToS3 } from "../../../utils/Helper";
+import { checkImageToUpload, getCategoryData, makeAPIRequest, uploadImageToS3 } from "../../../utils/Helper";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { selectBranchId, selectTenantId } from "../../../redux/state/UserStates";
 import { setIsLoading } from "../../../redux/state/UIStates";
@@ -77,15 +77,8 @@ const AddUpdateItem = ({ navigation, route }: any) => {
         });
     };
 
-    const checkImageToUpload = async () => {
-        // addedDisplayImagesIndex.map(async (index: number) => {
-        //     const updatedObjects = [...displayImages];
-        //     updatedObjects[index] = { ...updatedObjects[index], imagePath: await uploadImageToS3(iconUploads[index], tenantId) };
-        //     setDisplayImages(updatedObjects);
-        // });
-    };
 
-    const createRequestBody = (): { [key: string]: any } => {
+    const createRequestBody = async(): Promise<{ [key: string]: any }> => {
         let itemData: { [key: string]: any } = {
             active: isActive,
             benefits: benefits,
@@ -98,7 +91,7 @@ const AddUpdateItem = ({ navigation, route }: any) => {
             hideFromCatalogue: hideFromCatalogue,
             howToUse: usage,
             iTag: tag,
-            imagePaths: [],
+            imagePaths: await checkImageToUpload(displayImages, tenantId!),
             index: position,
             ingredients: ingredients,
             name: name,
@@ -133,7 +126,8 @@ const AddUpdateItem = ({ navigation, route }: any) => {
             return;
         }
         dispatch(setIsLoading({ isLoading: true }));
-        let response = await makeAPIRequest(environment.documentBaseUri + "stores/categories/items/update", createRequestBody(), "POST");
+        const requestBody = await createRequestBody();
+        let response = await makeAPIRequest(environment.documentBaseUri + "stores/categories/items/update", requestBody, "POST");
         dispatch(setIsLoading({ isLoading: false }));
         if (response) {
             Toast.show("Added Successfully", { backgroundColor: GlobalColors.success, opacity: 1 });
@@ -423,7 +417,7 @@ const AddUpdateItem = ({ navigation, route }: any) => {
                         ))}
                     </View>
                 </View>
-                <IconsAndImages showIcons={false} itemName={route.params.clickedItem.name} addedDisplayImagesIndex={addedDisplayImagesIndex} displayImageObjects={displayImages} setDisplayImageObjects={(val)=>setDisplayImages(val)}/>
+                <IconsAndImages showIcons={false} itemName={name} displayImageObjects={displayImages} setDisplayImageObjects={(val)=>setDisplayImages(val)}/>
             </ScrollView>
             <SubmitCancelButtons cancelHandler={() => { navigation.goBack() }} cancelText="Cancel" submitHandler={submitHandler} submitText="Submit" />
         </View>

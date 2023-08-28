@@ -16,12 +16,9 @@ type IconsAndImagesProp = {
     setFemaleIcon?: (val: { [key: string]: any }) => void;
     displayImageObjects: { [key: string]: any }[];
     setDisplayImageObjects: (val: any) => void;
-    setNewUploadIcon?: (val: boolean[]) => void;
-    newImagesIndex: number[];
-    setNewImagesIndex: (val: number[]) => void;
 };
 
-const IconsAndImages: FC<IconsAndImagesProp> = ({ showIcons, itemName, gender, bothIcon, maleIcon, femaleIcon, displayImageObjects, setBothIcon, setMaleIcon, setFemaleIcon, setDisplayImageObjects, setNewUploadIcon, newImagesIndex, setNewImagesIndex }) => {
+const IconsAndImages: FC<IconsAndImagesProp> = ({ showIcons, itemName, gender, bothIcon, maleIcon, femaleIcon, displayImageObjects, setBothIcon, setMaleIcon, setFemaleIcon, setDisplayImageObjects }) => {
    
     const createImageObject = (type: string, url: string) => {
         let index = type == "display" ? displayImageObjects.length + 1 : type == "both" ? 1 : type == "male" ? 2 : 3;
@@ -45,32 +42,19 @@ const IconsAndImages: FC<IconsAndImagesProp> = ({ showIcons, itemName, gender, b
         return result.canceled ? "" : result.assets[0].uri;
     };
 
-    const updateUploadIconAtIndex = (index: number, value: boolean) => {
-        setNewUploadIcon!(prevState => {
-            const updatedIcons = [...prevState];
-            updatedIcons[index] = value;
-            return updatedIcons;
-          })
-      };
-
     const handleImageUploadClick = async (type: string, isUpdate?: boolean, index?: number) => {
         switch (type) {
             case "both":
                 setBothIcon!(createImageObject("both", await selectImageFromLocal()));
-                updateUploadIconAtIndex(0, true);
                 break;
             case "male":
                 setMaleIcon!(createImageObject("male", await selectImageFromLocal()));
-                updateUploadIconAtIndex(1, true);
                 break;
             case "female":
                 setFemaleIcon!(createImageObject("female", await selectImageFromLocal()));
-                updateUploadIconAtIndex(2, true);
                 break;
             case "display":
                 let newImage = await selectImageFromLocal();
-                console.log("DISPLAY After image select",isUpdate, newImagesIndex, index);
-                !newImagesIndex.includes(index!) ? setNewImagesIndex([...newImagesIndex, displayImageObjects.length]) : null;
                 if (isUpdate) {
                     const updatedObjects = [...displayImageObjects];
                     updatedObjects[index!] = { ...updatedObjects[index!], imagePath: newImage };
@@ -86,15 +70,12 @@ const IconsAndImages: FC<IconsAndImagesProp> = ({ showIcons, itemName, gender, b
         switch (type) {
             case "both":
                 setBothIcon!({});
-                updateUploadIconAtIndex(0, false);
                 break;
             case "male":
                 setMaleIcon!({});
-                updateUploadIconAtIndex(1, false);
                 break;
             case "female":
                 setFemaleIcon!({});
-                updateUploadIconAtIndex(2, false);
                 break;
             case "display":
                 setDisplayImageObjects((prev: any) => { const updatedObjects = [...prev]; updatedObjects.splice(index, 1); return updatedObjects; });

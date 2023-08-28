@@ -73,7 +73,6 @@ export const getCategoryData = async (type: string, tenantId: number, storeId: n
 };
 
 export const uploadImageToS3 = async (imageUrl: string, tenantId?: number) => {
-  console.log("TO be updated URL", imageUrl)
   const formData = new FormData();
   formData.append('id', String(tenantId));
   formData.append('type', 'curatedcategory');
@@ -84,6 +83,17 @@ export const uploadImageToS3 = async (imageUrl: string, tenantId?: number) => {
   });
   let response = await uploadImageAPI(environment.documentBaseUri + 's3/uploadwithtype', formData);
   !response ? Toast.show("File Upload Error", { backgroundColor: GlobalColors.error, opacity: 1 }) : null;
-  console.log("S3 URL", response);
   return response;
 };
+
+
+export const checkImageToUpload = async (displayImageList: { [key: string]: any }[], tenantId: number) => {
+  let displayUploads = [...displayImageList];
+  for (let index = 0; index < displayImageList.length; index++) {
+    if (!displayUploads[index]["imagePath"].includes("https")) {
+      let imageS3Url = await uploadImageToS3(displayUploads[index]["imagePath"], tenantId);
+      displayUploads[index] = { ...displayUploads[index], imagePath: imageS3Url };
+    }
+  }
+  return displayUploads;
+}

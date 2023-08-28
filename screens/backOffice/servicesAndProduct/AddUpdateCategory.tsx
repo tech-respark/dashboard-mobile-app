@@ -7,7 +7,7 @@ import RadioButtonGroup from "../../../components/RadioButtonGroup";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { setIsLoading } from "../../../redux/state/UIStates";
-import { getCategoryData, makeAPIRequest, sleep, uploadImageToS3 } from "../../../utils/Helper";
+import { checkImageToUpload, getCategoryData, makeAPIRequest, uploadImageToS3 } from "../../../utils/Helper";
 import { environment, genderOptions } from "../../../utils/Constants";
 import { selectBranchId, selectStaffData, selectTenantId } from "../../../redux/state/UserStates";
 import Toast from "react-native-root-toast";
@@ -37,10 +37,8 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
     const [bothIcon, setBothIcon] = useState<{ [key: string]: any }>({});
     const [femaleIcon, setFemaleIcon] = useState<{ [key: string]: any }>({});
     const [maleIcon, setMaleIcon] = useState<{ [key: string]: any }>({});
-    const [newUploadIcon, setNewUploadIcon] = useState<boolean[]>([false, false, false]);
 
     const [displayImageObjects, setDisplayImageObjects] = useState<{ [key: string]: any }[]>([]);
-    const [newImagesIndex, setNewImagesIndex] = useState<number[]>([]);
     
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -68,7 +66,6 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
             setGender(responseData.group);
             getExperts(responseData);
             getImagesIcons(responseData);
-            console.log(responseData?.imagePaths);
             setDisplayImageObjects(responseData?.imagePaths || []);
         }
     };
@@ -110,11 +107,10 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
         })
     };
 
-    const checkImageToUpload = async () => {
-        let iconUploads: { [key: string]: any } = [bothIcon, maleIcon, femaleIcon];
-        let displayUploads = [...displayImageObjects];
+    const checkIconsToUpload = async () => {
+        let iconUploads: { [key: string]: any }[] = [bothIcon, maleIcon, femaleIcon];
         for (let index = 0; index < iconUploads.length; index++) {
-            if (!iconUploads[index]["imagePath"].includes("https")) {
+            if (Object.keys(iconUploads[index]).length !==0 && !iconUploads[index]["imagePath"].includes("https")) {
                 const imageS3Url = await uploadImageToS3(iconUploads[index]["imagePath"], tenantId);
                 switch (index) {
                     case 0:
@@ -131,13 +127,7 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
                 }
             }
         }
-        for(let index = 0; index<displayImageObjects.length; index++){
-            if(!displayUploads[index]["imagePath"].includes("https")){
-                let imageS3Url = await uploadImageToS3(displayUploads[index]["imagePath"], tenantId);   
-                displayUploads[index] = { ...displayUploads[index], imagePath:  imageS3Url};
-            }
-        }
-        return [iconUploads, displayUploads];
+        return iconUploads;
     };
 
     const handleStaffSelect = (expertName: string, index?: number) => {
@@ -152,14 +142,13 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
         setDeletedExperts(prevExperts => [...prevExperts, item]);
     };
 
-    const createRequestBody = (imagesData: any) => {
-        console.log("FINAL DATA BEFORE API:", imagesData[1])
+    const createRequestBody = async() => {
         let categoryList: { [key: string]: any } = {
             active: isActive,
             days: "All",
             group: gender,
-            icons: imagesData[0],
-            imagePaths: imagesData[1],
+            icons: await checkIconsToUpload(),
+            imagePaths: await checkImageToUpload(displayImageObjects, tenantId!),
             index: Number(position),
             name: name,
         };
@@ -187,7 +176,6 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
         if (deletedExperts.length > 0) {
             body["experts"]["delete"] = deletedExperts;
         }
-        console.log(body);
         return body;
     };
 
@@ -197,9 +185,8 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
             return
         }
         dispatch(setIsLoading({ isLoading: true }));
-        let data = await checkImageToUpload();
         const url = environment.documentBaseUri + 'stores/categories/update';
-        let requestBody = createRequestBody(data);
+        let requestBody = createRequestBody();
         let response = await makeAPIRequest(url, requestBody, "POST", !isAddNew);
         dispatch(setIsLoading({ isLoading: false }));
         if (response) {
@@ -268,9 +255,8 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
                         }}
                     />
                 </View>
-                <IconsAndImages showIcons={true} itemName={route.params.item.name} bothIcon={bothIcon} femaleIcon={femaleIcon} maleIcon={maleIcon} displayImageObjects={displayImageObjects}
-                    gender={gender}  setNewUploadIcon={(val) => setNewUploadIcon(val)} newImagesIndex={newImagesIndex} setNewImagesIndex={(val)=>setNewImagesIndex(val)}
-                    setBothIcon={(val)=>setBothIcon(val)} setMaleIcon={(val)=>setMaleIcon(val)} setFemaleIcon={(val)=>setFemaleIcon(val)} setDisplayImageObjects={(val)=>setDisplayImageObjects(val)}
+                <IconsAndImages showIcons={true} itemName={name} bothIcon={bothIcon} femaleIcon={femaleIcon} maleIcon={maleIcon} displayImageObjects={displayImageObjects}
+                    gender={gender} setBothIcon={(val)=>setBothIcon(val)} setMaleIcon={(val)=>setMaleIcon(val)} setFemaleIcon={(val)=>setFemaleIcon(val)} setDisplayImageObjects={(val)=>setDisplayImageObjects(val)}
                 />
                 {!isAddNew && type == "service" && showExpertsSection &&
                     <View style={styles.sectionView}>
