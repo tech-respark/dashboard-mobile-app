@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppDispatch } from '../../redux/Hooks';
 import { setUserData } from '../../redux/state/UserStates';
 import { getBranchesAndStoreId } from '../../utils/Helper';
+import { GlobalColors } from '../../Styles/GlobalStyleConfigs';
 
 const SplashScreen = ({ navigation }: any) => {
   const dispatch = useAppDispatch();
@@ -27,10 +28,17 @@ const SplashScreen = ({ navigation }: any) => {
 
   return (
     <View style={styles.container}>
+      <Image
+        source={require('../../assets/images/splash_graphic.png')}
+        style={{ width: '90%', resizeMode: 'contain', marginHorizontal: 10, marginBottom: 5 }}
+      />
+      <Image
+        source={require('../../assets/images/respark_logo.png')}
+        style={styles.overlayImage}
+      />
       <ActivityIndicator
         animating={animating}
-        color="#FFFFFF"
-        size="large"
+        color={GlobalColors.blue}
         style={styles.activityIndicator}
       />
     </View>
@@ -42,11 +50,19 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#307ecc',
+    backgroundColor: '#fff',
   },
   activityIndicator: {
     alignItems: 'center',
     height: 80,
+  },
+  overlayImage: {
+    position: 'absolute',
+    alignSelf: 'center',
+    resizeMode: 'contain',
+    width: '38%',
+    top: '38%',
+    left: '33%'
   },
 });
 

@@ -12,7 +12,7 @@ import Toast from "react-native-root-toast";
 import { checkImageToUpload, getCategoryData, makeAPIRequest, uploadImageToS3 } from "../../../utils/Helper";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { selectBranchId, selectTenantId } from "../../../redux/state/UserStates";
-import { setIsLoading } from "../../../redux/state/UIStates";
+import { setIsLoading, setShowBackOfficeCategories } from "../../../redux/state/UIStates";
 import IconsAndImages from "./IconsAndImages";
 
 const AddUpdateItem = ({ navigation, route }: any) => {
@@ -181,7 +181,11 @@ const AddUpdateItem = ({ navigation, route }: any) => {
   
 
     useEffect(() => {
+        dispatch(setShowBackOfficeCategories());
         !isAdd ? getItemInformation() : null;
+        return () => {
+            dispatch(setShowBackOfficeCategories());
+        }
     }, [])
 
     return (

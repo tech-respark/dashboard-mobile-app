@@ -6,7 +6,7 @@ import { TextInput } from "react-native-gesture-handler";
 import RadioButtonGroup from "../../../components/RadioButtonGroup";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
-import { setIsLoading } from "../../../redux/state/UIStates";
+import { setIsLoading, setShowBackOfficeCategories } from "../../../redux/state/UIStates";
 import { checkImageToUpload, getCategoryData, makeAPIRequest, uploadImageToS3 } from "../../../utils/Helper";
 import { environment, genderOptions } from "../../../utils/Constants";
 import { selectBranchId, selectStaffData, selectTenantId } from "../../../redux/state/UserStates";
@@ -200,7 +200,11 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
     };
 
     useEffect(() => {
+        dispatch(setShowBackOfficeCategories());
         isAddNew ? null : getCategoryInformation();
+        return () => {
+            dispatch(setShowBackOfficeCategories());
+        }
     }, []);
 
     return (

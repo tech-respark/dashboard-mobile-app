@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import CheckBox from "expo-checkbox";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
-import { setIsLoading } from "../../../redux/state/UIStates";
+import { setIsLoading, setShowBackOfficeCategories } from "../../../redux/state/UIStates";
 import { environment } from "../../../utils/Constants";
 import { selectBranchId, selectTenantId } from "../../../redux/state/UserStates";
 import { makeAPIRequest } from "../../../utils/Helper";
@@ -138,7 +138,11 @@ const AddOrUpdate = ({ navigation, route }: any) => {
     };
 
     useEffect(() => {
+        dispatch(setShowBackOfficeCategories());
         selectedStaff ? getRoleOfStaff() : null;
+        return () => {
+            dispatch(setShowBackOfficeCategories());
+        }
     }, []);
 
 
