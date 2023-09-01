@@ -9,7 +9,7 @@ import { useAppSelector } from '../../redux/Hooks';
 import { selectIsLoading } from '../../redux/state/UIStates';
 import { ActivityIndicator, View } from 'react-native';
 import { GlobalStyles } from '../../Styles/Styles';
-import DrawerNavigationRoutes from '../DrawerNavigationRoutes';
+import DrawerNavigationRoutes from '../drawerAndNavigationBar/DrawerNavigationRoutes';
 
 const Stack = createStackNavigator();
 

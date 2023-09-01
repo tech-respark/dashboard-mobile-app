@@ -1,25 +1,41 @@
 import { View, Text, StyleSheet } from 'react-native';
 import React, { FC } from 'react';
-import { FontSize, GlobalColors, GradientButtonColor } from '../Styles/GlobalStyleConfigs';
-import { useAppDispatch, useAppSelector } from '../redux/Hooks';
-import { selectCurrentBranch, selectStoreData, selectUserData, setUserData } from '../redux/state/UserStates';
+import { FontSize, GlobalColors, GradientButtonColor } from '../../Styles/GlobalStyleConfigs';
+import { useAppDispatch, useAppSelector } from '../../redux/Hooks';
+import { selectCurrentBranch, selectStoreData, selectUserData, setUserData } from '../../redux/state/UserStates';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
+import Toast from 'react-native-root-toast';
 
 type UserProfileBottomSheetProps = {
   handleSheetClose: () => void;
+  handleBranchModal: () => void;
   navigation: any;
 };
 
-const UserProfileBottomSheet: FC<UserProfileBottomSheetProps> = ({ handleSheetClose, navigation }) => {
+const UserProfileBottomSheet: FC<UserProfileBottomSheetProps> = ({ handleSheetClose, handleBranchModal, navigation }) => {
   const userData = useAppSelector(selectUserData);
+  const branchesData = useAppSelector(selectStoreData);
   const currentBranch = useAppSelector(selectCurrentBranch);
   const dispatch = useAppDispatch();
 
   return (
     <View style={styles.contentContainer}>
-      <Text style={styles.branchNameText}>{currentBranch}</Text>
+      <TouchableOpacity style={{ backgroundColor: GlobalColors.lightGray2, borderRadius: 5, minWidth: '70%', marginBottom: 25, flexDirection: 'row', alignItems: "center", justifyContent: "center", paddingVertical: 5 }}
+        onPress={() => {
+          if (branchesData!.length > 1) {
+            handleSheetClose();
+            handleBranchModal();
+          } else {
+            Toast.show("There is no other branch")
+          }
+        }}
+      >
+        <Text style={styles.branchNameText}>{currentBranch}</Text>
+        <Ionicons name='chevron-down' size={20} color={GlobalColors.blue} style={{ marginLeft: 15 }} />
+      </TouchableOpacity>
       <Text style={styles.nameText}>{userData?.firstName} {userData?.lastName}</Text>
       <Text style={[styles.mobileText, { marginBottom: 10 }]}>{userData?.mobile}</Text>
       <Text style={[styles.mobileText, { marginBottom: 50 }]}>{userData?.email}</Text>
@@ -70,8 +86,8 @@ const styles = StyleSheet.create({
   },
   branchNameText: {
     fontSize: FontSize.headingX,
-    marginBottom: 15,
-    textTransform: 'capitalize'
+    textTransform: 'capitalize',
+    textAlign: "center"
   },
   nameText: {
     fontSize: FontSize.large,

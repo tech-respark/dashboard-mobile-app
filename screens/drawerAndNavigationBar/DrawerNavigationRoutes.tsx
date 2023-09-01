@@ -1,31 +1,31 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import POSMainScreen from './pos/PosMain';
-import BackOfficeMainScreen from './backOffice/BackOfficeMain';
-import { FontSize, GlobalColors } from '../Styles/GlobalStyleConfigs';
-import { useAppDispatch, useAppSelector } from '../redux/Hooks';
-import { setIsLoading } from '../redux/state/UIStates';
-import { makeAPIRequest } from '../utils/Helper';
-import { environment } from '../utils/Constants';
-import { selectBranchId, selectTenantId, setConfig } from '../redux/state/UserStates';
-import CustomDrawerContent from '../components/SideDrawer';
-import UserProfileBottomSheet from '../components/UserProfileBottomSheet';
+import POSMainScreen from '../pos/PosMain';
+import BackOfficeMainScreen from '../backOffice/BackOfficeMain';
+import { FontSize, GlobalColors } from '../../Styles/GlobalStyleConfigs';
+import { useAppDispatch, useAppSelector } from '../../redux/Hooks';
+import { setIsLoading } from '../../redux/state/UIStates';
+import { makeAPIRequest } from '../../utils/Helper';
+import { environment } from '../../utils/Constants';
+import { selectBranchId, selectTenantId, setConfig } from '../../redux/state/UserStates';
+import CustomDrawerContent from './SideDrawer';
+import UserProfileBottomSheet from './UserProfileBottomSheet';
 import BottomSheet from '@gorhom/bottom-sheet';
-import AppointmentMain from './appointment/AppointmentMain';
-import CrmMain from './crm/CrmMain';
-import { useRoute } from '@react-navigation/native';
+import AppointmentMain from '../appointment/AppointmentMain';
+import CrmMain from '../crm/CrmMain';
+import BranchSelectModal from './BranchSelectModal';
 
 const Drawer = createDrawerNavigator();
 
 const DrawerNavigationRoutes = ({ navigation }: any) => {
   const dispatch = useAppDispatch();
-  const route = useRoute()
   const storeId = useAppSelector(selectBranchId);
   const tenantId = useAppSelector(selectTenantId);
 
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
+  const [showBranchModal, setShowBranchModal] = useState<boolean>(false);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = ['1%', '40%'];
 
@@ -99,8 +99,9 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
         handleIndicatorStyle={styles.handleIndicator}
         onChange={handleSheetChanges}
       >
-        <UserProfileBottomSheet handleSheetClose={handleSheetClose} navigation={navigation} />
+        <UserProfileBottomSheet handleSheetClose={handleSheetClose} handleBranchModal={()=>setShowBranchModal(true)} navigation={navigation}/>
       </BottomSheet>
+      <BranchSelectModal showBranchModal={showBranchModal} setShowBranchModal={(val) => setShowBranchModal(val)}/>
     </View>
   );
 };
@@ -130,6 +131,7 @@ const styles = StyleSheet.create({
   handleIndicator: {
     backgroundColor: 'transparent',
   },
+
 });
 
 export default DrawerNavigationRoutes;

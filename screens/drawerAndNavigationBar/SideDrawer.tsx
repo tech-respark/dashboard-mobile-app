@@ -1,12 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerContentScrollView } from "@react-navigation/drawer";
 import { StyleSheet, View } from "react-native";
-import { FontSize, GlobalColors } from "../Styles/GlobalStyleConfigs";
+import { FontSize, GlobalColors } from "../../Styles/GlobalStyleConfigs";
 import { Text } from "react-native";
-import { useAppSelector } from "../redux/Hooks";
-import { selectUserData } from "../redux/state/UserStates";
+import { useAppSelector } from "../../redux/Hooks";
+import { selectUserData } from "../../redux/state/UserStates";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { mainTabsIconsMap } from "../utils/Constants";
+import { mainTabsIconsMap } from "../../utils/Constants";
 
 const CustomDrawerContent = ({ navigation, state }: any) => {
     const userData = useAppSelector(selectUserData);
