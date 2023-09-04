@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
-import { selectBranchId, selectStaffData, selectTenantId, setStaffData } from "../../../redux/state/UserStates";
+import { selectBranchId, selectTenantId, setStaffData } from "../../../redux/state/UserStates";
 import { setIsLoading } from "../../../redux/state/UIStates";
 import { environment } from "../../../utils/Constants";
 import { makeAPIRequest } from "../../../utils/Helper";

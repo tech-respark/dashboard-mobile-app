@@ -10,6 +10,7 @@ export interface UserStates {
     currentBranch?: string,
     storeID?: number,
     staffData?: { [key: string]: any }[],
+    currentStoreConfig?: {[key: string]: any},
 }
 
 const initialState: UserStates = {
@@ -21,6 +22,7 @@ const initialState: UserStates = {
     currentBranch: "",
     storeID: 0,
     staffData: [],
+    currentStoreConfig: {}
 }
 
 const UserSlice = createSlice({
@@ -46,11 +48,14 @@ const UserSlice = createSlice({
         },
         setStaffData : (state, action: PayloadAction<UserStates>) => {
             state.staffData = action.payload.staffData;
+        },
+        setCurrrentStoreConfig : (state, action: PayloadAction<UserStates>) => {
+            state.currentStoreConfig = action.payload.currentStoreConfig;
         }
     },
 });
 
-export const { setUserData, setConfig, setStoreIdData, setCurrentBranch, setStaffData } = UserSlice.actions;
+export const { setUserData, setConfig, setStoreIdData, setCurrentBranch, setStaffData, setCurrrentStoreConfig } = UserSlice.actions;
 
 
 export const selectUserData = (state: RootState) => state.UserStates.userData;
@@ -60,7 +65,7 @@ export const selectStoreData = (state: RootState) => state.UserStates.StoreIdDat
 export const selectCurrentBranch = (state: RootState) => state.UserStates.currentBranch;
 export const selectBranchId = (state: RootState) => state.UserStates.storeID;
 export const selectStaffData = (state: RootState) => state.UserStates.staffData;
-
+export const selectCurrentStoreConfig = (state: RootState) => state.UserStates.currentStoreConfig;
 export const selectConfig = (state: RootState) => state.UserStates.configs;
 
 export default UserSlice.reducer;

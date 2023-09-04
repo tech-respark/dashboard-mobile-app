@@ -25,7 +25,7 @@ const BranchSelectModal: FC<BranchSelectModalProp> = ({ showBranchModal, setShow
             <View style={styles.centeredView}>
                 <View style={styles.modalView}>
                     {branchesData?.map((branch: { [key: string]: any }, index: number) => (
-                        <TouchableOpacity style={[{ paddingVertical: 15, width: '100%', alignItems: 'center' }, index != branchesData!.length - 1 ? { borderBottomWidth: 0.5, borderColor: 'lightgray' } : {}]}
+                        <TouchableOpacity key={index} style={[{ paddingVertical: 15, width: '100%', alignItems: 'center' }, index != branchesData!.length - 1 ? { borderBottomWidth: 0.5, borderColor: 'lightgray' } : {}]}
                             onPress={() => {
                                 dispatch(setCurrentBranch({ currentBranch: branch.name }));
                                 setShowBranchModal(false);

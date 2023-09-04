@@ -9,7 +9,7 @@ import { useAppDispatch, useAppSelector } from '../../redux/Hooks';
 import { setIsLoading } from '../../redux/state/UIStates';
 import { makeAPIRequest } from '../../utils/Helper';
 import { environment } from '../../utils/Constants';
-import { selectBranchId, selectTenantId, setConfig } from '../../redux/state/UserStates';
+import { selectBranchId, selectTenantId, setConfig, setCurrrentStoreConfig, setStaffData } from '../../redux/state/UserStates';
 import CustomDrawerContent from './SideDrawer';
 import UserProfileBottomSheet from './UserProfileBottomSheet';
 import BottomSheet from '@gorhom/bottom-sheet';
@@ -39,11 +39,33 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
     }
     dispatch(setIsLoading({ isLoading: false }));
   };
+
+  const getStaffDetails = async () => {
+    dispatch(setIsLoading({ isLoading: true }));
+    let url = environment.sqlBaseUri + `staffs/${tenantId}/${storeId}`;
+    let responseStaff = await makeAPIRequest(url, null, "GET");
+    dispatch(setIsLoading({ isLoading: false }));
+    if (responseStaff) {
+      dispatch(setStaffData({ staffData: responseStaff }));
+    }
+  };
+
+  const getStoreConfig = async () => {
+    dispatch(setIsLoading({ isLoading: true }));
+    let url = environment.documentBaseUri + `configs/tenant/${tenantId}/store/${storeId}`;
+    let response = await makeAPIRequest(url, null, "GET");
+    dispatch(setIsLoading({ isLoading: false }));
+    if (response) {
+      dispatch(setCurrrentStoreConfig({ currentStoreConfig: response }));
+    }
+  };
+
   const handleSheetChanges = (index: number) => {
     if (index === 0) {
       setIsSheetOpen(false);
     }
   };
+
   const handleSheetClose = () => {
     if (bottomSheetRef.current) {
       bottomSheetRef.current.close();
@@ -53,6 +75,8 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
 
   useEffect(() => {
     getUserConfig();
+    getStaffDetails();
+    getStoreConfig();
   }, [])
 
   return (
@@ -99,9 +123,9 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
         handleIndicatorStyle={styles.handleIndicator}
         onChange={handleSheetChanges}
       >
-        <UserProfileBottomSheet handleSheetClose={handleSheetClose} handleBranchModal={()=>setShowBranchModal(true)} navigation={navigation}/>
+        <UserProfileBottomSheet handleSheetClose={handleSheetClose} handleBranchModal={() => setShowBranchModal(true)} navigation={navigation} />
       </BottomSheet>
-      <BranchSelectModal showBranchModal={showBranchModal} setShowBranchModal={(val) => setShowBranchModal(val)}/>
+      <BranchSelectModal showBranchModal={showBranchModal} setShowBranchModal={(val) => setShowBranchModal(val)} />
     </View>
   );
 };

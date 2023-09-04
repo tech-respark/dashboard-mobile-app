@@ -1,30 +1,59 @@
-import React, { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 import { GlobalStyles } from "../../../Styles/Styles";
 import { GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import { useAppSelector } from "../../../redux/Hooks";
-import { selectStaffData } from "../../../redux/state/UserStates";
+import { selectCurrentStoreConfig, selectStaffData } from "../../../redux/state/UserStates";
 
 const AppointmentCalendar = () => {
     const staffList = useAppSelector(selectStaffData);
-    const staffsNameList = staffList!.map(item => `${item.firstName} ${item.lastName}`);
+    const storeConfig = useAppSelector(selectCurrentStoreConfig);
 
-    const time = ["08:00 AM", "08:15 AM", "08:30 AM", "08:45 AM", "09:00 AM", "09:15 AM", "09:30 AM", "09:45 AM", "10:00 AM", "10:15 AM", "10:30 AM", "10:45 AM", "11:00 AM", "11:15 AM", "11:30 AM", "11:45 AM", "12:00 PM", "12:15 PM", "12:30 PM", "12:45 PM", "01:00 PM", "01:15 PM", "01:30 PM", "01:45 PM", "02:00 PM", "02:15 PM", "02:30 PM", "02:45 PM", "03:00 PM", "03:15 PM", "03:30 PM", "03:45 PM", "04:00 PM", "04:15 PM", "04:30 PM", "04:45 PM", "05:00 PM", "05:15 PM", "05:30 PM", "05:45 PM", "06:00 PM", "06:15 PM", "06:30 PM", "06:45 PM", "07:00 PM", "07:15 PM", "07:30 PM", "07:45 PM", "08:00 PM", "08:15 PM", "8:30 PM", "08:45 PM", "09:00 PM", "09:15 PM", "09:30 PM", "09:45 PM", "10:00 PM", "10:15 PM", "10:30 PM", "10:45 PM", "11:00 PM"]
-    const initialTimeSlots = Array.from({ length: staffsNameList.length }, () => (
-        Array.from({ length: time.length }, () => 0)
-    ));
-    const [timeSlots, setTimeSlots] = useState<number[][]>(initialTimeSlots);
+    const [staffsNameList, setStaffNameList] = useState<string[]>([]);
+    const [timeIntervals, setTimeIntervals] = useState<string[]>([]);
+    const [timeSlots, setTimeSlots] = useState<number[][]>([]);
+
+    const getTimeIntervalList = () => {
+        const timeList = [];
+        const start = new Date(`1970-01-01T${storeConfig!['startTime']}`);
+        const end = new Date(`1970-01-01T${storeConfig!['closureTime']}`);
+        while (start <= end) {
+          const timeString = start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          timeList.push(timeString);
+          start.setMinutes(start.getMinutes() + 15);
+        }
+        setTimeIntervals(timeList);
+        return timeList;
+    };
+
+    const getTimeSlotsOfExperts = (timeIntervals: string[], staffs: string[]) => {
+        const initialTimeSlots = Array.from({ length: staffs.length }, () => (
+            Array.from({ length: timeIntervals.length }, () => 0)
+        ));
+        setTimeSlots(initialTimeSlots);
+    };
+
+    useEffect(()=>{
+        if(staffList && storeConfig){
+            let staffNames = staffList!.map(item => `${item.firstName} ${item.lastName}`);
+            setStaffNameList(staffNames);
+            let intervals = getTimeIntervalList();
+            getTimeSlotsOfExperts(intervals, staffNames);
+        }
+    }, [staffList, storeConfig])
+
 
     return (
         <View style={GlobalStyles.whiteContainer}>
             <View style={{ width: '90%', height: '15%', borderColor: 'gray', backgroundColor: GlobalColors.lightGray2, justifyContent: 'center', alignItems: 'center' }}>
                 <Text>Date and Tabs</Text>
             </View>
-            <ScrollView showsVerticalScrollIndicator showsHorizontalScrollIndicator>
+            { timeSlots.length > 0 ? 
+            <ScrollView showsVerticalScrollIndicator showsHorizontalScrollIndicator stickyHeaderIndices={[1]}>
                 <View style={{ backgroundColor: GlobalColors.lightGray2, flexDirection: 'row', margin: 10 }}>
                     <View style={{ backgroundColor: 'black', paddingTop: 50, marginRight: 5, width: 90 }}>
-                        {time.map((time: string, index: number) => (
-                            <View style={{ paddingHorizontal: 10, paddingVertical: 15, borderColor: 'gray', borderWidth: 1 }}>
+                        {timeIntervals.map((time: string, index: number) => (
+                            <View style={{ paddingHorizontal: 10, paddingVertical: 15, borderColor: 'gray', borderWidth: 1 }} key={index}>
                                 <Text key={index} style={{ color: '#fff' }}>{time}</Text>
                             </View>
                         ))}
@@ -53,7 +82,11 @@ const AppointmentCalendar = () => {
                         </View>
                     </View>
                 </View>
-            </ScrollView>
+            </ScrollView> : 
+            <View style={{justifyContent: "center", alignItems: "center", flex: 1}}>
+                <ActivityIndicator/>
+            </View>
+}
         </View>
     )
 };
