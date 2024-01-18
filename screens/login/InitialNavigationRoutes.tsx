@@ -10,6 +10,7 @@ import { selectIsLoading } from '../../redux/state/UIStates';
 import { ActivityIndicator, View } from 'react-native';
 import { GlobalStyles } from '../../Styles/Styles';
 import DrawerNavigationRoutes from '../drawerAndNavigationBar/DrawerNavigationRoutes';
+import { GlobalColors } from '../../Styles/GlobalStyleConfigs';
 
 const Stack = createStackNavigator();
 
@@ -27,7 +28,7 @@ const InitialNavigationRoutes = () => {
       </NavigationContainer>
       {isLoading &&
         <View style={GlobalStyles.isLoading}>
-          <ActivityIndicator />
+          <ActivityIndicator color={GlobalColors.blue} size={"large"}/>
         </View>
       }
     </>

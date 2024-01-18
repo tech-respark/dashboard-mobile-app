@@ -38,7 +38,7 @@ const SplashScreen = ({ navigation }: any) => {
       />
       <ActivityIndicator
         animating={animating}
-        color={GlobalColors.blue}
+        color={GlobalColors.blueLight}
         style={styles.activityIndicator}
       />
     </View>

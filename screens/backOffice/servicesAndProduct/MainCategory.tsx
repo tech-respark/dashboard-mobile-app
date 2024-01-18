@@ -21,6 +21,7 @@ const MainCategory = ({ navigation, type }: any) => {
 
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [clickedItem, setClickedItem] = useState<{ [key: string]: any }>({});
+    const [loader, setLoader] = useState<boolean>(false);
 
     const onTextClickHandler = (item: { [key: string]: any }, index: number) => {
         if (item.categoryList.length > 0) {
@@ -42,9 +43,15 @@ const MainCategory = ({ navigation, type }: any) => {
         navigation.navigate("AddUpdateCategory", { type: type, isAddNew: true, categoryLevel: 1, position: String(categoryList.length + 1) });
     };
 
+    const temp = async() => {
+        setLoader(true);
+        await getCategoryData(type, tenantId!, storeId!, dispatch);
+        setLoader(false);
+    }
+
     useEffect(() => {
         if (isFocused) {
-            getCategoryData(type, tenantId!, storeId!, dispatch);
+           temp() 
         }
     }, [isFocused]);
 
@@ -53,7 +60,7 @@ const MainCategory = ({ navigation, type }: any) => {
     return (
         <View style={{ padding: 10, flex: 1, backgroundColor: '#fff', opacity: modalVisible ? 0.5 : 1 }}>
             <Text style={{ fontSize: FontSize.large, fontWeight: 'bold', padding: 5 }}>Category</Text>
-            <CategoryList dataList={categoryList} onTextClickHandler={onTextClickHandler} editItemHandler={editCategory} buttonClickHandler={addNew} buttonText="Add New" type={type} />
+            <CategoryList dataList={categoryList} onTextClickHandler={onTextClickHandler} editItemHandler={editCategory} buttonClickHandler={addNew} buttonText="Add New" type={type} loader={loader}/>
             <Modal
                 animationType="slide"
                 transparent={true}

@@ -64,12 +64,12 @@ export const getCategoryData = async (type: string, tenantId: number, storeId: n
   const subDomain = (type == 'service') ? "getServiceCategoriesByTenantAndStore" : "getProductCategoriesByTenantAndStore";
   const url = environment.documentBaseUri + `stores/${subDomain}?tenantId=${tenantId}&storeId=${storeId}`;
   let response = await makeAPIRequest(url, null, "GET");
-  dispatch(setIsLoading({ isLoading: false }));
   if (response) {
     dispatch(setCategoriesData({ categoriesData: response }));
   } else {
     Toast.show("No Data Found", { backgroundColor: GlobalColors.error });
   }
+  dispatch(setIsLoading({ isLoading: false }));
 };
 
 export const uploadImageToS3 = async (imageUrl: string, tenantId?: number) => {

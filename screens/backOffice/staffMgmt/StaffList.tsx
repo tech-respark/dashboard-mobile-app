@@ -3,9 +3,9 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { selectBranchId, selectTenantId, setStaffData } from "../../../redux/state/UserStates";
-import { setIsLoading } from "../../../redux/state/UIStates";
+import { selectIsLoading, setIsLoading } from "../../../redux/state/UIStates";
 import { environment } from "../../../utils/Constants";
-import { makeAPIRequest } from "../../../utils/Helper";
+import { makeAPIRequest, sleep } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
 import { FontSize, GlobalColors, GradientButtonColor } from "../../../Styles/GlobalStyleConfigs";
 import { Ionicons } from "@expo/vector-icons";
@@ -17,6 +17,7 @@ const StaffList = ({ navigation }: any) => {
     const dispatch = useAppDispatch();
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
+    const isLoading = useAppSelector(selectIsLoading);
 
     const [staffList, setStaffList] = useState<{ [key: string]: any }[]>([]);
     const [rolesData, setRolesData] = useState<{ [key: string]: any }[]>([]);
@@ -30,7 +31,7 @@ const StaffList = ({ navigation }: any) => {
         dispatch(setIsLoading({ isLoading: false }));
         if (responseStaff && responseRoles) {
             setStaffList(responseStaff);
-            dispatch(setStaffData({staffData: responseStaff}));
+            dispatch(setStaffData({ staffData: responseStaff }));
             setRolesData(responseRoles);
         } else {
             Toast.show("No Data Found");
@@ -44,38 +45,39 @@ const StaffList = ({ navigation }: any) => {
     }, [isFocused]);
 
     return (
-        <View style={{flex: 1, backgroundColor: '#fff'}}>
+        <View style={{ flex: 1, backgroundColor: '#fff' }}>
             {
                 staffList.length > 0 ?
-                    <ScrollView style={{ marginBottom: 0, padding: 10 }}>
-                        {staffList.map((item: any, index: number) => (
-                            <TouchableOpacity key={index} style={styles.itemView} onPress={() => {
-                                navigation.navigate("AddOrUpdate", { selectedStaff: item, rolesData: rolesData });
-                            }}>
-                                <Text style={[{ fontSize: FontSize.medium, maxWidth: '70%' }, item.active ? {} : { color: 'gray' }]}>{item.firstName} {item.lastName}</Text>
-                                <Ionicons name="chevron-forward-outline" size={25} style={{ marginRight: 5 }} color={GlobalColors.blue} />
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
+                        <ScrollView style={{ marginBottom: 0, padding: 10 }}>
+                            {staffList.map((item: any, index: number) => (
+                                <TouchableOpacity key={index} style={styles.itemView} onPress={() => {
+                                    navigation.navigate("AddOrUpdate", { selectedStaff: item, rolesData: rolesData });
+                                }}>
+                                    <Text style={[{ fontSize: FontSize.medium, maxWidth: '70%' }, item.active ? {} : { color: 'gray' }]}>{item.firstName} {item.lastName}</Text>
+                                    <Ionicons name="chevron-forward-outline" size={25} style={{ marginRight: 5 }} color={GlobalColors.blue} />
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
                     :
-                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                        <Text style={{ textAlign: 'center', fontSize: FontSize.large }}>No Staff Data Found</Text>
+                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ textAlign: 'center', fontSize: FontSize.large }}>{isLoading ? "Loading" : "No Staff Data Found"}</Text>
                     </View>
             }
-            <TouchableOpacity style={{ marginHorizontal: 40, marginBottom: 30 }}
-                onPress={() => {
-                    navigation.navigate("AddOrUpdate", { rolesData: rolesData });
-                }}
-            >
-                <LinearGradient
-                    colors={GradientButtonColor}
-                    style={styles.loginButton}
-                    start={{ y: 0.0, x: 0.0 }}
-                    end={{ y: 0.0, x: 1.0 }}
-                >
-                    <Text style={styles.addNewText}>Create New</Text>
-                </LinearGradient>
-            </TouchableOpacity>
+            <TouchableOpacity style={{ marginHorizontal: 40, marginBottom: 15 }}
+                            onPress={() => {
+                                navigation.navigate("AddOrUpdate", { rolesData: rolesData });
+                            }}
+                        >
+                            <LinearGradient
+                                colors={GradientButtonColor}
+                                style={styles.loginButton}
+                                start={{ y: 0.0, x: 0.0 }}
+                                end={{ y: 0.0, x: 1.0 }}
+                            >
+                                <Text style={styles.addNewText}>Create New</Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
+
         </View>
     )
 };

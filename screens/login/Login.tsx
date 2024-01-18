@@ -50,7 +50,6 @@ const LoginScreen = ({ navigation }: any) => {
       } else {
         AsyncStorage.setItem("userData", JSON.stringify(response)); //now while on splash screen will fetch and save to store
         await getBranchesAndStoreId(response.id, dispatch);
-        Toast.show("Login successfully", { duration: Toast.durations.SHORT, backgroundColor: GlobalColors.success });
         dispatch(setUserData({ userData: response, tenantId: response.tenantId }));
         navigation.navigate("DrawerNavigationRoutes");
       }

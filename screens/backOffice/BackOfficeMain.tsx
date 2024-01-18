@@ -4,13 +4,13 @@ import SwipeablePills from "../../components/SwipablePills";
 import HomePage from "./homepage/HomePage";
 import StaffManagement from "./staffMgmt/StaffManagementNavigation";
 import CategoryNavigation from "./servicesAndProduct/CategoryNavigation";
-import { useAppSelector } from "../../redux/Hooks";
-import { selectShowBackOfficeCategories } from "../../redux/state/UIStates";
+import { useAppDispatch, useAppSelector } from "../../redux/Hooks";
+import { selectShowBackOfficeCategories, setIsLoading } from "../../redux/state/UIStates";
 
 const BackOfficeMainScreen = ({ navigation }: any) => {
     const pillsData = ['Home Page', 'Services', 'Product', 'Staff Mgmt'];
     const showPills = useAppSelector(selectShowBackOfficeCategories);
-    const [selectedPill, setSelectedPill] = useState<string>("Services");
+    const [selectedPill, setSelectedPill] = useState<string>("Home Page");
 
     const onSelectedPillChange = (pill: string) => {
         setSelectedPill(pill);

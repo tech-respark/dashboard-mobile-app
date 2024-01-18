@@ -21,7 +21,7 @@ const UploadImageField: FC<UploadImageFieldProps> = ({ imageUrl, handleImageUplo
                     {imageUrl ?
                         <View style={styles.container}>
                             <Image source={{ uri: imageUrl }} style={styles.imageView} onLoadEnd={() => { setLoading(false) }} />
-                            <ActivityIndicator style={styles.activityIndicator} animating={loading} />
+                            <ActivityIndicator style={styles.activityIndicator} animating={loading} color={GlobalColors.blueLight}/>
                         </View>
                         :
                         <View style={styles.noImageView}>

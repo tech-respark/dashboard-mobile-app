@@ -1,10 +1,13 @@
 import React, { FC } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { FontSize, GlobalColors, GradientButtonColor } from "../../../Styles/GlobalStyleConfigs";
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import UpdateProductStockModal from "./updateProductStockModal";
 import { ProgressBar } from "react-native-paper";
+import { useAppSelector } from "../../../redux/Hooks";
+import { selectIsLoading } from "../../../redux/state/UIStates";
+import { GlobalStyles } from "../../../Styles/Styles";
 
 type CategoryListType = {
     dataList: { [key: string]: any }[],
@@ -13,41 +16,39 @@ type CategoryListType = {
     editItemHandler: (item: { [key: string]: any }) => void,
     buttonText: string,
     type: string,
-    topLevelObject?: { [key: string]: any }
+    topLevelObject?: { [key: string]: any },
+    loader: boolean
 }
-const CategoryList: FC<CategoryListType> = ({ dataList, onTextClickHandler, buttonClickHandler, editItemHandler, buttonText, type, topLevelObject }) => {
-
+const CategoryList: FC<CategoryListType> = ({ dataList, onTextClickHandler, buttonClickHandler, editItemHandler, buttonText, type, topLevelObject, loader }) => {
     return (
         <>
-            {dataList ?
-                (dataList.length > 0 ?
-                    <ScrollView style={{ marginBottom: 0 }}>
-                        {dataList.map((item: any, index: number) => (
-                            <View key={index} style={styles.itemView}>
-                                <Text style={[{ fontSize: FontSize.regular, maxWidth: '70%' }, item.active ? {} : { color: 'gray' }]} onPress={() => { onTextClickHandler(item, index) }}>{item.name}</Text>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    {
-                                        (item.price != null && (item.variations.length == 0 || type == "service")) ? <Text style={{ marginHorizontal: 10 }}>₹{Math.round(item.price)}</Text> : <></>
-                                    }
-                                    {(type === "product" && item.variations && item.variations.length > 0) ? <UpdateProductStockModal selectedProduct={item} topLevelObject={topLevelObject ?? {}} /> : <></>
-                                    }
-                                    <TouchableOpacity onPress={() => editItemHandler(item)}>
-                                        <FontAwesome5 name="edit" size={20} style={{ marginRight: 5 }} color={GlobalColors.blueLight} />
-                                    </TouchableOpacity>
-                                </View>
+            {!loader && dataList && dataList.length > 0 ?
+                <ScrollView style={{ marginBottom: 0 }}>
+                    {dataList.map((item: any, index: number) => (
+                        <View key={index} style={styles.itemView}>
+                            <Text style={[{ fontSize: FontSize.regular, maxWidth: '70%' }, item.active ? {} : { color: 'gray' }]} onPress={() => { onTextClickHandler(item, index) }}>{item.name}</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                {
+                                    (item.price != null && (item.variations.length == 0 || type == "service")) ? <Text style={{ marginHorizontal: 10 }}>₹{Math.round(item.price)}</Text> : <></>
+                                }
+                                {(type === "product" && item.variations && item.variations.length > 0) ? <UpdateProductStockModal selectedProduct={item} topLevelObject={topLevelObject ?? {}} /> : <></>
+                                }
+                                <TouchableOpacity onPress={() => editItemHandler(item)}>
+                                    <FontAwesome5 name="edit" size={20} style={{ marginRight: 5 }} color={GlobalColors.blueLight} />
+                                </TouchableOpacity>
                             </View>
-                        ))}
-                    </ScrollView>
-                    :
-                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                        <Text style={{ textAlign: 'center', fontSize: FontSize.large }}>No Data Found</Text>
-                    </View>)
+                        </View>
+                    ))}
+                </ScrollView>
                 :
-                <View>
-                    <ProgressBar />
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    {loader &&
+                        <ActivityIndicator color={GlobalColors.blueLight} />
+                    }
+                    <Text style={{ textAlign: 'center', fontSize: FontSize.large }}>{loader ? "Loading" : "No Data Found"}</Text>
                 </View>
             }
-            <TouchableOpacity style={{ marginHorizontal: 40, marginBottom: 30 }}
+            <TouchableOpacity style={{ marginHorizontal: 40, marginBottom: 15 }}
                 onPress={buttonClickHandler}
             >
                 <LinearGradient

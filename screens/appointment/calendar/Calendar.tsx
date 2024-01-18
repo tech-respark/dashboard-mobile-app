@@ -84,7 +84,7 @@ const AppointmentCalendar = () => {
                 </View>
             </ScrollView> : 
             <View style={{justifyContent: "center", alignItems: "center", flex: 1}}>
-                <ActivityIndicator/>
+                <ActivityIndicator color={GlobalColors.blueLight}/>
             </View>
 }
         </View>
