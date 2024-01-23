@@ -13,7 +13,8 @@ export const GlobalColors = {
     blue: "#197af1",
     lightGray2: "#F5F5F5",
     error: '#d32f2f',
-    success: "#2e7d32"
+    success: "#2e7d32",
+    grayDark: "#60626C"
 }
 
 export const GradientButtonColor = [GlobalColors.blueLight, GlobalColors.blue];

@@ -8,7 +8,7 @@ import { FontSize, GlobalColors } from '../../Styles/GlobalStyleConfigs';
 import { useAppDispatch, useAppSelector } from '../../redux/Hooks';
 import { setIsLoading } from '../../redux/state/UIStates';
 import { makeAPIRequest } from '../../utils/Helper';
-import { environment } from '../../utils/Constants';
+import { environment, mainTabsIconsMap } from '../../utils/Constants';
 import { selectBranchId, selectTenantId, setConfig, setCurrrentStoreConfig, setStaffData } from '../../redux/state/UserStates';
 import CustomDrawerContent from './SideDrawer';
 import UserProfileBottomSheet from './UserProfileBottomSheet';
@@ -73,6 +73,26 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
     }
   };
 
+  const setLeftHeader = (navigation: any, name: string) => {
+    return (
+      {
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => {navigation.openDrawer()}}
+            style={{backgroundColor: GlobalColors.grayDark, padding: 8, marginLeft: 10, borderRadius: 20}}>
+            <Ionicons
+              name={mainTabsIconsMap[name] as 'key'}
+              size={20}
+              color="#fff"
+            />
+          </TouchableOpacity>
+        ),
+        drawerLabel: name
+      }
+    )
+   
+  }
+
   useEffect(() => {
     getUserConfig();
     getStaffDetails();
@@ -84,6 +104,7 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
       <View style={[styles.mainContent, { opacity: isSheetOpen ? 0.5 : 1, pointerEvents: isSheetOpen ? 'none' : 'auto' }]}>
         <Drawer.Navigator
           screenOptions={({ route }) => ({
+            drawerType: "front",
             headerTitleAlign: 'left',
             headerTitle: () => (
               <Text style={{ fontSize: FontSize.large }}>{route.name}</Text>
@@ -109,11 +130,10 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
           drawerContent={(props) => <CustomDrawerContent {...props} />}
           initialRouteName="Backoffice"
         >
-          <Drawer.Screen name="POS" options={{ drawerLabel: 'POS' }} component={POSMainScreen} />
-          <Drawer.Screen name="Appointment" options={{ drawerLabel: 'Appointment' }} component={AppointmentMain} />
-          <Drawer.Screen name="Backoffice" options={{ drawerLabel: 'Backoffice' }} component={BackOfficeMainScreen} />
-          <Drawer.Screen name="CRM" options={{ drawerLabel: 'CRM' }} component={CrmMain} />
-
+          <Drawer.Screen name="POS" options={({navigation}) => setLeftHeader(navigation, 'POS')} component={POSMainScreen}/>
+          <Drawer.Screen name="Appointment" options={({navigation}) => setLeftHeader(navigation, 'Appointment')} component={AppointmentMain} />
+          <Drawer.Screen name="Backoffice" options={({navigation}) => setLeftHeader(navigation, 'Backoffice')} component={BackOfficeMainScreen} />
+          <Drawer.Screen name="CRM" options={({navigation}) => setLeftHeader(navigation, 'CRM')} component={CrmMain} />
         </Drawer.Navigator>
       </View>
       <BottomSheet
