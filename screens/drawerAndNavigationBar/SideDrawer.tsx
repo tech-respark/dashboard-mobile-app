@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { DrawerContentScrollView } from "@react-navigation/drawer";
 import { StyleSheet, View } from "react-native";
 import { FontSize, GlobalColors } from "../../Styles/GlobalStyleConfigs";
@@ -37,7 +37,7 @@ const CustomDrawerContent = ({ navigation, state }: any) => {
                                 navigation.closeDrawer();
                             }}
                         >
-                            <Ionicons name={mainTabsIconsMap[item] as 'key'} size={20} color={state.index === index ? "#fff" : '#000'} style={{ marginHorizontal: 15 }} />
+                            <FontAwesome name={mainTabsIconsMap[item] as 'key'} size={20} color={state.index === index ? "#fff" : '#000'} style={{ marginHorizontal: 15 }}/>
                             <Text style={{ color: state.index === index ? '#fff' : '#000' }}>{item}</Text>
                         </TouchableOpacity>
                     ))}

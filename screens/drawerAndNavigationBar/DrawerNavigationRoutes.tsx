@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome, FontAwesome5, Ionicons } from '@expo/vector-icons';
 import POSMainScreen from '../pos/PosMain';
 import BackOfficeMainScreen from '../backOffice/BackOfficeMain';
 import { FontSize, GlobalColors } from '../../Styles/GlobalStyleConfigs';
@@ -80,7 +80,7 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
           <TouchableOpacity
             onPress={() => {navigation.openDrawer()}}
             style={{backgroundColor: GlobalColors.grayDark, padding: 8, marginLeft: 10, borderRadius: 20}}>
-            <Ionicons
+            <FontAwesome
               name={mainTabsIconsMap[name] as 'key'}
               size={20}
               color="#fff"

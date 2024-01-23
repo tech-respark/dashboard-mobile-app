@@ -6,14 +6,14 @@ export const environment = {
 }
 
 export const mainTabsIconsMap: {[key: string]: string} = {
-    "POS": "tv-outline",
-    "Appointment": "calendar-outline",
-    "Backoffice": "document-outline",
-    "CRM": "refresh-circle-outline",
-    "Setting": "settings-outline",
-    "Reports": "trending-up-outline",
-    "Expenses": "logo-euro",
-    "Campaign": "golf-outline"
+    "POS": "tv",
+    "Appointment": "calendar-o",
+    "Backoffice": "file-text-o",
+    "CRM": "refresh",
+    "Setting": "cog",
+    "Reports": "line-chart",
+    "Expenses": "rupee",
+    "Campaign": "bullhorn"
 };
 
 export const genderOptions: string[] = ["both", "male", "female"];
