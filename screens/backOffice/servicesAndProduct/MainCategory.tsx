@@ -43,7 +43,7 @@ const MainCategory = ({ navigation, type }: any) => {
         navigation.navigate("AddUpdateCategory", { type: type, isAddNew: true, categoryLevel: 1, position: String(categoryList.length + 1) });
     };
 
-    const temp = async() => {
+    const onFocusHandler = async() => {
         setLoader(true);
         await getCategoryData(type, tenantId!, storeId!, dispatch);
         setLoader(false);
@@ -51,7 +51,7 @@ const MainCategory = ({ navigation, type }: any) => {
 
     useEffect(() => {
         if (isFocused) {
-           temp() 
+            onFocusHandler() 
         }
     }, [isFocused]);
 

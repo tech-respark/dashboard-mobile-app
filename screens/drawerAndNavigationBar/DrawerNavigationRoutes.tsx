@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { FontAwesome, FontAwesome5, Ionicons } from '@expo/vector-icons';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import POSMainScreen from '../pos/PosMain';
 import BackOfficeMainScreen from '../backOffice/BackOfficeMain';
 import { FontSize, GlobalColors } from '../../Styles/GlobalStyleConfigs';
