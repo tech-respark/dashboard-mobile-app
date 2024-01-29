@@ -18,4 +18,11 @@ export const GlobalStyles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center'
     },
+    sectionView: {
+      backgroundColor: '#fff',
+      borderRadius: 5,
+      padding: 10,
+      marginHorizontal: 5,
+      marginVertical: 5 
+  },
 })

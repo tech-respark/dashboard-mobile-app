@@ -6,14 +6,14 @@ import { environment } from "../../../utils/Constants";
 import { LinearGradient } from "expo-linear-gradient";
 import TextFieldWithBorderHeader from "../../../components/HeaderTextField";
 import Dropdown from "../../../components/Dropdown";
-import UploadImageField from "../../../components/UploadImageField";
 import SubmitCancelButtons from "../../../components/SubmitCancelButtons";
 import Toast from "react-native-root-toast";
-import { checkImageToUpload, getCategoryData, makeAPIRequest, uploadImageToS3 } from "../../../utils/Helper";
+import { checkImageToUpload, getCategoryData, makeAPIRequest } from "../../../utils/Helper";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { selectBranchId, selectTenantId } from "../../../redux/state/UserStates";
 import { setIsLoading, setShowBackOfficeCategories } from "../../../redux/state/UIStates";
 import IconsAndImages from "./IconsAndImages";
+import { GlobalStyles } from "../../../Styles/Styles";
 
 const AddUpdateItem = ({ navigation, route }: any) => {
 
@@ -191,7 +191,7 @@ const AddUpdateItem = ({ navigation, route }: any) => {
     return (
         <View style={{ flex: 1 }}>
             <ScrollView style={styles.container}>
-                <View style={styles.sectionView}>
+                <View style={GlobalStyles.sectionView}>
                     <View style={styles.rowView}>
                         <Text>Name</Text>
                         <Text style={{ color: 'red' }}>*</Text>
@@ -252,7 +252,7 @@ const AddUpdateItem = ({ navigation, route }: any) => {
                         </View>
                     }
                 </View>
-                <View style={styles.sectionView}>
+                <View style={GlobalStyles.sectionView}>
                     <View style={{ flexDirection: "row", alignItems: 'center', paddingTop: 10 }}>
                         <Text style={{ fontSize: FontSize.medium }}>Hide From Catalogue</Text>
                         <Switch
@@ -264,7 +264,7 @@ const AddUpdateItem = ({ navigation, route }: any) => {
                     </View>
                 </View>
                 {(route.params.type == "service" || variations.length == 0) &&
-                    <View style={styles.sectionView}>
+                    <View style={GlobalStyles.sectionView}>
                         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-around" }}>
                             <TextFieldWithBorderHeader value={price} setValue={setPrice} header={"Price"} showSymbol={true} />
                             <TextFieldWithBorderHeader value={salePrice} setValue={setSalePrice} header={"Sale Price"} showSymbol={true} />
@@ -272,7 +272,7 @@ const AddUpdateItem = ({ navigation, route }: any) => {
                     </View>
                 }
                 {route.params.type == "product" &&
-                    <View style={styles.sectionView}>
+                    <View style={GlobalStyles.sectionView}>
                         <View style={{ flexDirection: "row", alignItems: 'center', justifyContent: 'space-between' }}>
                             <Text style={{ fontSize: FontSize.medium, paddingVertical: 5 }}>Variation</Text>
                             <View style={{ flexDirection: "row", alignItems: "center", marginHorizontal: 10 }}>
@@ -314,7 +314,7 @@ const AddUpdateItem = ({ navigation, route }: any) => {
                     </View>
                 }
 
-                <View style={styles.sectionView}>
+                <View style={GlobalStyles.sectionView}>
                     <View style={{ marginBottom: 10 }}>
                         <Text>{route.params.type == "service" ? "Service" : "Product"} Tag</Text>
                         <TextInput
@@ -438,7 +438,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 5,
         paddingVertical: 10
     },
-    sectionView: { backgroundColor: '#fff', borderRadius: 5, padding: 10, marginHorizontal: 5, marginVertical: 5 },
     switch: {
         transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }],
         marginHorizontal: 10

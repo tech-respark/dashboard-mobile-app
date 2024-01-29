@@ -4,7 +4,7 @@ import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { selectBranchId, selectCurrentStoreConfig, selectStaffData, selectTenantId } from "../../../redux/state/UserStates";
 import moment from "moment";
-import { setIsLoading } from "../../../redux/state/UIStates";
+import { setIsLoading, setShowUserProfileTopBar } from "../../../redux/state/UIStates";
 import { appointmentColorCodes, environment } from "../../../utils/Constants";
 import { getActiveStaffsForAppointment, makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
@@ -132,7 +132,8 @@ const AppointmentCalendar = ({navigation}: any) => {
                 {timeSlots.length > 0 ?
                     <ScrollView showsVerticalScrollIndicator contentContainerStyle={{ paddingBottom: '35%', paddingRight: 10 }}
                     >
-                        {Object.keys(timeIntervals).map((time: string, index: number) => (
+                        { 
+                        Object.keys(timeIntervals).map((time: string, index: number) => (
                             <View key={index} style={{ flexDirection: "row", width: '100%', }}
                                 onLayout={(event) => {
                                     const layout = event.nativeEvent.layout;
@@ -147,7 +148,8 @@ const AppointmentCalendar = ({navigation}: any) => {
                                 <TouchableOpacity style={styles.cell}
                                     onPress={()=> {
                                         if(timeSlots[index] != 0){
-                                            navigation.navigate("Create Appointment", {});
+                                            dispatch(setShowUserProfileTopBar());
+                                            navigation.navigate("Create Appointment", {from: timeIntervals[time], to: timeIntervals[Object.keys(timeIntervals)[index+1]]});
                                         }
                                     }}
                                 >

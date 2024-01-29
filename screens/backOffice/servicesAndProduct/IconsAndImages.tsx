@@ -1,8 +1,9 @@
 import React, { FC } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import UploadImageField from "../../../components/UploadImageField";
 import { FontSize } from "../../../Styles/GlobalStyleConfigs";
 import * as ImagePicker from 'expo-image-picker';
+import { GlobalStyles } from "../../../Styles/Styles";
 
 type IconsAndImagesProp = {
     showIcons: boolean;
@@ -85,7 +86,7 @@ const IconsAndImages: FC<IconsAndImagesProp> = ({ showIcons, itemName, gender, b
     return (
         <>
             {showIcons &&
-                <View style={styles.sectionView}>
+                <View style={GlobalStyles.sectionView}>
                     <Text style={{ fontSize: FontSize.medium, paddingVertical: 5 }}>Icons</Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', margin: 10 }}>
                         <View>
@@ -110,7 +111,7 @@ const IconsAndImages: FC<IconsAndImagesProp> = ({ showIcons, itemName, gender, b
                     </View>
                 </View>
             }
-            <View style={styles.sectionView}>
+            <View style={GlobalStyles.sectionView}>
                 <Text style={{ fontSize: FontSize.medium, paddingVertical: 5 }}>Display Images</Text>
                 <ScrollView
                     horizontal
@@ -128,16 +129,5 @@ const IconsAndImages: FC<IconsAndImagesProp> = ({ showIcons, itemName, gender, b
         </>
     )
 };
-
-const styles = StyleSheet.create({
-    sectionView: {
-        backgroundColor: '#fff',
-        borderRadius: 5,
-        padding: 10,
-        marginHorizontal: 5,
-        marginVertical: 5
-    },
-
-});
 
 export default IconsAndImages;

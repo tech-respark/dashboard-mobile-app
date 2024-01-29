@@ -13,6 +13,7 @@ import { selectBranchId, selectStaffData, selectTenantId } from "../../../redux/
 import Toast from "react-native-root-toast";
 import Dropdown from "../../../components/Dropdown";
 import IconsAndImages from "./IconsAndImages";
+import { GlobalStyles } from "../../../Styles/Styles";
 
 const AddUpdateCategory = ({ navigation, route }: any) => {
     const dispatch = useAppDispatch();
@@ -210,7 +211,7 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
     return (
         <View style={{ flex: 1 }}>
             <ScrollView style={styles.container}>
-                <View style={styles.sectionView}>
+                <View style={GlobalStyles.sectionView}>
                     <View style={styles.rowView}>
                         <Text>Active</Text>
                         <Switch
@@ -249,7 +250,7 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
                     </View>
                 </View>
 
-                <View style={styles.sectionView}>
+                <View style={GlobalStyles.sectionView}>
                     <Text style={{ fontSize: FontSize.medium, paddingVertical: 5 }}>Group</Text>
                     <RadioButtonGroup
                         options={genderOptions}
@@ -263,7 +264,7 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
                     gender={gender} setBothIcon={(val)=>setBothIcon(val)} setMaleIcon={(val)=>setMaleIcon(val)} setFemaleIcon={(val)=>setFemaleIcon(val)} setDisplayImageObjects={(val)=>setDisplayImageObjects(val)}
                 />
                 {!isAddNew && type == "service" && showExpertsSection &&
-                    <View style={styles.sectionView}>
+                    <View style={GlobalStyles.sectionView}>
                         <Text style={{ fontSize: FontSize.medium, paddingVertical: 5 }}>Experts</Text>
                         <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
                             {experts.map((item: any) => (
@@ -315,13 +316,6 @@ const styles = StyleSheet.create({
     container: {
         paddingHorizontal: 5,
         paddingVertical: 10
-    },
-    sectionView: {
-        backgroundColor: '#fff',
-        borderRadius: 5,
-        padding: 10,
-        marginHorizontal: 5,
-        marginVertical: 5 
     },
     switch: {
         transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }],

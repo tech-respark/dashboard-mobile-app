@@ -6,7 +6,7 @@ import POSMainScreen from '../pos/PosMain';
 import BackOfficeMainScreen from '../backOffice/BackOfficeMain';
 import { FontSize, GlobalColors } from '../../Styles/GlobalStyleConfigs';
 import { useAppDispatch, useAppSelector } from '../../redux/Hooks';
-import { setIsLoading } from '../../redux/state/UIStates';
+import { selectShowUserProfileTopBar, setIsLoading } from '../../redux/state/UIStates';
 import { makeAPIRequest } from '../../utils/Helper';
 import { environment, mainTabsIconsMap } from '../../utils/Constants';
 import { selectBranchId, selectTenantId, setConfig, setCurrrentStoreConfig, setStaffData } from '../../redux/state/UserStates';
@@ -23,6 +23,7 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
   const dispatch = useAppDispatch();
   const storeId = useAppSelector(selectBranchId);
   const tenantId = useAppSelector(selectTenantId);
+  const showHeader = useAppSelector(selectShowUserProfileTopBar);
 
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
   const [showBranchModal, setShowBranchModal] = useState<boolean>(false);
@@ -87,7 +88,8 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
             />
           </TouchableOpacity>
         ),
-        drawerLabel: name
+        drawerLabel: name,
+        headerShown: showHeader
       }
     )
    
