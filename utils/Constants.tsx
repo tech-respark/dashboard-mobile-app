@@ -15,4 +15,11 @@ export const mainTabsIconsMap: {[key: string]: string} = {
     "Campaign": "bullhorn"
 };
 
+export const appointmentColorCodes: { [key: string]: string } = {
+    "CONFIRMED": "#f8c068",
+    "CHECKIN": "#77e63d",
+    "CANCELLED": "#ff8787",
+    "COMPLETED": "#6cd6cc"
+};
+
 export const genderOptions: string[] = ["both", "male", "female"];

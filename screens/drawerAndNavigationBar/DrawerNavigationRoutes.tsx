@@ -131,7 +131,7 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
           initialRouteName="Backoffice"
         >
           <Drawer.Screen name="POS" options={({navigation}) => setLeftHeader(navigation, 'POS')} component={POSMainScreen}/>
-          <Drawer.Screen name="Appointment" options={({navigation}) => setLeftHeader(navigation, 'Appointment')} component={AppointmentMain} />
+          <Drawer.Screen name="Appointment" options={({navigation}) => setLeftHeader(navigation, 'Appointment')} component={AppointmentMain}/>
           <Drawer.Screen name="Backoffice" options={({navigation}) => setLeftHeader(navigation, 'Backoffice')} component={BackOfficeMainScreen} />
           <Drawer.Screen name="CRM" options={({navigation}) => setLeftHeader(navigation, 'CRM')} component={CrmMain} />
         </Drawer.Navigator>
