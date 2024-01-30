@@ -98,17 +98,17 @@ export const checkImageToUpload = async (displayImageList: { [key: string]: any 
   return displayUploads;
 }
 
-export function getActiveStaffsForAppointment(latestStaffList: { [key: string]: any }[], mainStaffList: { [key: string]: any }[]): [{ [key: string]: any }[], string[]] {
+export function getActiveStaffsForAppointment(latestStaffList: { [key: string]: any }[], mainStaffList: { [key: string]: any }[]): { [key: string]: any }[] {
   mainStaffList = mainStaffList.filter(item => item.enableAppointments && item.active);
   latestStaffList = latestStaffList.filter(item => !item.onLeave);
 
   const commonStaffList = latestStaffList.filter(latestStaff => {
-    return mainStaffList.some(mainStaff => mainStaff.id === latestStaff.staffId);
+    const mainStaff = mainStaffList.find(mainStaff => mainStaff.id === latestStaff.staffId);
+    if (mainStaff) {
+      latestStaff.name = `${mainStaff.firstName} ${mainStaff.lastName}`;
+      return true;
+    }
+    return false;
   });
-
-  const staffNames = Array.from(new Set(latestStaffList.map(item => item.staffId))).flatMap(id => {
-    const item = mainStaffList.find(item => item.id === id);
-    return item ? [`${item.firstName} ${item.lastName}`] : [];
-  });
-  return [commonStaffList, staffNames];
+  return commonStaffList;
 }

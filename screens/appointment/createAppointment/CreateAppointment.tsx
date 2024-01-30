@@ -1,4 +1,4 @@
-import { FontAwesome, FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
@@ -10,9 +10,9 @@ import { environment } from "../../../utils/Constants";
 import { selectBranchId, selectTenantId } from "../../../redux/state/UserStates";
 import { makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
-import { SearchBar } from "react-native-screens";
-import SearchModal from "./SearchGuest";
 import { TimerWithBorderHeader } from "../../../components/HeaderTextField";
+import SearchModal from "./SearchModal";
+import Checkbox from 'expo-checkbox';
 
 const CreateAppointment = ({ navigation, route }: any) => {
 
@@ -22,9 +22,12 @@ const CreateAppointment = ({ navigation, route }: any) => {
     const tenantId = useAppSelector(selectTenantId);
 
     const [customers, setCustomers] = useState<{ [key: string]: any }[]>([]);
-    const [selectedCustomerIndex, setSelectedCustomerIndex] = useState<number>(0);
+    const [selectedCustomer, setSelectedCustomer] = useState<{[key:string]: any}>({});
+    const [selectedExperts, setSelectedExperts] = useState<{[key:string]: any}>(route.params.staffObjects[route.params.selectedStaffIndex]);
     const [fromTime, setFromTime] = useState<string>(route.params.from);
     const [toTime, setToTime] = useState<string>(route.params.to);
+    const [instructions, setInstructions] = useState<string>('');
+    const [enableSMS, setEnableSMS] = useState<boolean>(true);
 
     const getCustomersData = async () => {
         const url = environment.guestUrl + `customer/getByTenantStoreMinimal?tenantId=${tenantId}&storeId=${storeId}`;
@@ -59,37 +62,75 @@ const CreateAppointment = ({ navigation, route }: any) => {
     return (
         <View style={{ flex: 1 }}>
             <ScrollView style={styles.container}>
-                <View style={GlobalStyles.sectionView}>
-                    <View style={styles.justifiedRow}>
-                        <Text style={{ fontSize: FontSize.large, fontWeight: '500' }}>1. Guest Details</Text>
-                        <View style={styles.justifiedRow}>
+                <View style={[GlobalStyles.sectionView, { zIndex: 2 }]}>
+                    <View style={GlobalStyles.justifiedRow}>
+                        <Text style={styles.headingText}>1. Guest Details</Text>
+                        <View style={[GlobalStyles.justifiedRow, { marginBottom: 10 }]}>
                             <Text style={{ color: GlobalColors.blue, marginRight: 10 }}>Add User</Text>
-                            <TouchableOpacity style={{ backgroundColor: GlobalColors.blue, borderRadius: 20, padding: 3 }}
+                            <TouchableOpacity style={styles.circleIcon}
                                 onPress={() => { }}>
                                 <Ionicons name="add" size={25} color="#fff" />
                             </TouchableOpacity>
                         </View>
                     </View>
-                    <SearchModal customerData={customers} setSelectedCustomerIndex={(val) => setSelectedCustomerIndex(val)} />
+                    <SearchModal data={customers} setSelectedIndex={(val: number) => setSelectedCustomer(customers[val])} type="customer" placeholderText="Search By Name Or Number" headerText="" />
+                </View>
+
+                <View style={[GlobalStyles.sectionView, {zIndex: 2}]}>
+                    <View style={[GlobalStyles.justifiedRow, { marginBottom: 10 }]}>
+                        <Text style={styles.headingText}>2. Service Details</Text>
+                        <View style={GlobalStyles.justifiedRow}>
+                            <Text style={{ color: GlobalColors.blue, marginRight: 10 }}>Add Service</Text>
+                            <TouchableOpacity style={styles.circleIcon}
+                                onPress={() => { }}>
+                                <Ionicons name="add" size={25} color="#fff" />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                    {/* will be iterated for multiple */}
+                    <SearchModal data={customers} type="service" placeholderText="Search Service By Name" headerText="Service 1" />
+                    <SearchModal data={route.params.staffObjects} type="expert" placeholderText="Search Expert" headerText="Expert 1" selectedValue={selectedExperts.name} setSelectedIndex={(val) => setSelectedExperts(route.params.staffObjects[val])}/>
+
+                    <Text onPress={() => { }} style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}>Add Expert</Text>
+                    <View style={[GlobalStyles.justifiedRow, { marginTop: 20 }]}>
+                        <TimerWithBorderHeader value={fromTime} setValue={(val) => { setFromTime(val) }} header="From Time" />
+                        <TimerWithBorderHeader value={toTime} setValue={(val) => { setToTime(val) }} header="To Time" />
+                    </View>
                 </View>
 
                 <View style={GlobalStyles.sectionView}>
-                    <View style={styles.justifiedRow}>
-                        <Text style={{ fontSize: FontSize.large, fontWeight: '500' }}>2. Service Details</Text>
-                        <View style={styles.justifiedRow}>
-                            <Text style={{ color: GlobalColors.blue, marginRight: 10 }}>Add Service</Text>
-                            <TouchableOpacity style={{ backgroundColor: GlobalColors.blue, borderRadius: 20, padding: 3 }}
-                                onPress={() => { }}>
-                                <Ionicons name="add" size={25} color="#fff" />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                    <View style={styles.justifiedRow}>
-                        <TimerWithBorderHeader value={fromTime} setValue={(val)=>{setFromTime(val)}} header="From Time"/>
-                        <TimerWithBorderHeader value={toTime} setValue={(val)=>{setToTime(val)}} header="To Time"/>
-                    </View>
+                    <Text style={styles.headingText}>3. Instruction Details</Text>
+                    <TextInput
+                        style={styles.textInput}
+                        numberOfLines={4}
+                        multiline
+                        placeholder="Enter Appointment Instructions"
+                        value={instructions}
+                        placeholderTextColor="gray"
+                        underlineColorAndroid="transparent"
+                        onChangeText={(val) => {
+                            setInstructions(val);
+                        }}
+                    />
                 </View>
             </ScrollView>
+            <View style={{ backgroundColor: '#fff', padding: 20, alignItems: 'center' }}>
+                <View style={[GlobalStyles.justifiedRow, {justifyContent: 'space-between', width: '100%', marginBottom: 20}]}>
+                    <View style={[GlobalStyles.justifiedRow, {width: '35%'}]}>
+                        <Checkbox
+                            color={"#4FACFE"}
+                            style={{ borderColor: 'gray', borderRadius: 2, borderWidth: 0.5 }}
+                            value={enableSMS}
+                            onValueChange={() => setEnableSMS(!enableSMS)}
+                        />
+                        <Text>{"SMS\nConfirmation"}</Text>
+                    </View>
+                    <Text onPress={() => {}} style={{color: GlobalColors.blue, textDecorationLine: 'underline'}}>Membership Validation</Text>
+                </View>
+                <TouchableOpacity style={{width: '100%', backgroundColor: GlobalColors.blue, paddingVertical: 10, borderRadius: 5, marginBottom: 5}}>
+                    <Text style={{color: "#fff", textAlign: "center", fontSize: FontSize.large, fontWeight: '500'}}>Create</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 };
@@ -99,13 +140,21 @@ const styles = StyleSheet.create({
         paddingHorizontal: 5,
         paddingVertical: 10
     },
-    justifiedRow: {
-        flexDirection: "row",
-        justifyContent: 'space-between',
-        alignItems: 'center'
-    },
     textInput: {
-        paddingHorizontal: 10
+        paddingHorizontal: 10,
+        paddingVertical: 10,
+        marginVertical: 15,
+        borderWidth: 0.5,
+        borderColor: 'lightgray',
+        borderRadius: 2,
+    },
+    headingText: {
+        fontSize: FontSize.large,
+        fontWeight: '500'
+    },
+    circleIcon: {
+        backgroundColor: GlobalColors.blue,
+        borderRadius: 20, padding: 3
     }
 });
 

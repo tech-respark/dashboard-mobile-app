@@ -11,7 +11,7 @@ import Toast from "react-native-root-toast";
 import { useIsFocused } from "@react-navigation/native";
 import DateAndDropdown from "./DateAndDropdown";
 
-const AppointmentCalendar = ({navigation}: any) => {
+const AppointmentCalendar = ({ navigation }: any) => {
     const staffList = useAppSelector(selectStaffData);
     const storeConfig = useAppSelector(selectCurrentStoreConfig);
     const storeId = useAppSelector(selectBranchId);
@@ -20,7 +20,6 @@ const AppointmentCalendar = ({navigation}: any) => {
     const dispatch = useAppDispatch();
 
     const [staffObjects, setStaffObjects] = useState<{ [key: string]: any }[]>([]);
-    const [staffsNameList, setStaffNameList] = useState<string[]>([]);
     const [selectedStaffIndex, setSelectedStaffIndex] = useState<number>(0);
     const [timeIntervals, setTimeIntervals] = useState<{ [key: string]: string }>({});
     const [timeSlots, setTimeSlots] = useState<number[]>([]);
@@ -69,9 +68,8 @@ const AppointmentCalendar = ({navigation}: any) => {
         const url = environment.sqlBaseUri + `staffshifts/${tenantId}/${storeId}/${selectedDate}`;
         let response = await makeAPIRequest(url, null, "GET");
         if (response) {
-            let [filteredList, staffNames] = getActiveStaffsForAppointment(response, staffList!);
+            let filteredList = getActiveStaffsForAppointment(response, staffList!);
             setStaffObjects(filteredList);
-            setStaffNameList(staffNames);
             return filteredList;
         } else {
             Toast.show("No Data Found", { backgroundColor: GlobalColors.error });
@@ -115,15 +113,17 @@ const AppointmentCalendar = ({navigation}: any) => {
 
     return (
         <View style={styles.container}>
-            <DateAndDropdown selectedDate={selectedDate} setSelectedDate={(value)=>{setSelectedDate(value)}}/>
+            <DateAndDropdown selectedDate={selectedDate} setSelectedDate={(value) => { setSelectedDate(value) }} />
             {/* Calender view */}
             <View style={styles.staffView}>
                 <ScrollView horizontal showsHorizontalScrollIndicator >
-                    {staffsNameList.map((staff: string, index: number) => (
-                        <Pressable key={index} style={[styles.staffViewSingle, index == selectedStaffIndex && { borderBottomWidth: 2, borderColor: GlobalColors.blue }]}
+                    {staffObjects.map((staff: any, index: number) => (
+                        <Pressable
+                            key={index}
+                            style={[styles.staffViewSingle, index === selectedStaffIndex && { borderBottomWidth: 2, borderColor: GlobalColors.blue }]}
                             onPress={() => { setSelectedStaffIndex(index) }}
                         >
-                            <Text style={{ color: index == selectedStaffIndex ? "#000" : GlobalColors.grayDark }}>{staff}</Text>
+                            <Text style={{ color: index === selectedStaffIndex ? "#000" : GlobalColors.grayDark }}>{staff.name}</Text>
                         </Pressable>
                     ))}
                 </ScrollView>
@@ -132,34 +132,34 @@ const AppointmentCalendar = ({navigation}: any) => {
                 {timeSlots.length > 0 ?
                     <ScrollView showsVerticalScrollIndicator contentContainerStyle={{ paddingBottom: '35%', paddingRight: 10 }}
                     >
-                        { 
-                        Object.keys(timeIntervals).map((time: string, index: number) => (
-                            <View key={index} style={{ flexDirection: "row", width: '100%', }}
-                                onLayout={(event) => {
-                                    const layout = event.nativeEvent.layout;
-                                    setTimeYPositions((prevPositions) => ({
-                                        ...prevPositions,
-                                        [time]: layout.y,
-                                    }));
-                                }}>
-                                <View style={{ width: "30%", backgroundColor: GlobalColors.lightGray2, marginRight: 5 }}>
-                                    <Text style={{ fontSize: 12, width: '90%', textAlign: 'center' }}>{timeIntervals[time]}</Text>
-                                </View>
-                                <TouchableOpacity style={styles.cell}
-                                    onPress={()=> {
-                                        if(timeSlots[index] != 0){
-                                            dispatch(setShowUserProfileTopBar());
-                                            navigation.navigate("Create Appointment", {from: timeIntervals[time], to: timeIntervals[Object.keys(timeIntervals)[index+1]]});
+                        {
+                            Object.keys(timeIntervals).map((time: string, index: number) => (
+                                <View key={index} style={{ flexDirection: "row", width: '100%', }}
+                                    onLayout={(event) => {
+                                        const layout = event.nativeEvent.layout;
+                                        setTimeYPositions((prevPositions) => ({
+                                            ...prevPositions,
+                                            [time]: layout.y,
+                                        }));
+                                    }}>
+                                    <View style={{ width: "30%", backgroundColor: GlobalColors.lightGray2, marginRight: 5 }}>
+                                        <Text style={{ fontSize: 12, width: '90%', textAlign: 'center' }}>{timeIntervals[time]}</Text>
+                                    </View>
+                                    <TouchableOpacity style={styles.cell}
+                                        onPress={() => {
+                                            if (timeSlots[index] != 0) {
+                                                dispatch(setShowUserProfileTopBar());
+                                                navigation.navigate("Create Appointment", { from: timeIntervals[time], to: timeIntervals[Object.keys(timeIntervals)[index + 1]], selectedStaffIndex: selectedStaffIndex, staffObjects: staffObjects });
+                                            }
+                                        }}
+                                    >
+                                        {timeSlots[index] == 0 ?
+                                            <Text style={{ color: 'gray', fontStyle: 'italic' }}>Expert Unavailable</Text> :
+                                            <Text></Text>
                                         }
-                                    }}
-                                >
-                                    {timeSlots[index] == 0 ?
-                                        <Text style={{ color: 'gray', fontStyle: 'italic' }}>Expert Unavailable</Text> :
-                                        <Text></Text>
-                                    }
-                                </TouchableOpacity>
-                            </View>
-                        ))}
+                                    </TouchableOpacity>
+                                </View>
+                            ))}
                         {Object.keys(expertAppointments).map((appointmentTime: any, index: number) => {
                             let times = appointmentTime.split("-");
                             let bc = appointmentColorCodes[expertAppointments[appointmentTime]["status"].slice(-1)[0]["status"]];

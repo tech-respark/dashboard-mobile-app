@@ -25,4 +25,9 @@ export const GlobalStyles = StyleSheet.create({
       marginHorizontal: 5,
       marginVertical: 5 
   },
+  justifiedRow: {
+    flexDirection: "row",
+    justifyContent: 'space-between',
+    alignItems: 'center'
+},
 })

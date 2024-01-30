@@ -4,7 +4,6 @@ import { ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View
 import { FontSize, GlobalColors, GradientButtonColor } from "../../../Styles/GlobalStyleConfigs";
 import { environment } from "../../../utils/Constants";
 import { LinearGradient } from "expo-linear-gradient";
-import TextFieldWithBorderHeader from "../../../components/HeaderTextField";
 import Dropdown from "../../../components/Dropdown";
 import SubmitCancelButtons from "../../../components/SubmitCancelButtons";
 import Toast from "react-native-root-toast";
@@ -14,6 +13,7 @@ import { selectBranchId, selectTenantId } from "../../../redux/state/UserStates"
 import { setIsLoading, setShowBackOfficeCategories } from "../../../redux/state/UIStates";
 import IconsAndImages from "./IconsAndImages";
 import { GlobalStyles } from "../../../Styles/Styles";
+import { TextFieldWithBorderHeader } from "../../../components/HeaderTextField";
 
 const AddUpdateItem = ({ navigation, route }: any) => {
 

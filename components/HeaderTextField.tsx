@@ -73,6 +73,17 @@ export const TimerWithBorderHeader: FC<TimerWithBorderHeaderProps> = ({ value, s
   );
 };
 
+export const HeaderedComponent = ({ header, children }: any) => {
+  return (
+    <View>
+      <View style={[styles.header, header && { backgroundColor: "#fff" }]}>
+        <Text style={styles.headerText}>{header}</Text>
+      </View>
+      {children}
+    </View>
+  );
+};
+
 
 const styles = StyleSheet.create({
   container: {
@@ -89,7 +100,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5
   },
   headerText: {
-    color: GlobalColors.blue
+    color: GlobalColors.blue,
   },
   inputContainer: {
     borderRadius: 5,
