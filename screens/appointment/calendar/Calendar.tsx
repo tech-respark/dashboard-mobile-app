@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
@@ -77,31 +77,81 @@ const AppointmentCalendar = ({ navigation }: any) => {
         return [];
     };
 
-    const getAppointmentsData = async (staffs: { [key: string]: any }[]) => {
-        dispatch(setIsLoading({ isLoading: true }));
+    const getAppointmentsData = async (isFirstCall: boolean) => {
         let endDate = moment(selectedDate, 'YYYY-MM-DD').clone().add(15, 'days').format('YYYY-MM-DD');
         const url = environment.appointmentUri + `appointments/between?count=${appointmentCount}&end=${endDate}&start=${selectedDate}&storeid=${storeId}&tenantid=${tenantId}`;
-        let response = await makeAPIRequest(url, null, "GET");
-        setAppointmentsData(response);
-        dispatch(setIsLoading({ isLoading: false }));
+        let response = await makeAPIRequest(url, null, "GET") ?? [];
+        if (isFirstCall) {
+            setAppointmentsData(response);
+        } else if (response) {
+            setAppointmentsData(prevState => [...prevState, ...response]);
+        }
+        setAppointmentCount(prevState => prevState + response.length);
     };
 
     const initialStatesHandler = async () => {
         if (staffList && storeConfig) {
             dispatch(setIsLoading({ isLoading: true }));
-            let staffs = await getStaffShifts();
-            getAppointmentsData(staffs);
+            setAppointmentCount(0);
+            await getStaffShifts();
+            getAppointmentsData(true);
             dispatch(setIsLoading({ isLoading: false }));
         }
     };
 
-    useEffect(() => {
-        getTimeIntervalList();
-    }, [])
+    const emptyCalender = () => {
+        let positions: { [key: string]: number } = {};
+        let intervalKeys = Object.keys(timeIntervals);
+        return (
+            intervalKeys.map((time: string, index: number) => {
+                return (
+                    <View key={index} style={{ flexDirection: "row", width: '100%', }}
+                        onLayout={(event) => {
+                            const layout = event.nativeEvent.layout;
+                            positions[time] = layout.y
+                            if (Object.keys(positions).length == intervalKeys.length) {
+                                setTimeYPositions(positions);
+                            }
+                        }}>
+                        <View style={{ width: "30%", backgroundColor: GlobalColors.lightGray2, marginRight: 5 }}>
+                            <Text style={{ fontSize: 12, width: '90%', textAlign: 'center' }}>{timeIntervals[time]}</Text>
+                        </View>
+                        <TouchableOpacity style={styles.cell}
+                            onPress={() => {
+                                if (timeSlots[index] != 0) {
+                                    dispatch(setShowUserProfileTopBar());
+                                    navigation.navigate("Create Appointment", { from: timeIntervals[time], to: timeIntervals[Object.keys(timeIntervals)[index + 1]], selectedStaffIndex: selectedStaffIndex, staffObjects: staffObjects });
+                                }
+                            }}
+                        >
+                            {timeSlots[index] == 0 ?
+                                <Text style={{ color: 'gray', fontStyle: 'italic' }}>Expert Unavailable</Text> :
+                                <Text></Text>
+                            }
+                        </TouchableOpacity>
+                    </View>
+                )
+            }
+            )
+        );
+    };
 
     useEffect(() => {
-        isFocused ? initialStatesHandler() : null;
+        getTimeIntervalList();
+    }, []);
+
+    useEffect(() => {
+        if (isFocused) {
+            initialStatesHandler();
+        }
     }, [isFocused, selectedDate]);
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            getAppointmentsData(false);
+        }, 20000);
+        return () => clearInterval(intervalId);
+    }, [appointmentCount]);
 
     useEffect(() => {
         if (staffObjects.length > 0) {
@@ -109,7 +159,7 @@ const AppointmentCalendar = ({ navigation }: any) => {
             if (appointmentsData.length > 0)
                 getExpertAppointmentTimes(appointmentsData);
         }
-    }, [selectedStaffIndex, appointmentsData])
+    }, [selectedStaffIndex, appointmentsData]);
 
     return (
         <View style={styles.container}>
@@ -132,50 +182,24 @@ const AppointmentCalendar = ({ navigation }: any) => {
                 {timeSlots.length > 0 ?
                     <ScrollView showsVerticalScrollIndicator contentContainerStyle={{ paddingBottom: '35%', paddingRight: 10 }}
                     >
+                        {emptyCalender()}
                         {
-                            Object.keys(timeIntervals).map((time: string, index: number) => (
-                                <View key={index} style={{ flexDirection: "row", width: '100%', }}
-                                    onLayout={(event) => {
-                                        const layout = event.nativeEvent.layout;
-                                        setTimeYPositions((prevPositions) => ({
-                                            ...prevPositions,
-                                            [time]: layout.y,
-                                        }));
+                            Object.keys(timeYPositions).length > 0 && Object.keys(expertAppointments).map((appointmentTime: any, index: number) => {
+                                let times = appointmentTime.split("-");
+                                let bc = appointmentColorCodes[expertAppointments[appointmentTime]["status"].slice(-1)[0]["status"]];
+                                return (
+                                    <View key={index} style={{
+                                        position: 'absolute', zIndex: 1, top: timeYPositions[times[0]], height: timeYPositions[times[1]] - timeYPositions[times[0]], left: '30%',
+                                        backgroundColor: bc, width: '69%', marginLeft: 5, padding: 10, borderRadius: 2, borderWidth: 0.5
                                     }}>
-                                    <View style={{ width: "30%", backgroundColor: GlobalColors.lightGray2, marginRight: 5 }}>
-                                        <Text style={{ fontSize: 12, width: '90%', textAlign: 'center' }}>{timeIntervals[time]}</Text>
+                                        <View style={{ flexDirection: "row", width: '100%', justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
+                                            <Text style={{ fontWeight: "bold", maxWidth: '50%' }} ellipsizeMode="tail">{expertAppointments[appointmentTime]["guestName"]}</Text>
+                                            <Text style={{ fontSize: FontSize.small }}>{timeIntervals[times[0]]}-{timeIntervals[times[1]]}</Text>
+                                        </View>
+                                        <Text ellipsizeMode="tail" numberOfLines={1} style={{ maxWidth: '60%' }}>{expertAppointments[appointmentTime]["expertAppointments"][0]["service"]}</Text>
                                     </View>
-                                    <TouchableOpacity style={styles.cell}
-                                        onPress={() => {
-                                            if (timeSlots[index] != 0) {
-                                                dispatch(setShowUserProfileTopBar());
-                                                navigation.navigate("Create Appointment", { from: timeIntervals[time], to: timeIntervals[Object.keys(timeIntervals)[index + 1]], selectedStaffIndex: selectedStaffIndex, staffObjects: staffObjects });
-                                            }
-                                        }}
-                                    >
-                                        {timeSlots[index] == 0 ?
-                                            <Text style={{ color: 'gray', fontStyle: 'italic' }}>Expert Unavailable</Text> :
-                                            <Text></Text>
-                                        }
-                                    </TouchableOpacity>
-                                </View>
-                            ))}
-                        {Object.keys(expertAppointments).map((appointmentTime: any, index: number) => {
-                            let times = appointmentTime.split("-");
-                            let bc = appointmentColorCodes[expertAppointments[appointmentTime]["status"].slice(-1)[0]["status"]];
-                            return (
-                                <View key={index} style={{
-                                    position: 'absolute', zIndex: 1, top: timeYPositions[times[0]], height: timeYPositions[times[1]] - timeYPositions[times[0]], left: '30%',
-                                    backgroundColor: bc, width: '69%', marginLeft: 5, padding: 10, borderRadius: 2
-                                }}>
-                                    <View style={{ flexDirection: "row", width: '100%', justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
-                                        <Text style={{ fontWeight: "bold", maxWidth: '50%' }} ellipsizeMode="tail">{expertAppointments[appointmentTime]["guestName"]}</Text>
-                                        <Text style={{ fontSize: FontSize.small }}>{timeIntervals[times[0]]}-{timeIntervals[times[1]]}</Text>
-                                    </View>
-                                    <Text ellipsizeMode="tail" numberOfLines={1} style={{ maxWidth: '60%' }}>{expertAppointments[appointmentTime]["expertAppointments"][0]["service"]}</Text>
-                                </View>
-                            );
-                        })
+                                );
+                            })
                         }
 
                     </ScrollView> :

@@ -89,7 +89,7 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
           </TouchableOpacity>
         ),
         drawerLabel: name,
-        headerShown: showHeader
+        headerShown: showHeader,
       }
     )
    
@@ -106,6 +106,7 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
       <View style={[styles.mainContent, { opacity: isSheetOpen ? 0.5 : 1, pointerEvents: isSheetOpen ? 'none' : 'auto' }]}>
         <Drawer.Navigator
           screenOptions={({ route }) => ({
+            unmountOnBlur: true,
             drawerType: "front",
             headerTitleAlign: 'left',
             headerTitle: () => (
