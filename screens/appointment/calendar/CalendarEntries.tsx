@@ -4,7 +4,7 @@ import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { selectCurrentStoreConfig } from "../../../redux/state/UserStates";
 import moment from "moment";
-import { setShowUserProfileTopBar } from "../../../redux/state/UIStates";
+import { setIsLoading, setShowUserProfileTopBar } from "../../../redux/state/UIStates";
 import { appointmentColorCodes } from "../../../utils/Constants";
 
 interface ICalenderEntries {
@@ -64,6 +64,7 @@ const CalendarEntries: FC<ICalenderEntries> = ({ selectedStaffIndex, staffObject
     }, []);
 
     useEffect(() => {
+        console.log("##############1")
         if (staffObjects.length > 0) {
             setTimeSlotsInTable(timeIntervals, staffObjects);
             getExpertAppointmentTimes(appointmentsData);

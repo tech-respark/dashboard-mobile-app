@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react"
+import React, { FC, useEffect, useState } from "react"
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
@@ -8,21 +8,18 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 
 type DateAndDropdownType = {
+    data: { [key: string]: number},
+    selectedDropdown: string,
+    setSelectedDropdown: (val: string) => void,
     selectedDate: string,
     setSelectedDate: (newDate: string) => void,
 }
 
-const DateAndDropdown: FC<DateAndDropdownType> = ({ selectedDate, setSelectedDate }) => {
-    const data = [
-        { label: 'Confirmed', number: 3 },
-        { label: 'Online', number: 3 },
-        { label: 'Future', number: 4 },
-        { label: 'Completed', number: 1 },
-        { label: 'Cancelled', number: 0 },
-    ];
+const DateAndDropdown: FC<DateAndDropdownType> = ({ selectedDate, setSelectedDate, data, selectedDropdown, setSelectedDropdown }) => {
 
-    const [selectedDropdown, setSelectedDropdown] = useState<{ label: string, number: number }>(data[0]);
     const [isDatePickerVisible, setIsDatePickerVisible] = useState<boolean>(false);
+
+    const options = [{ label: 'confirmed' },{ label: 'online' },{ label: 'future' },{ label: 'completed'},{ label: 'cancelled' },{ label: 'total'}];
 
     const handlePreviousNextDate = (isNext: boolean) => {
         const currentDate = moment(selectedDate, 'YYYY-MM-DD');
@@ -60,17 +57,18 @@ const DateAndDropdown: FC<DateAndDropdownType> = ({ selectedDate, setSelectedDat
             </View>
             <Dropdown
                 style={styles.dropdown}
-                data={data}
+                selectedTextStyle={{color: '#fff', textTransform: 'capitalize'}}
+                data={options}
                 labelField="label"
                 valueField="label"
-                value={selectedDropdown.label}
+                value={selectedDropdown}
                 onChange={item => {
-                    setSelectedDropdown(item);
+                    setSelectedDropdown(item.label);
                 }}
                 renderRightIcon={() => (
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '30%' }}>
-                        <Text style={{ paddingRight: 10, fontSize: FontSize.medium }}>{selectedDropdown.number}</Text>
-                        <View style={{ backgroundColor: GlobalColors.lightGray2, borderRadius: 20 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '35%' }}>
+                        <Text style={{fontSize: FontSize.medium, color: '#fff' }} ellipsizeMode="clip">{data[selectedDropdown] ?? 0}</Text>
+                        <View style={{ backgroundColor: '#fff', borderRadius: 20 }}>
                             <Ionicons
                                 name="caret-down"
                                 color={GlobalColors.blue}
@@ -83,8 +81,8 @@ const DateAndDropdown: FC<DateAndDropdownType> = ({ selectedDate, setSelectedDat
                 renderItem={(item) => (
                     <View style={{ paddingHorizontal: 10 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 0.5, borderColor: 'lightgray' }}>
-                            <Text style={{ paddingRight: 10, fontSize: FontSize.medium, color: item.label == "Future" ? 'red' : 'gray' }}>{item.label}</Text>
-                            <Text style={{ fontSize: FontSize.medium, color: item.label == "Future" ? 'red' : 'gray' }}>{item.number}</Text>
+                            <Text style={{ paddingRight: 10, fontSize: FontSize.medium, color: item.label == "future" ? 'red' : 'gray', textTransform: 'capitalize' }}>{item.label}</Text>
+                            <Text style={{ fontSize: FontSize.medium, color: item.label == "future" ? 'red' : 'gray' }}>{data[item.label] ?? 0}</Text>
                         </View>
                     </View>
                 )}
@@ -107,8 +105,7 @@ const styles = StyleSheet.create({
         borderRadius: 15
     },
     dropdown: {
-        borderWidth: 0.5,
-        borderColor: 'lightgray',
+        backgroundColor: GlobalColors.blue,
         borderRadius: 5,
         paddingHorizontal: 10,
         justifyContent: 'center',
