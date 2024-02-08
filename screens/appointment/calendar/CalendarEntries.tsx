@@ -6,6 +6,7 @@ import { selectCurrentStoreConfig } from "../../../redux/state/UserStates";
 import moment from "moment";
 import { setIsLoading, setShowUserProfileTopBar } from "../../../redux/state/UIStates";
 import { appointmentColorCodes } from "../../../utils/Constants";
+import { useTimeIntervalList } from "../../../customHooks/AppointmentHooks";
 
 interface ICalenderEntries {
     selectedStaffIndex: number,
@@ -16,27 +17,12 @@ interface ICalenderEntries {
 }
 
 const CalendarEntries: FC<ICalenderEntries> = ({ selectedStaffIndex, staffObjects, selectedDate, appointmentsData, navigation }) => {
-    const storeConfig = useAppSelector(selectCurrentStoreConfig);
     const dispatch = useAppDispatch();
+    const timeIntervals = useTimeIntervalList();
 
     const [timeYPositions, setTimeYPositions] = useState<{ [key: string]: number }>({});
     const [expertAppointments, setExpertAppointments] = useState<{ [key: string]: any }>({});
-    const [timeIntervals, setTimeIntervals] = useState<{ [key: string]: string }>({});
     const [timeSlots, setTimeSlots] = useState<number[]>([]);
-
-    const getTimeIntervalList = () => {
-        const timeObject: { [key: string]: string } = {};
-        const start = new Date(`1970-01-01T${storeConfig!['startTime']}`);
-        const end = new Date(`1970-01-01T${storeConfig!['closureTime']}`);
-        while (start <= end) {
-            const timeString = start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false });
-            const formattedTime = start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-            timeObject[timeString] = formattedTime;
-            start.setMinutes(start.getMinutes() + 15);
-        }
-        setTimeIntervals(timeObject);
-        return timeObject;
-    };
 
     const setTimeSlotsInTable = (timeIntervals: { [key: string]: string }, staffs: { [key: string]: any }[]) => {
         let slots = staffs[selectedStaffIndex]["slot"].split("-");
@@ -60,11 +46,6 @@ const CalendarEntries: FC<ICalenderEntries> = ({ selectedStaffIndex, staffObject
     };
 
     useEffect(() => {
-        getTimeIntervalList();
-    }, []);
-
-    useEffect(() => {
-        console.log("##############1")
         if (staffObjects.length > 0) {
             setTimeSlotsInTable(timeIntervals, staffObjects);
             getExpertAppointmentTimes(appointmentsData);

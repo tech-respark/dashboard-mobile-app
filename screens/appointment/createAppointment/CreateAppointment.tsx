@@ -13,6 +13,7 @@ import Toast from "react-native-root-toast";
 import { TimerWithBorderHeader } from "../../../components/HeaderTextField";
 import SearchModal from "./SearchModal";
 import Checkbox from 'expo-checkbox';
+import CreateUser from "./CreateUser";
 
 const CreateAppointment = ({ navigation, route }: any) => {
 
@@ -22,6 +23,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
     const tenantId = useAppSelector(selectTenantId);
 
     const [customers, setCustomers] = useState<{ [key: string]: any }[]>([]);
+    const [services, setServices] = useState<{ [key: string]: any }[]>([]);
     const [selectedCustomer, setSelectedCustomer] = useState<{[key:string]: any}>({});
     const [selectedExperts, setSelectedExperts] = useState<{[key:string]: any}>(route.params.staffObjects[route.params.selectedStaffIndex]);
     const [fromTime, setFromTime] = useState<string>(route.params.from);
@@ -35,6 +37,17 @@ const CreateAppointment = ({ navigation, route }: any) => {
         if (response) {
             setCustomers(response);
         } else {
+            Toast.show("Encountered issue", { backgroundColor: GlobalColors.error });
+        }
+    };
+
+    const getServices = async() => {
+        const url = environment.documentBaseUri + `stores/getStoreByTenantAndStoreId?storeId=${storeId}&tenantId=${tenantId}`;
+        let response = await makeAPIRequest(url, null, "GET")
+        if(response){
+            console.log("DATA", response)
+            setServices(response.categories);
+        }else {
             Toast.show("Encountered issue", { backgroundColor: GlobalColors.error });
         }
     };
@@ -56,8 +69,9 @@ const CreateAppointment = ({ navigation, route }: any) => {
             dispatch(setShowUserProfileTopBar());
         else {
             getCustomersData();
+            getServices();
         }
-    }, [isFocused])
+    }, [isFocused]);
 
     return (
         <View style={{ flex: 1 }}>
@@ -65,13 +79,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
                 <View style={[GlobalStyles.sectionView, { zIndex: 2 }]}>
                     <View style={GlobalStyles.justifiedRow}>
                         <Text style={styles.headingText}>1. Guest Details</Text>
-                        <View style={[GlobalStyles.justifiedRow, { marginBottom: 10 }]}>
-                            <Text style={{ color: GlobalColors.blue, marginRight: 10 }}>Add User</Text>
-                            <TouchableOpacity style={styles.circleIcon}
-                                onPress={() => { }}>
-                                <Ionicons name="add" size={25} color="#fff" />
-                            </TouchableOpacity>
-                        </View>
+                            <CreateUser/>
                     </View>
                     <SearchModal data={customers} setSelectedIndex={(val: number) => setSelectedCustomer(customers[val])} type="customer" placeholderText="Search By Name Or Number" headerText="" />
                 </View>
@@ -88,7 +96,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
                         </View>
                     </View>
                     {/* will be iterated for multiple */}
-                    <SearchModal data={customers} type="service" placeholderText="Search Service By Name" headerText="Service 1" />
+                    <SearchModal data={services} type="service" placeholderText="Search Service By Name" headerText="Service 1" />
                     <SearchModal data={route.params.staffObjects} type="expert" placeholderText="Search Expert" headerText="Expert 1" selectedValue={selectedExperts.name} setSelectedIndex={(val) => setSelectedExperts(route.params.staffObjects[val])}/>
 
                     <Text onPress={() => { }} style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}>Add Expert</Text>

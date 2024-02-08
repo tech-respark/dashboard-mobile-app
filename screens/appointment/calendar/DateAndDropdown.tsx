@@ -42,8 +42,8 @@ const DateAndDropdown: FC<DateAndDropdownType> = ({ selectedDate, setSelectedDat
                 <TouchableOpacity style={styles.dateIcon} onPress={() => handlePreviousNextDate(true)}>
                     <Ionicons name="chevron-forward" color={GlobalColors.blue} size={20} />
                 </TouchableOpacity>
-                <Text style={{ marginHorizontal: 10 }}>{moment(selectedDate, 'YYYY-MM-DD').format('DD/MM/YYYY')}</Text>
-                <TouchableOpacity onPress={() => { setIsDatePickerVisible(true) }}>
+                <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center'}} onPress={() => { setIsDatePickerVisible(true) }}>
+                    <Text style={{ marginHorizontal: 10 }}>{moment(selectedDate, 'YYYY-MM-DD').format('DD/MM/YYYY')}</Text>
                     <FontAwesome5 name="calendar-alt" size={20} color={GlobalColors.blue} />
                 </TouchableOpacity>
                 <DateTimePickerModal

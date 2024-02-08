@@ -61,6 +61,7 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
     }
   };
 
+
   const handleSheetChanges = (index: number) => {
     if (index === 0) {
       setIsSheetOpen(false);

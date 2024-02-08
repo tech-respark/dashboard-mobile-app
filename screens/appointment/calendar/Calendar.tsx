@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { selectBranchId, selectCurrentStoreConfig, selectStaffData, selectTenantId } from "../../../redux/state/UserStates";
 import moment from "moment";
 import { setIsLoading } from "../../../redux/state/UIStates";
-import { environment } from "../../../utils/Constants";
+import { APPOINTMENT_FETCH_INTERVAL, environment } from "../../../utils/Constants";
 import { getActiveStaffsForAppointment, makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
 import { useIsFocused } from "@react-navigation/native";
@@ -46,11 +46,12 @@ const AppointmentCalendar = ({ navigation }: any) => {
         return [];
     };
 
-    const getAppointmentsData = async (isFirstCall: boolean) => {
+    const getAppointmentsData = async (isFirstCall: boolean, appCount: number = appointmentCount) => {
         let endDate = moment(selectedDate, 'YYYY-MM-DD').clone().add(15, 'days').format('YYYY-MM-DD');
-        const url = environment.appointmentUri + `appointments/between?count=${appointmentCount}&end=${endDate}&start=${selectedDate}&storeid=${storeId}&tenantid=${tenantId}`;
-        console.log(url)
+        const url = environment.appointmentUri + `appointments/between?count=${appCount}&end=${endDate}&start=${selectedDate}&storeid=${storeId}&tenantid=${tenantId}`;
+        console.log(url);
         let response = await makeAPIRequest(url, null, "GET") ?? [];
+        console.log(response.length);
         if (isFirstCall) {
             setAppointmentsData(response);
         } else if (response) {
@@ -68,17 +69,19 @@ const AppointmentCalendar = ({ navigation }: any) => {
             'cancelled': [],
         };
         const tempCategory: { [key: string]: number } = {};
-
         appointments.forEach(appointment => {
-            let status = appointment.status.slice(-1)[0]['status'].toLowerCase();
-            tempData[status]?.push(appointment);
-            tempCategory[status] = (tempCategory[status] || 0) + 1;
+            if(moment(appointment.appointmentDay).format('YYYY-MM-DD')==selectedDate){
+                let status = appointment.status.slice(-1)[0]['status'].toLowerCase();
+                tempData[status]?.push(appointment);
+                tempCategory[status] = (tempCategory[status] || 0) + 1;
+            }else{
+                tempData['future']?.push(appointment);
+                tempCategory['future'] = (tempCategory['future'] || 0) + 1;
+            }
         });
-        tempCategory['total'] = appointmentCount;
-
+        tempCategory['total'] = appointments.length;
         setTabWiseAppointments(tempData);
         setCategoryCount(tempCategory);
-        console.log(tempCategory);
     };
 
     const initialStatesHandler = async () => {
@@ -86,7 +89,7 @@ const AppointmentCalendar = ({ navigation }: any) => {
             dispatch(setIsLoading({ isLoading: true }));
             setAppointmentCount(0);
             await getStaffShifts();
-            getAppointmentsData(true);
+            getAppointmentsData(true, 0);
             dispatch(setIsLoading({ isLoading: false }));
         }
     };
@@ -100,7 +103,7 @@ const AppointmentCalendar = ({ navigation }: any) => {
     useEffect(() => {
         const intervalId = setInterval(() => {
             getAppointmentsData(false);
-        }, 30000);
+        }, APPOINTMENT_FETCH_INTERVAL);
         return () => clearInterval(intervalId);
     }, [appointmentCount]);
 
