@@ -7,8 +7,14 @@ import { GlobalStyles } from "../../../Styles/Styles";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from "moment";
 import DropdownApp from "../../../components/DropdownApp";
+import { useDispatch } from "react-redux";
+import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
+import { selectSegments } from "../../../redux/state/AppointmentStates";
 
 const CreateUser = () => {
+    const dispatch = useAppDispatch();
+    const segments = useAppSelector(selectSegments);
+
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [isDatePickerVisible, setIsDatePickerVisible] = useState<boolean>(false);
     const [form, setForm] = useState<{ [key: string]: any }>({
@@ -20,17 +26,47 @@ const CreateUser = () => {
         gstNumber: "",
         source: "",
         gender: "female",
-        skin: "",
-        hair: "",
-        profession: "",
-        pattern: ""
     });
+
+    const [selectedSegments, setSelectedSegments] = useState<{ [key: string]: any }>({});
+
 
     const handleFormChange = (name: string, value: string | Date) => {
         setForm({
             ...form,
             [name]: value
         });
+    };
+
+    const handleSegmentsChange = (name: string, value: { [key: string]: any }) => {
+        setSelectedSegments({
+            ...selectedSegments,
+            [name]: value
+        });
+        console.log(selectedSegments)
+    };
+
+    const renderSegments = () => {
+        const rows = [];
+        const keys = Object.keys(segments);
+        for (let i = 0; i < keys.length; i += 2) {
+            rows.push(
+                <View style={[GlobalStyles.justifiedRow, styles.rowViews]}>
+                    <View style={{ width: '45%' }}>
+                        <Text style={styles.marginBt5}>{keys[i]}</Text>
+                        <DropdownApp selectedItem={selectedSegments[keys[i]]} setSelectedItem={(val: { [key: string]: any }) => { handleSegmentsChange(keys[i], val) }} options={segments[keys[i]]} labelKey={'segTypeName'} />
+                    </View>
+                    {
+                        i + 1 < keys.length &&
+                        <View style={{ width: '45%' }}>
+                            <Text style={styles.marginBt5}>{keys[i + 1]}</Text>
+                            <DropdownApp selectedItem={selectedSegments[keys[i + 1]]} setSelectedItem={(val: { [key: string]: any }) => { handleSegmentsChange(keys[i + 1], val) }} options={segments[keys[i + 1]]} labelKey={'segTypeName'} />
+                        </View>
+                    }
+                </View>
+            );
+        }
+        return rows;
     };
 
     return (
@@ -138,47 +174,7 @@ const CreateUser = () => {
                                 />
                             </View>
                         </View>
-
-                        <View style={[GlobalStyles.justifiedRow, styles.rowViews]}>
-                            <View style={{ width: '45%' }}>
-                                <Text style={styles.marginBt5}>Source</Text>
-                                <DropdownApp selectedValue={form.source} setSelectedValue={(val: string) => { handleFormChange('source', val) }} options={[{ label: 'Facebook' }, { label: 'Insta' }, { label: 'Other' }]} />
-                            </View>
-                            <View style={{ width: '45%' }}>
-                                <Text>GST Number</Text>
-                                <TextInput
-                                    style={[styles.textInput]}
-                                    placeholder={'GST No'}
-                                    value={form.mobileNumber}
-                                    placeholderTextColor="gray"
-                                    underlineColorAndroid="transparent"
-                                    onChangeText={(value) => handleFormChange('email', value)}
-                                />
-                            </View>
-                        </View>
-
-                        <View style={[GlobalStyles.justifiedRow, styles.rowViews]}>
-                            <View style={{ width: '45%' }}>
-                                <Text style={styles.marginBt5}>Skin</Text>
-                                <DropdownApp selectedValue={form.skin} setSelectedValue={(val: string) => { handleFormChange('skin', val) }} options={[{ label: 'Facebook' }, { label: 'Insta' }, { label: 'Other' }]} />
-                            </View>
-                            <View style={{ width: '45%' }}>
-                                <Text style={styles.marginBt5}>Hair</Text>
-                                <DropdownApp selectedValue={form.hair} setSelectedValue={(val: string) => { handleFormChange('hair', val) }} options={[{ label: 'Facebook' }, { label: 'Insta' }, { label: 'Other' }]} />
-                            </View>
-                        </View>
-
-                        <View style={[GlobalStyles.justifiedRow, styles.rowViews]}>
-                            <View style={{ width: '45%' }}>
-                                <Text style={styles.marginBt5}>Profession</Text>
-                                <DropdownApp selectedValue={form.profession} setSelectedValue={(val: string) => { handleFormChange('profession', val) }} options={[{ label: 'Facebook' }, { label: 'Insta' }, { label: 'Other' }]} />
-                            </View>
-                            <View style={{ width: '45%' }}>
-                                <Text style={styles.marginBt5}>Pattern</Text>
-                                <DropdownApp selectedValue={form.pattern} setSelectedValue={(val: string) => { handleFormChange('pattern', val) }} options={[{ label: 'Facebook' }, { label: 'Insta' }, { label: 'Other' }]} />
-                            </View>
-                        </View>
-
+                        {renderSegments()}
                         <View style={[GlobalStyles.justifiedRow, { justifyContent: "flex-end", width: "100%" }]}>
                             <Pressable style={[styles.buttonContainer, { marginRight: 20 }]}
                                 onPress={() => { setModalVisible(false) }}
@@ -205,7 +201,7 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         marginBottom: 20
     },
-    rowViews:{ 
+    rowViews: {
         width: '100%',
         marginBottom: 20
     },

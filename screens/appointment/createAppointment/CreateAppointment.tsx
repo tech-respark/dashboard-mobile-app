@@ -45,7 +45,6 @@ const CreateAppointment = ({ navigation, route }: any) => {
         const url = environment.documentBaseUri + `stores/getStoreByTenantAndStoreId?storeId=${storeId}&tenantId=${tenantId}`;
         let response = await makeAPIRequest(url, null, "GET")
         if(response){
-            console.log("DATA", response)
             setServices(response.categories);
         }else {
             Toast.show("Encountered issue", { backgroundColor: GlobalColors.error });
