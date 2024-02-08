@@ -13,29 +13,18 @@ interface IDropdownApp {
 }
 
 const DropdownApp: FC<IDropdownApp> = ({options, selectedItem, setSelectedItem, labelKey}) => {
-    const data = [
-        { label: 'Item 1', value: '1' },
-        { label: 'Item 2', value: '2' },
-        { label: 'Item 3', value: '3' },
-        { label: 'Item 4', value: '4' },
-        { label: 'Item 5', value: '5' },
-        { label: 'Item 6', value: '6' },
-        { label: 'Item 7', value: '7' },
-        { label: 'Item 8', value: '8' },
-      ];
-      const [value, setValue] = useState<any>('hello');
-
     return (
         <Dropdown
         style={styles.dropdown}
-        placeholder=""
+        placeholder="Hello"
         iconColor={GlobalColors.blue}
         selectedTextStyle={{color: '#fff', textTransform: 'capitalize'}}
-        data={data}
-        labelField='label'
-        valueField='value'
+        data={options}
+        labelField={labelKey}
+        valueField={labelKey}
+        value={"Cancelled"}
         onChange={item => {
-            setValue(item.value);
+            setSelectedItem(item);
         }}
     />
     );

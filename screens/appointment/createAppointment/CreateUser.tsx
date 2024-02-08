@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import { TextInput, TouchableOpacity } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
@@ -10,26 +10,26 @@ import DropdownApp from "../../../components/DropdownApp";
 import { useDispatch } from "react-redux";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { selectSegments } from "../../../redux/state/AppointmentStates";
+import RadioButtonGroup from "../../../components/RadioButtonGroup";
+import { environment } from "../../../utils/Constants";
+import { makeAPIRequest, sleep } from "../../../utils/Helper";
+import { setIsLoading } from "../../../redux/state/UIStates";
+import Toast from "react-native-root-toast";
+import { selectBranchId, selectTenantId } from "../../../redux/state/UserStates";
 
-const CreateUser = () => {
+const CreateUser = ({ navigation }: any) => {
     const dispatch = useAppDispatch();
+    const storeId = useAppSelector(selectBranchId);
+    const tenantId = useAppSelector(selectTenantId);
     const segments = useAppSelector(selectSegments);
 
     const [modalVisible, setModalVisible] = useState<boolean>(false);
+    const [selectedDateLabel, setSelectedDateLabel] = useState<string>("");
     const [isDatePickerVisible, setIsDatePickerVisible] = useState<boolean>(false);
-    const [form, setForm] = useState<{ [key: string]: any }>({
-        mobileNumber: "",
-        name: "",
-        email: "",
-        dob: null,
-        aniversaryDate: null,
-        gstNumber: "",
-        source: "",
-        gender: "female",
-    });
-
+    const [form, setForm] = useState<{ [key: string]: any }>({});
     const [selectedSegments, setSelectedSegments] = useState<{ [key: string]: any }>({});
-
+    const [segmentObject, setSegmentObject] = useState<{ [key: string]: any }>({});
+    const [loader, setLoader] = useState<boolean>(false);
 
     const handleFormChange = (name: string, value: string | Date) => {
         setForm({
@@ -43,7 +43,36 @@ const CreateUser = () => {
             ...selectedSegments,
             [name]: value
         });
-        console.log(selectedSegments)
+        setSegmentObject({
+            ...segmentObject,
+            [value.segId]: [value.id]
+        });
+    };
+
+    const createUser = async () => {
+        if (!form.mobileNo || !form.firstName) {
+            Toast.show("Fill required fields", { backgroundColor: GlobalColors.error, opacity: 1 });
+            return
+        }
+        setLoader(true);
+        const url = environment.guestUrl + `customers`;
+        let data = {
+            ...form,
+            isGlobal: false,
+            area: '',
+            lastName: "",
+            segments: segmentObject,
+            storeId: storeId,
+            tenantId: tenantId
+        };
+        let response = await makeAPIRequest(url, data, "POST");
+        if (response) {
+            setModalVisible(false);
+            Toast.show("User Added", { backgroundColor: GlobalColors.success, opacity: 1 });
+        }
+        else
+            Toast.show("Encountered Error", { backgroundColor: GlobalColors.error, opacity: 1 });
+        setLoader(false);
     };
 
     const renderSegments = () => {
@@ -68,6 +97,21 @@ const CreateUser = () => {
         }
         return rows;
     };
+
+    useEffect(() => {
+        setForm({
+            mobileNo: "",
+            firstName: "",
+            email: "",
+            dob: null,
+            aniversaryDate: null,
+            gstNumber: "",
+            source: "",
+            gender: "female"
+        })
+        setSegmentObject({});
+        setSelectedSegments({});
+    }, [modalVisible])
 
     return (
         <View style={[GlobalStyles.justifiedRow, { marginBottom: 10 }]}>
@@ -95,10 +139,12 @@ const CreateUser = () => {
                             <TextInput
                                 style={[styles.textInput]}
                                 placeholder={'Mobile Number'}
-                                value={form.mobileNumber}
+                                keyboardType={'phone-pad'}
+                                value={form.mobileNo}
+                                dataDetectorTypes={'phoneNumber'}
                                 placeholderTextColor="gray"
                                 underlineColorAndroid="transparent"
-                                onChangeText={(value) => handleFormChange('mobileNumber', value)}
+                                onChangeText={(value) => handleFormChange('mobileNo', value)}
                             />
                         </View>
 
@@ -109,11 +155,11 @@ const CreateUser = () => {
                             </View>
                             <TextInput
                                 style={[styles.textInput]}
-                                placeholder={'Mobile Number'}
-                                value={form.mobileNumber}
+                                placeholder={'Name'}
+                                value={form.firstName}
                                 placeholderTextColor="gray"
                                 underlineColorAndroid="transparent"
-                                onChangeText={(value) => handleFormChange('name', value)}
+                                onChangeText={(value) => handleFormChange('firstName', value)}
                             />
                         </View>
 
@@ -123,7 +169,7 @@ const CreateUser = () => {
                                 <TextInput
                                     style={[styles.textInput]}
                                     placeholder={'example@gmail.com'}
-                                    value={form.mobileNumber}
+                                    value={form.email}
                                     placeholderTextColor="gray"
                                     underlineColorAndroid="transparent"
                                     onChangeText={(value) => handleFormChange('email', value)}
@@ -131,46 +177,59 @@ const CreateUser = () => {
                             </View>
                             <View style={{ width: '45%' }}>
                                 <Text>DOB</Text>
-                                <TouchableOpacity style={[styles.textInput]} onPress={() => { setIsDatePickerVisible(true) }}>
+                                <TouchableOpacity style={[styles.textInput]} onPress={() => {
+                                    setSelectedDateLabel('dob')
+                                    setIsDatePickerVisible(true)
+                                }}>
                                     <Text style={{ color: form.dob ? '#000' : 'gray' }}>{form.dob ? moment(form.dob).format('DD/MM/YYYY') : "DD/MM/YYYY"}</Text>
                                 </TouchableOpacity>
-                                <DateTimePickerModal
-                                    isVisible={isDatePickerVisible}
-                                    mode="date"
-                                    onConfirm={(date) => {
-                                        handleFormChange('dob', date)
-                                        setIsDatePickerVisible(false);
-                                    }}
-                                    onCancel={() => setIsDatePickerVisible(false)}
-                                />
                             </View>
                         </View>
 
                         <View style={[GlobalStyles.justifiedRow, styles.rowViews]}>
                             <View style={{ width: '45%' }}>
                                 <Text>Anniversary Date</Text>
-                                <TouchableOpacity style={[styles.textInput]} onPress={() => { setIsDatePickerVisible(true) }}>
+                                <TouchableOpacity style={[styles.textInput]} onPress={() => {
+                                    setSelectedDateLabel('aniversaryDate')
+                                    setIsDatePickerVisible(true)
+                                }}>
                                     <Text style={{ color: form.aniversaryDate ? '#000' : 'gray' }}>{form.aniversaryDate ? moment(form.aniversaryDate).format('DD/MM/YYYY') : "DD/MM/YYYY"}</Text>
                                 </TouchableOpacity>
-                                <DateTimePickerModal
-                                    isVisible={isDatePickerVisible}
-                                    mode="date"
-                                    onConfirm={(date) => {
-                                        handleFormChange('aniversaryDate', date)
-                                        setIsDatePickerVisible(false);
-                                    }}
-                                    onCancel={() => setIsDatePickerVisible(false)}
-                                />
                             </View>
                             <View style={{ width: '45%' }}>
                                 <Text>GST Number</Text>
                                 <TextInput
                                     style={[styles.textInput]}
                                     placeholder={'GST No'}
-                                    value={form.mobileNumber}
+                                    value={form.gstNumber}
                                     placeholderTextColor="gray"
                                     underlineColorAndroid="transparent"
-                                    onChangeText={(value) => handleFormChange('email', value)}
+                                    onChangeText={(value) => handleFormChange('gstNumber', value)}
+                                />
+                            </View>
+                        </View>
+                        <DateTimePickerModal
+                            isVisible={isDatePickerVisible}
+                            mode="date"
+                            onConfirm={(date) => {
+                                handleFormChange(selectedDateLabel, date)
+                                setIsDatePickerVisible(false);
+                            }}
+                            onCancel={() => setIsDatePickerVisible(false)}
+                        />
+                        <View style={[GlobalStyles.justifiedRow, styles.rowViews]}>
+                            <View style={{ width: '45%' }}>
+                                <Text>Source</Text>
+                                <DropdownApp selectedItem={{}} setSelectedItem={(val: { [key: string]: any }) => { }} options={[{ 'label': 'facebook' }]} labelKey={'segTypeName'} />
+                            </View>
+                            <View style={{ width: '45%' }}>
+                                <Text>Gender</Text>
+                                <RadioButtonGroup
+                                    options={["female", "male"]}
+                                    selectedOption={form.gender}
+                                    onSelect={(val: string) => {
+                                        handleFormChange('gender', val)
+                                    }}
                                 />
                             </View>
                         </View>
@@ -182,12 +241,17 @@ const CreateUser = () => {
                                 <Text style={styles.buttonText}>Cancel</Text>
                             </Pressable>
                             <Pressable style={[styles.buttonContainer, { backgroundColor: GlobalColors.blue }]}
-                                onPress={() => { }}
+                                onPress={async () => { await createUser() }}
                             >
                                 <Text style={[styles.buttonText, { color: '#fff' }]}>Add</Text>
                             </Pressable>
                         </View>
                     </View>
+                    {loader &&
+                        <View style={GlobalStyles.isLoading}>
+                            <ActivityIndicator color={GlobalColors.blue} size={"large"} />
+                        </View>
+                    }
                 </View>
             </Modal>
         </View>
