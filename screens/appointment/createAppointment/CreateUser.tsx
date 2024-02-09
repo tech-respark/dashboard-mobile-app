@@ -7,21 +7,20 @@ import { GlobalStyles } from "../../../Styles/Styles";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from "moment";
 import DropdownApp from "../../../components/DropdownApp";
-import { useDispatch } from "react-redux";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { selectSegments } from "../../../redux/state/AppointmentStates";
 import RadioButtonGroup from "../../../components/RadioButtonGroup";
 import { environment } from "../../../utils/Constants";
-import { makeAPIRequest, sleep } from "../../../utils/Helper";
-import { setIsLoading } from "../../../redux/state/UIStates";
+import { makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
-import { selectBranchId, selectTenantId } from "../../../redux/state/UserStates";
+import { selectBranchId, selectStoreCount, selectTenantId } from "../../../redux/state/UserStates";
+import Checkbox from "expo-checkbox";
 
-const CreateUser = ({ navigation }: any) => {
-    const dispatch = useAppDispatch();
+const CreateUser = () => {
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
     const segments = useAppSelector(selectSegments);
+    const storeCount = useAppSelector(selectStoreCount);
 
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [selectedDateLabel, setSelectedDateLabel] = useState<string>("");
@@ -31,7 +30,7 @@ const CreateUser = ({ navigation }: any) => {
     const [segmentObject, setSegmentObject] = useState<{ [key: string]: any }>({});
     const [loader, setLoader] = useState<boolean>(false);
 
-    const handleFormChange = (name: string, value: string | Date) => {
+    const handleFormChange = (name: string, value: string | Date | boolean) => {
         setForm({
             ...form,
             [name]: value
@@ -58,7 +57,6 @@ const CreateUser = ({ navigation }: any) => {
         const url = environment.guestUrl + `customers`;
         let data = {
             ...form,
-            isGlobal: false,
             area: '',
             lastName: "",
             segments: segmentObject,
@@ -107,7 +105,8 @@ const CreateUser = ({ navigation }: any) => {
             aniversaryDate: null,
             gstNumber: "",
             source: "",
-            gender: "female"
+            gender: "female",
+            isGlobal: false
         })
         setSegmentObject({});
         setSelectedSegments({});
@@ -131,21 +130,35 @@ const CreateUser = ({ navigation }: any) => {
                 <View style={styles.centeredView}>
                     <View style={styles.modalView}>
                         <Text style={styles.addUser}>Add User</Text>
-                        <View style={styles.rowViews}>
-                            <View style={{ flexDirection: 'row' }}>
-                                <Text>Mobile Number</Text>
-                                <Text style={{ color: 'red' }}>*</Text>
+                        <View style={[styles.rowViews, GlobalStyles.justifiedRow]}>
+                            <View style={{width: storeCount! > 1 ? '70%': '100%'}}>
+                                <View style={{ flexDirection: 'row' }}>
+                                    <Text>Mobile Number</Text>
+                                    <Text style={{ color: 'red' }}>*</Text>
+                                </View>
+                                <TextInput
+                                    style={[styles.textInput]}
+                                    placeholder={'Mobile Number'}
+                                    keyboardType={'phone-pad'}
+                                    value={form.mobileNo}
+                                    dataDetectorTypes={'phoneNumber'}
+                                    placeholderTextColor="gray"
+                                    underlineColorAndroid="transparent"
+                                    onChangeText={(value) => handleFormChange('mobileNo', value)}
+                                />
                             </View>
-                            <TextInput
-                                style={[styles.textInput]}
-                                placeholder={'Mobile Number'}
-                                keyboardType={'phone-pad'}
-                                value={form.mobileNo}
-                                dataDetectorTypes={'phoneNumber'}
-                                placeholderTextColor="gray"
-                                underlineColorAndroid="transparent"
-                                onChangeText={(value) => handleFormChange('mobileNo', value)}
-                            />
+                            {
+                                (storeCount && storeCount > 1) &&
+                                <View style={[GlobalStyles.justifiedRow, {width: '25%'}]}>
+                                    <Text>Is Global</Text>
+                                    <Checkbox
+                                        color={"#4FACFE"}
+                                        style={{ borderColor: 'gray', borderRadius: 2, borderWidth: 0.5 }}
+                                        value={form.isGlobal}
+                                        onValueChange={() => handleFormChange('isGlobal', !form.isGlobal)}
+                                    />
+                                </View>
+                            }
                         </View>
 
                         <View style={styles.rowViews}>

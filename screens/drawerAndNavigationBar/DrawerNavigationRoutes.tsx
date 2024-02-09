@@ -17,58 +17,18 @@ import AppointmentMain from '../appointment/AppointmentMain';
 import CrmMain from '../crm/CrmMain';
 import BranchSelectModal from './BranchSelectModal';
 import { setSegments } from '../../redux/state/AppointmentStates';
+import useInitialDataFetch from '../../customHooks/InitialDataFetch';
 
 const Drawer = createDrawerNavigator();
 
 const DrawerNavigationRoutes = ({ navigation }: any) => {
-  const dispatch = useAppDispatch();
-  const storeId = useAppSelector(selectBranchId);
-  const tenantId = useAppSelector(selectTenantId);
   const showHeader = useAppSelector(selectShowUserProfileTopBar);
+  const initialFetchData = useInitialDataFetch();
 
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
   const [showBranchModal, setShowBranchModal] = useState<boolean>(false);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = ['1%', '40%'];
-
-  const getUserConfig = async () => {
-    let url = environment.documentBaseUri + `stores`;
-    url += tenantId ? `/getStoreByTenantAndStoreId?storeId=${storeId}&tenantId=${tenantId}` : `/${storeId}`
-    let response = await makeAPIRequest(url, null, "GET");
-    if (response) {
-      dispatch(setConfig({ configs: response }));
-    }
-  };
-
-  const getStaffDetails = async () => {
-    let url = environment.sqlBaseUri + `staffs/${tenantId}/${storeId}`;
-    let responseStaff = await makeAPIRequest(url, null, "GET");
-    if (responseStaff) {
-      dispatch(setStaffData({ staffData: responseStaff }));
-    }
-  };
-
-  const getStoreConfig = async () => {
-    let url = environment.documentBaseUri + `configs/tenant/${tenantId}/store/${storeId}`;
-    let response = await makeAPIRequest(url, null, "GET");
-    if (response) {
-      dispatch(setCurrrentStoreConfig({ currentStoreConfig: response }));
-    }
-  };
-
-  const getSegmentAndItsTypes = async() => {
-    let urlSegments = environment.guestUrl + `segments?tenantId=${tenantId}&storeId=${storeId}`;
-    let segments = await makeAPIRequest(urlSegments, null, "GET");
-    let urlSegmentTypes = environment.guestUrl + `segmentTypes?tenantId=${tenantId}&storeId=${storeId}`;
-    let segmentTypes = await makeAPIRequest(urlSegmentTypes, null, "GET");
-    if (segments.code == 200 && segmentTypes.code == 200) {
-        const result = segments.data.reduce((acc: any, curr: any) => {
-          acc[curr.segName] = segmentTypes.data.filter((item: any) => item.segId === curr.id);
-          return acc;
-      }, {});
-    result ? dispatch(setSegments({segments: result})): null;
-    }
-  };
 
   const handleSheetChanges = (index: number) => {
     if (index === 0) {
@@ -103,15 +63,6 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
     )
    
   }
-
-  useEffect(() => {
-    dispatch(setIsLoading({ isLoading: true }));
-    getUserConfig();
-    getStaffDetails();
-    getStoreConfig();
-    getSegmentAndItsTypes();
-    dispatch(setIsLoading({ isLoading: false }));
-  }, [])
 
   return (
     <View style={{ flex: 1 }}>

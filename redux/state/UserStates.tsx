@@ -11,6 +11,7 @@ export interface UserStates {
     storeID?: number,
     staffData?: { [key: string]: any }[],
     currentStoreConfig?: {[key: string]: any},
+    storeCount?: number,
 }
 
 const initialState: UserStates = {
@@ -22,7 +23,8 @@ const initialState: UserStates = {
     currentBranch: "",
     storeID: 0,
     staffData: [],
-    currentStoreConfig: {}
+    currentStoreConfig: {},
+    storeCount: 0
 }
 
 const UserSlice = createSlice({
@@ -51,11 +53,14 @@ const UserSlice = createSlice({
         },
         setCurrrentStoreConfig : (state, action: PayloadAction<UserStates>) => {
             state.currentStoreConfig = action.payload.currentStoreConfig;
-        }
+        },
+        setStoreCount: (state, action: PayloadAction<UserStates>) => {
+            state.storeCount = action.payload.storeCount;
+        },
     },
 });
 
-export const { setUserData, setConfig, setStoreIdData, setCurrentBranch, setStaffData, setCurrrentStoreConfig } = UserSlice.actions;
+export const { setUserData, setConfig, setStoreIdData, setCurrentBranch, setStaffData, setCurrrentStoreConfig, setStoreCount } = UserSlice.actions;
 
 
 export const selectUserData = (state: RootState) => state.UserStates.userData;
@@ -67,5 +72,6 @@ export const selectBranchId = (state: RootState) => state.UserStates.storeID;
 export const selectStaffData = (state: RootState) => state.UserStates.staffData;
 export const selectCurrentStoreConfig = (state: RootState) => state.UserStates.currentStoreConfig;
 export const selectConfig = (state: RootState) => state.UserStates.configs;
+export const selectStoreCount = (state: RootState) => state.UserStates.storeCount;
 
 export default UserSlice.reducer;
