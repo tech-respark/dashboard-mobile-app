@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView } from "react-native";
 import { FontSize, GlobalColors, GradientButtonColor } from "../../../Styles/GlobalStyleConfigs";
@@ -11,12 +11,14 @@ import { checkImageToUpload, getCategoryData, makeAPIRequest, uploadImageToS3 } 
 import { environment, genderOptions } from "../../../utils/Constants";
 import { selectBranchId, selectStaffData, selectTenantId } from "../../../redux/state/UserStates";
 import Toast from "react-native-root-toast";
-import Dropdown from "../../../components/Dropdown";
+import CustomDropdown from "../../../components/CustomDropdown";
 import IconsAndImages from "./IconsAndImages";
 import { GlobalStyles } from "../../../Styles/Styles";
+import { useIsFocused } from "@react-navigation/native";
 
 const AddUpdateCategory = ({ navigation, route }: any) => {
     const dispatch = useAppDispatch();
+    const isFocused = useIsFocused();
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
     const isAddNew = route.params.isAddNew;
@@ -40,7 +42,7 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
     const [maleIcon, setMaleIcon] = useState<{ [key: string]: any }>({});
 
     const [displayImageObjects, setDisplayImageObjects] = useState<{ [key: string]: any }[]>([]);
-    
+
     useLayoutEffect(() => {
         navigation.setOptions({
             headerTitle: categoryLevel === 1 ? (isAddNew ? "New Category" : route.params.item.name) : (`${route.params.categoryName} / ${isAddNew ? "New Category" : route.params.item.name}`),
@@ -111,17 +113,17 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
     const checkIconsToUpload = async () => {
         let iconUploads: { [key: string]: any }[] = [bothIcon, maleIcon, femaleIcon];
         for (let index = 0; index < iconUploads.length; index++) {
-            if (Object.keys(iconUploads[index]).length !==0 && !iconUploads[index]["imagePath"].includes("https")) {
+            if (Object.keys(iconUploads[index]).length !== 0 && !iconUploads[index]["imagePath"].includes("https")) {
                 const imageS3Url = await uploadImageToS3(iconUploads[index]["imagePath"], tenantId);
                 switch (index) {
                     case 0:
-                        iconUploads[index] = { ...bothIcon, "imagePath":  imageS3Url};
+                        iconUploads[index] = { ...bothIcon, "imagePath": imageS3Url };
                         break;
                     case 1:
-                        iconUploads[index] = { ...maleIcon, "imagePath":  imageS3Url};
+                        iconUploads[index] = { ...maleIcon, "imagePath": imageS3Url };
                         break;
                     case 2:
-                        iconUploads[index] = { ...femaleIcon, "imagePath":  imageS3Url};
+                        iconUploads[index] = { ...femaleIcon, "imagePath": imageS3Url };
                         break;
                     default:
                         break;
@@ -131,7 +133,7 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
         return iconUploads;
     };
 
-    const handleStaffSelect = (expertName: string, index?: number) => {
+    const handleStaffSelect = (item: string, index?: number) => {
         let expertObject = staffList![index!];
         experts.some(expert => expert.id === expertObject.id) ? null : setExperts(prevExperts => [...prevExperts, expertObject]);
         setAddedExperts(prevExperts => [...prevExperts, expertObject]);
@@ -143,7 +145,7 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
         setDeletedExperts(prevExperts => [...prevExperts, item]);
     };
 
-    const createRequestBody = async() => {
+    const createRequestBody = async () => {
         let categoryList: { [key: string]: any } = {
             active: isActive,
             days: "All",
@@ -202,11 +204,8 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
 
     useEffect(() => {
         dispatch(setShowBackOfficeCategories());
-        isAddNew ? null : getCategoryInformation();
-        return () => {
-            dispatch(setShowBackOfficeCategories());
-        }
-    }, []);
+        if(isFocused && isAddNew) getCategoryInformation();
+    }, [isFocused]);
 
     return (
         <View style={{ flex: 1 }}>
@@ -261,7 +260,7 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
                     />
                 </View>
                 <IconsAndImages showIcons={true} itemName={name} bothIcon={bothIcon} femaleIcon={femaleIcon} maleIcon={maleIcon} displayImageObjects={displayImageObjects}
-                    gender={gender} setBothIcon={(val)=>setBothIcon(val)} setMaleIcon={(val)=>setMaleIcon(val)} setFemaleIcon={(val)=>setFemaleIcon(val)} setDisplayImageObjects={(val)=>setDisplayImageObjects(val)}
+                    gender={gender} setBothIcon={(val) => setBothIcon(val)} setMaleIcon={(val) => setMaleIcon(val)} setFemaleIcon={(val) => setFemaleIcon(val)} setDisplayImageObjects={(val) => setDisplayImageObjects(val)}
                 />
                 {!isAddNew && type == "service" && showExpertsSection &&
                     <View style={GlobalStyles.sectionView}>
@@ -277,7 +276,7 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
                             ))}
                         </View>
                         <View style={{ width: '50%' }}>
-                            <Dropdown data={staffsNameList} onSelect={handleStaffSelect} renderContent={() => (
+                            <CustomDropdown data={staffsNameList} onSelect={handleStaffSelect} position="top" renderContent={() => (
                                 <View style={styles.addExpertView}>
                                     <Text style={{ fontSize: FontSize.medium }}>Add Expert</Text>
                                     <Ionicons name="chevron-down" size={20} style={{ marginLeft: 5, color: GlobalColors.blue }} />
@@ -285,6 +284,7 @@ const AddUpdateCategory = ({ navigation, route }: any) => {
                             )} />
                         </View>
                     </View>
+                    
                 }
 
             </ScrollView>
@@ -397,7 +397,26 @@ const styles = StyleSheet.create({
         borderColor: GlobalColors.blue,
         padding: 5,
         justifyContent: 'space-evenly'
-    }
+    },
+    dropdown: {
+        marginVertical: 10,
+        borderRadius: 20,
+        paddingHorizontal: 15,
+        justifyContent: 'space-evenly',
+        alignContent: "center",
+        borderWidth: 1.5,
+        borderColor: GlobalColors.blue,
+    },
+    inputSearchStyle: {
+        height: 40,
+        fontSize: 16,
+    },
+    icon: {
+        marginRight: 5,
+    },
+    selectedStyle: {
+        borderRadius: 12,
+    },
 });
 
 export default AddUpdateCategory;

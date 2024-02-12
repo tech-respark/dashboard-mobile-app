@@ -13,11 +13,12 @@ import { makeAPIRequest } from "../../../utils/Helper";
 import WeeklyOffModal from "./WeeklyOffModal";
 import Toast from "react-native-root-toast";
 import RadioButtonGroup from "../../../components/RadioButtonGroup";
-import Dropdown from "../../../components/Dropdown";
-
+import CustomDropdown from "../../../components/CustomDropdown";
+import { useIsFocused } from "@react-navigation/native";
 
 const AddOrUpdate = ({ navigation, route }: any) => {
     const dispatch = useAppDispatch();
+    const isFocused = useIsFocused();
     const tenantId = useAppSelector(selectTenantId);
     const storeId = useAppSelector(selectBranchId);
 
@@ -139,11 +140,8 @@ const AddOrUpdate = ({ navigation, route }: any) => {
 
     useEffect(() => {
         dispatch(setShowBackOfficeCategories());
-        selectedStaff ? getRoleOfStaff() : null;
-        return () => {
-            dispatch(setShowBackOfficeCategories());
-        }
-    }, []);
+       if(isFocused && selectedStaff) getRoleOfStaff();
+    }, [isFocused]);
 
 
     return (
@@ -179,13 +177,16 @@ const AddOrUpdate = ({ navigation, route }: any) => {
                 <Text style={{ fontWeight: '300', marginTop: 20, marginHorizontal: 5 }}>Select Role</Text>
 
                 <View style={{ flexDirection: 'row', width: '80%', alignItems: 'center', justifyContent: 'space-evenly' }}>
-                    <Dropdown data={rolesOptions} onSelect={setSelectedRole} renderContent={() => (
+                    <View style={{marginHorizontal: 10, width: 150, marginRight: 15,}}>
+                    <CustomDropdown data={rolesOptions} onSelect={setSelectedRole} renderContent={() => (
                         <View style={styles.roleSelectRect}>
                             <Text style={{ textTransform: 'capitalize' }}>{selectedRole}</Text>
                             <Ionicons name="chevron-down" size={20} style={{ marginLeft: 5, color: GlobalColors.blue }} />
                         </View>
                     )}>
-                    </Dropdown>
+                    </CustomDropdown>
+                    </View>
+                    
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 15 }}>
                         <View style={{ padding: 10 }}>
                             <Text style={{ fontSize: FontSize.regular, fontWeight: '300' }}>Weekly</Text>
@@ -328,15 +329,12 @@ const styles = StyleSheet.create({
         justifyContent: 'space-evenly', width: '100%'
     },
     roleSelectRect: {
-        marginHorizontal: 10,
-        width: 150,
         backgroundColor: GlobalColors.lightGray2,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingVertical: 6,
         paddingHorizontal: 12,
-        marginRight: 15,
         borderRadius: 5
     },
     dropdownContainer: {

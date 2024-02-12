@@ -6,7 +6,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { GlobalStyles } from "../../../Styles/Styles";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from "moment";
-import DropdownApp from "../../../components/DropdownApp";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { selectSegments } from "../../../redux/state/AppointmentStates";
 import RadioButtonGroup from "../../../components/RadioButtonGroup";
@@ -15,6 +14,7 @@ import { makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
 import { selectBranchId, selectStoreCount, selectTenantId } from "../../../redux/state/UserStates";
 import Checkbox from "expo-checkbox";
+import CustomDropdown2 from "../../../components/CustomDropdown2";
 
 const CreateUser = () => {
     const storeId = useAppSelector(selectBranchId);
@@ -81,13 +81,13 @@ const CreateUser = () => {
                 <View style={[GlobalStyles.justifiedRow, styles.rowViews]}>
                     <View style={{ width: '45%' }}>
                         <Text style={styles.marginBt5}>{keys[i]}</Text>
-                        <DropdownApp selectedItem={selectedSegments[keys[i]]} setSelectedItem={(val: { [key: string]: any }) => { handleSegmentsChange(keys[i], val) }} options={segments[keys[i]]} labelKey={'segTypeName'} />
+                        <CustomDropdown2 setSelectedItem={(val: { [key: string]: any }) => { handleSegmentsChange(keys[i], val) }} options={segments[keys[i]]} labelKey={'segTypeName'} />
                     </View>
                     {
                         i + 1 < keys.length &&
                         <View style={{ width: '45%' }}>
                             <Text style={styles.marginBt5}>{keys[i + 1]}</Text>
-                            <DropdownApp selectedItem={selectedSegments[keys[i + 1]]} setSelectedItem={(val: { [key: string]: any }) => { handleSegmentsChange(keys[i + 1], val) }} options={segments[keys[i + 1]]} labelKey={'segTypeName'} />
+                            <CustomDropdown2 setSelectedItem={(val: { [key: string]: any }) => { handleSegmentsChange(keys[i + 1], val) }} options={segments[keys[i + 1]]} labelKey={'segTypeName'} />
                         </View>
                     }
                 </View>
@@ -233,7 +233,7 @@ const CreateUser = () => {
                         <View style={[GlobalStyles.justifiedRow, styles.rowViews]}>
                             <View style={{ width: '45%' }}>
                                 <Text>Source</Text>
-                                <DropdownApp selectedItem={{}} setSelectedItem={(val: { [key: string]: any }) => { }} options={[{ 'label': 'facebook' }]} labelKey={'segTypeName'} />
+                                <CustomDropdown2 setSelectedItem={(val: { [key: string]: any }) => { handleFormChange('source', val.label)}} options={[{ 'label': 'facebook' },{'label': 'Insta'}]} labelKey={'label'} />
                             </View>
                             <View style={{ width: '45%' }}>
                                 <Text>Gender</Text>

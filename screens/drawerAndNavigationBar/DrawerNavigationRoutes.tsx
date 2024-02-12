@@ -48,8 +48,8 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
       {
         headerLeft: () => (
           <TouchableOpacity
-            onPress={() => {navigation.openDrawer()}}
-            style={{backgroundColor: GlobalColors.grayDark, padding: 8, marginLeft: 10, borderRadius: 20}}>
+            onPress={() => { navigation.openDrawer() }}
+            style={{ backgroundColor: GlobalColors.grayDark, padding: 8, marginLeft: 10, borderRadius: 20 }}>
             <FontAwesome
               name={mainTabsIconsMap[name] as 'key'}
               size={20}
@@ -61,7 +61,7 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
         headerShown: showHeader,
       }
     )
-   
+
   }
 
   return (
@@ -96,10 +96,10 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
           drawerContent={(props) => <CustomDrawerContent {...props} />}
           initialRouteName="Backoffice"
         >
-          <Drawer.Screen name="POS" options={({navigation}) => setLeftHeader(navigation, 'POS')} component={POSMainScreen}/>
-          <Drawer.Screen name="Appointment" options={({navigation}) => setLeftHeader(navigation, 'Appointment')} component={AppointmentMain}/>
-          <Drawer.Screen name="Backoffice" options={({navigation}) => setLeftHeader(navigation, 'Backoffice')} component={BackOfficeMainScreen} />
-          <Drawer.Screen name="CRM" options={({navigation}) => setLeftHeader(navigation, 'CRM')} component={CrmMain} />
+          <Drawer.Screen name="POS" options={({ navigation }) => setLeftHeader(navigation, 'POS')} component={POSMainScreen} />
+          <Drawer.Screen name="Appointment" options={({ navigation }) => setLeftHeader(navigation, 'Appointment')} component={AppointmentMain} />
+          <Drawer.Screen name="Backoffice" options={({ navigation }) => setLeftHeader(navigation, 'Backoffice')} component={BackOfficeMainScreen} />
+          <Drawer.Screen name="CRM" options={({ navigation }) => setLeftHeader(navigation, 'CRM')} component={CrmMain} />
         </Drawer.Navigator>
       </View>
       <BottomSheet
@@ -124,19 +124,12 @@ const styles = StyleSheet.create({
   bottomSheet: {
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
-    backgroundColor: 'transparent',
-    ...Platform.select({
-      android: {
-        elevation: 5,
-      },
-      ios: {
-        shadowColor: 'black',
-        shadowOffset: { width: 0, height: -5 },
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
-      },
-    }),
-
+    backgroundColor: '#fff',
+    elevation: 5,
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: -5 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
   },
   handleIndicator: {
     backgroundColor: 'transparent',

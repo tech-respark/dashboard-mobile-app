@@ -1,4 +1,4 @@
-import React, { useState, createRef } from 'react';
+import React, { useState, createRef, useRef } from 'react';
 import {
   StyleSheet,
   TextInput,
@@ -30,6 +30,7 @@ const LoginScreen = ({ navigation }: any) => {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const passwordRef = useRef(null);
 
   const checkUsernamePassword = () => {
     !username ? setError("Username is required") : !password ? setError("Password is required") : setError("");
@@ -59,7 +60,7 @@ const LoginScreen = ({ navigation }: any) => {
   };
 
   return (
-    <View style={GlobalStyles.whiteContainer}>
+    <KeyboardAvoidingView style={GlobalStyles.whiteContainer} behavior='padding'>
       <Image
         source={require('../../assets/images/respark_logo.png')}
         style={{ width: '50%', resizeMode: 'contain', marginHorizontal: 10, marginBottom: 5 }}
@@ -75,6 +76,11 @@ const LoginScreen = ({ navigation }: any) => {
             placeholder="User Name"
             placeholderTextColor="lightgray"
             underlineColorAndroid="transparent"
+            returnKeyType='next'
+            onSubmitEditing={() => {
+              passwordRef.current.focus();
+            }}
+            blurOnSubmit={false}
             onChangeText={(val) => { setUsername(val) }}
           />
         </View>
@@ -88,6 +94,7 @@ const LoginScreen = ({ navigation }: any) => {
             underlineColorAndroid="transparent"
             secureTextEntry={true}
             onChangeText={(val) => { setPassword(val) }}
+            ref={passwordRef}
           />
         </View>
         <TouchableOpacity
@@ -112,7 +119,7 @@ const LoginScreen = ({ navigation }: any) => {
           </LinearGradient>
         </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 export default LoginScreen;

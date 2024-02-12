@@ -4,7 +4,6 @@ import { ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View
 import { FontSize, GlobalColors, GradientButtonColor } from "../../../Styles/GlobalStyleConfigs";
 import { environment } from "../../../utils/Constants";
 import { LinearGradient } from "expo-linear-gradient";
-import Dropdown from "../../../components/Dropdown";
 import SubmitCancelButtons from "../../../components/SubmitCancelButtons";
 import Toast from "react-native-root-toast";
 import { checkImageToUpload, getCategoryData, makeAPIRequest } from "../../../utils/Helper";
@@ -14,10 +13,13 @@ import { setIsLoading, setShowBackOfficeCategories } from "../../../redux/state/
 import IconsAndImages from "./IconsAndImages";
 import { GlobalStyles } from "../../../Styles/Styles";
 import { TextFieldWithBorderHeader } from "../../../components/HeaderTextField";
+import CustomDropdown from "../../../components/CustomDropdown";
+import { useIsFocused } from "@react-navigation/native";
 
 const AddUpdateItem = ({ navigation, route }: any) => {
 
     const dispatch = useAppDispatch();
+    const isFocused = useIsFocused();
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
 
@@ -182,11 +184,8 @@ const AddUpdateItem = ({ navigation, route }: any) => {
 
     useEffect(() => {
         dispatch(setShowBackOfficeCategories());
-        !isAdd ? getItemInformation() : null;
-        return () => {
-            dispatch(setShowBackOfficeCategories());
-        }
-    }, [])
+        if(isFocused && !isAdd) getItemInformation();
+    }, [isFocused])
 
     return (
         <View style={{ flex: 1 }}>
@@ -231,7 +230,7 @@ const AddUpdateItem = ({ navigation, route }: any) => {
                     </View>
                     {route.params.type == "service" &&
                         <View style={[styles.rowView, { justifyContent: 'space-around' }]}>
-                            <Dropdown data={durationOptions[durationType]} onSelect={setDuration} optionWidth={100} renderContent={() => (
+                            <CustomDropdown data={durationOptions[durationType]} onSelect={setDuration}  renderContent={() => (
                                 <>
                                     <Text style={styles.dropdownHeading}>Duration</Text>
                                     <View style={styles.inputContainer}>
@@ -240,7 +239,7 @@ const AddUpdateItem = ({ navigation, route }: any) => {
                                     </View>
                                 </>
                             )} />
-                            <Dropdown data={durationTypesOptions} onSelect={setDurationType} optionWidth={100} renderContent={() => (
+                            <CustomDropdown data={durationTypesOptions} onSelect={setDurationType} renderContent={() => (
                                 <>
                                     <Text style={styles.dropdownHeading}>Duration Type</Text>
                                     <View style={[styles.inputContainer, { width: 150 }]}>
