@@ -29,6 +29,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
     const [toTime, setToTime] = useState<string>(route.params.to);
     const [instructions, setInstructions] = useState<string>('');
     const [enableSMS, setEnableSMS] = useState<boolean>(true);
+    const [selectedModal, setSelectedModal] = useState<'guest' | 'service'>('guest');
 
     const getCustomersData = async () => {
         const url = environment.guestUrl + `customer/getByTenantStoreMinimal?tenantId=${tenantId}&storeId=${storeId}`;
@@ -70,7 +71,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
     return (
         <View style={{ flex: 1 }}>
             <ScrollView style={styles.container}>
-                <View style={[GlobalStyles.sectionView, { zIndex: 2 }]}>
+                <View style={[GlobalStyles.sectionView, {zIndex: selectedModal=='guest' ? 2 : 1}]}>
                     <View style={[GlobalStyles.justifiedRow, {marginBottom: 10}]}>
                         <Text style={styles.headingText}>1. Guest Details</Text>
                         {
@@ -84,9 +85,10 @@ const CreateAppointment = ({ navigation, route }: any) => {
                                 <CreateUser />
                         }
                     </View>
-                    <SearchModal data={customers} setSelectedIndex={(val: number) => { setSelectedCustomer(customers[val]), console.log("#######", customers[val]) }} type="customer" placeholderText="Search By Name Or Number" headerText="" />
+                    <SearchModal data={customers} setSelected={(val) => {setSelectedCustomer(val)}} type="customer" placeholderText="Search By Name Or Number" headerText="" setModal={setSelectedModal}/>
                 </View>
-                <View style={[GlobalStyles.sectionView, { zIndex: 2 }]}>
+
+                <View style={[GlobalStyles.sectionView, {zIndex: selectedModal=='service' ? 2 : 1}]}>
                     <View style={[GlobalStyles.justifiedRow, { marginBottom: 10 }]}>
                         <Text style={styles.headingText}>2. Service Details</Text>
                         <View style={GlobalStyles.justifiedRow}>
@@ -98,8 +100,8 @@ const CreateAppointment = ({ navigation, route }: any) => {
                         </View>
                     </View>
                     {/* will be iterated for multiple */}
-                    <SearchModal data={services} type="service" placeholderText="Search Service By Name" headerText="Service 1" />
-                    <SearchModal data={route.params.staffObjects} type="expert" placeholderText="Search Expert" headerText="Expert 1" selectedValue={selectedExperts.name} setSelectedIndex={(val) => setSelectedExperts(route.params.staffObjects[val])} />
+                    <SearchModal data={services} type="service" placeholderText="Search Service By Name" headerText="Service 1" setSelected={(val) => {}} setModal={setSelectedModal}/>
+                    <SearchModal data={route.params.staffObjects} type="expert" placeholderText="Search Expert" headerText="Expert 1" selectedValue={selectedExperts.name} setSelected={(val) => setSelectedExperts(val)} setModal={setSelectedModal}/>
 
                     <Text onPress={() => { }} style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}>Add Expert</Text>
                     <View style={[GlobalStyles.justifiedRow, { marginTop: 20 }]}>

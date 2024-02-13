@@ -12,11 +12,12 @@ type SearchModalType = {
     placeholderText: string,
     type: string,
     headerText: string,
-    setSelectedIndex?: (index: number) => void,
+    setSelected?: (val: {[key:string]: any}) => void,
     selectedValue?: string,
+    setModal: (val: 'guest'| 'service') => void,
 }
 
-const SearchModal: FC<SearchModalType> = ({ data, placeholderText, type, headerText, selectedValue = '', setSelectedIndex }) => {
+const SearchModal: FC<SearchModalType> = ({ data, placeholderText, type, headerText, selectedValue = '', setSelected, setModal }) => {
     const [modalVisible, setModalVisible] = useState(false);
     const [searchValue, setSearchValue] = useState<string>(selectedValue);
     const [viewPosition, setViewPosition] = useState({ top: 0, left: 0, width: 0 });
@@ -76,7 +77,7 @@ const SearchModal: FC<SearchModalType> = ({ data, placeholderText, type, headerT
 
     return (
         <>
-            <Pressable style={{ marginVertical: 10 }} onPress={() => { setModalVisible(true); }}
+            <Pressable style={{ marginVertical: 10 }} onPress={() => { setModalVisible(true); setModal(type=='customer' ? 'guest' : 'service') }}
                 onLayout={(event) => {
                     const layout = event.nativeEvent.layout;
                     setViewPosition({ top: layout.y, left: layout.x, width: layout.width });
@@ -93,10 +94,18 @@ const SearchModal: FC<SearchModalType> = ({ data, placeholderText, type, headerT
                             onChangeText={(val) => {
                                 setSearchValue(val);
                                 filterData(val);
+                                val=="" ? setSelected!({}) : null;
                             }}
                             onPressIn={() => { setModalVisible(true) }}
                         />
-                        <Ionicons name={type == "expert" ? 'caret-down' : 'search-outline'} size={type == "expert" ? 15 : 25} color={type == "expert" ? GlobalColors.blue : ''} style={type == "expert" && { padding: 5 }} />
+                        {
+                            searchValue && type != "expert" ? <Ionicons name="close" size={25} color={GlobalColors.grayDark} 
+                            onPress={()=>{
+                                setSearchValue(""); 
+                                setSelected!({});
+                            }}/> :
+                            <Ionicons name={type == "expert" ? 'caret-down' : 'search-outline'} size={type == "expert" ? 15 : 25} color={type == "expert" ? GlobalColors.blue : GlobalColors.grayDark} style={type == "expert" && { padding: 5 }} />
+                        }
                     </View>
                 </HeaderedComponent>
             </Pressable>
@@ -124,7 +133,7 @@ const SearchModal: FC<SearchModalType> = ({ data, placeholderText, type, headerT
                                     :
                                     <TouchableOpacity key={item.id} style={{ borderWidth: 0.5, borderColor: 'lightgray', marginHorizontal: 20, marginVertical: 5, padding: 10, borderRadius: 2 }}
                                         onPress={() => {
-                                            setSelectedIndex!(index);
+                                            setSelected!(data[index]);
                                             setSearchValue(type == 'expert' ? item.name : item.firstName);
                                             setModalVisible(false);
                                         }}
