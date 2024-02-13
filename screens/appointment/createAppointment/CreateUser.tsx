@@ -7,9 +7,9 @@ import { GlobalStyles } from "../../../Styles/Styles";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from "moment";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
-import { selectSegments } from "../../../redux/state/AppointmentStates";
+import { selectCustomerSources, selectSegments } from "../../../redux/state/AppointmentStates";
 import RadioButtonGroup from "../../../components/RadioButtonGroup";
-import { environment } from "../../../utils/Constants";
+import { REGULAR_EXP, environment } from "../../../utils/Constants";
 import { makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
 import { selectBranchId, selectStoreCount, selectTenantId } from "../../../redux/state/UserStates";
@@ -21,6 +21,7 @@ const CreateUser = () => {
     const tenantId = useAppSelector(selectTenantId);
     const segments = useAppSelector(selectSegments);
     const storeCount = useAppSelector(selectStoreCount);
+    const sources = useAppSelector(selectCustomerSources);
 
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [selectedDateLabel, setSelectedDateLabel] = useState<string>("");
@@ -49,8 +50,9 @@ const CreateUser = () => {
     };
 
     const createUser = async () => {
-        if (!form.mobileNo || !form.firstName) {
-            Toast.show("Fill required fields", { backgroundColor: GlobalColors.error, opacity: 1 });
+        let isMobileValid = REGULAR_EXP.mobile.test(form.mobileNo);
+        if (!isMobileValid || !form.firstName) {
+            Toast.show(isMobileValid ? "Fill required fields" : "Invalid mobile number", { backgroundColor: GlobalColors.error, opacity: 1 });
             return
         }
         setLoader(true);
@@ -75,19 +77,19 @@ const CreateUser = () => {
 
     const renderSegments = () => {
         const rows = [];
-        const keys = Object.keys(segments);
+        const keys = Object.keys(segments!);
         for (let i = 0; i < keys.length; i += 2) {
             rows.push(
                 <View style={[GlobalStyles.justifiedRow, styles.rowViews]}>
                     <View style={{ width: '45%' }}>
                         <Text style={styles.marginBt5}>{keys[i]}</Text>
-                        <CustomDropdown2 setSelectedItem={(val: { [key: string]: any }) => { handleSegmentsChange(keys[i], val) }} options={segments[keys[i]]} labelKey={'segTypeName'} />
+                        <CustomDropdown2 setSelectedItem={(val: { [key: string]: any }) => { handleSegmentsChange(keys[i], val) }} options={segments![keys[i]]} labelKey={'segTypeName'} />
                     </View>
                     {
                         i + 1 < keys.length &&
                         <View style={{ width: '45%' }}>
                             <Text style={styles.marginBt5}>{keys[i + 1]}</Text>
-                            <CustomDropdown2 setSelectedItem={(val: { [key: string]: any }) => { handleSegmentsChange(keys[i + 1], val) }} options={segments[keys[i + 1]]} labelKey={'segTypeName'} />
+                            <CustomDropdown2 setSelectedItem={(val: { [key: string]: any }) => { handleSegmentsChange(keys[i + 1], val) }} options={segments![keys[i + 1]]} labelKey={'segTypeName'} />
                         </View>
                     }
                 </View>
@@ -113,7 +115,7 @@ const CreateUser = () => {
     }, [modalVisible])
 
     return (
-        <View style={[GlobalStyles.justifiedRow, { marginBottom: 10 }]}>
+        <View style={[GlobalStyles.justifiedRow]}>
             <Text style={{ color: GlobalColors.blue, marginRight: 10 }}>Add User</Text>
             <TouchableOpacity style={styles.circleIcon}
                 onPress={() => {
@@ -233,7 +235,7 @@ const CreateUser = () => {
                         <View style={[GlobalStyles.justifiedRow, styles.rowViews]}>
                             <View style={{ width: '45%' }}>
                                 <Text>Source</Text>
-                                <CustomDropdown2 setSelectedItem={(val: { [key: string]: any }) => { handleFormChange('source', val.label)}} options={[{ 'label': 'facebook' },{'label': 'Insta'}]} labelKey={'label'} />
+                                <CustomDropdown2 setSelectedItem={(val: { [key: string]: any }) => { handleFormChange('source', val.name)}} options={sources!} labelKey={'name'} />
                             </View>
                             <View style={{ width: '45%' }}>
                                 <Text>Gender</Text>

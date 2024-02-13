@@ -4,7 +4,7 @@ import { setIsLoading } from '../redux/state/UIStates';
 import { environment } from '../utils/Constants';
 import { makeAPIRequest } from '../utils/Helper';
 import { selectBranchId, selectTenantId, setConfig, setCurrrentStoreConfig, setStaffData, setStoreCount } from '../redux/state/UserStates';
-import { setSegments } from '../redux/state/AppointmentStates';
+import { setCustomerSources, setSegments } from '../redux/state/AppointmentStates';
 
 const useInitialDataFetch = () => {
     const dispatch = useAppDispatch();
@@ -50,6 +50,14 @@ const useInitialDataFetch = () => {
         }
     };
 
+    const getCustomerSources = async() => {
+        let url = environment.guestUrl + `customer/sourceOfCustomer?tenantId=${tenantId}&storeId=${storeId}`;
+        let response = await makeAPIRequest(url, null, "GET");
+        if (response && response.code == 200) {
+            dispatch(setCustomerSources({ sources: response.data }));
+        }
+    };
+
     const getStoreCount = async() => {
         let url = environment.sqlBaseUri + `tenants/storeCount?tenantId=${tenantId}`;
         let response = await makeAPIRequest(url, null, "GET");
@@ -64,6 +72,7 @@ const useInitialDataFetch = () => {
         getStaffDetails();
         getStoreConfig();
         getSegmentAndItsTypes();
+        getCustomerSources();
         getStoreCount();
         dispatch(setIsLoading({ isLoading: false }));
     }, []);

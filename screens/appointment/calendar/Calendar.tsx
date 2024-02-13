@@ -4,7 +4,7 @@ import { GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { selectBranchId, selectCurrentStoreConfig, selectStaffData, selectTenantId } from "../../../redux/state/UserStates";
 import moment from "moment";
-import { setIsLoading } from "../../../redux/state/UIStates";
+import { setIsLoading, setShowUserProfileTopBar } from "../../../redux/state/UIStates";
 import { APPOINTMENT_FETCH_INTERVAL, environment } from "../../../utils/Constants";
 import { getActiveStaffsForAppointment, makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
@@ -94,6 +94,7 @@ const AppointmentCalendar = ({ navigation }: any) => {
 
     useEffect(() => {
         if (isFocused) {
+            dispatch(setShowUserProfileTopBar({showUserProfileTopBar: true}));
             initialStatesHandler();
         }
     }, [isFocused, selectedDate]);
@@ -143,8 +144,9 @@ const styles = StyleSheet.create({
     },
     staffView: {
         backgroundColor: GlobalColors.lightGray2,
-        maxHeight: '8%',
-        marginBottom: 10
+        width: '100%',
+        height: '8%',
+        marginBottom: 10,
     },
     staffViewSingle: {
         justifyContent: "center",

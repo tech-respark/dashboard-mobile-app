@@ -72,7 +72,7 @@ const CalendarEntries: FC<ICalenderEntries> = ({ selectedStaffIndex, staffObject
                         <TouchableOpacity style={styles.cell}
                             onPress={() => {
                                 if (timeSlots[index] != 0) {
-                                    dispatch(setShowUserProfileTopBar());
+                                    dispatch(setShowUserProfileTopBar({showUserProfileTopBar: false}));
                                     navigation.navigate("Create Appointment", { from: timeIntervals[time], to: timeIntervals[Object.keys(timeIntervals)[index + 1]], selectedStaffIndex: selectedStaffIndex, staffObjects: staffObjects });
                                 }
                             }}

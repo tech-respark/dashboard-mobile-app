@@ -17,15 +17,14 @@ import CreateUser from "./CreateUser";
 
 const CreateAppointment = ({ navigation, route }: any) => {
 
-    const isFocused = useIsFocused();
     const dispatch = useAppDispatch();
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
 
     const [customers, setCustomers] = useState<{ [key: string]: any }[]>([]);
     const [services, setServices] = useState<{ [key: string]: any }[]>([]);
-    const [selectedCustomer, setSelectedCustomer] = useState<{[key:string]: any}>({});
-    const [selectedExperts, setSelectedExperts] = useState<{[key:string]: any}>(route.params.staffObjects[route.params.selectedStaffIndex]);
+    const [selectedCustomer, setSelectedCustomer] = useState<{ [key: string]: any }>({});
+    const [selectedExperts, setSelectedExperts] = useState<{ [key: string]: any }>(route.params.staffObjects[route.params.selectedStaffIndex]);
     const [fromTime, setFromTime] = useState<string>(route.params.from);
     const [toTime, setToTime] = useState<string>(route.params.to);
     const [instructions, setInstructions] = useState<string>('');
@@ -41,12 +40,12 @@ const CreateAppointment = ({ navigation, route }: any) => {
         }
     };
 
-    const getServices = async() => {
+    const getServices = async () => {
         const url = environment.documentBaseUri + `stores/getStoreByTenantAndStoreId?storeId=${storeId}&tenantId=${tenantId}`;
         let response = await makeAPIRequest(url, null, "GET")
-        if(response){
+        if (response) {
             setServices(response.categories);
-        }else {
+        } else {
             Toast.show("Encountered issue", { backgroundColor: GlobalColors.error });
         }
     };
@@ -64,26 +63,30 @@ const CreateAppointment = ({ navigation, route }: any) => {
     }, [navigation]);
 
     useEffect(() => {
-        if (!isFocused)
-            dispatch(setShowUserProfileTopBar());
-        else {
             getCustomersData();
             getServices();
-        }
-    }, [isFocused]);
+    }, []);
 
     return (
         <View style={{ flex: 1 }}>
             <ScrollView style={styles.container}>
                 <View style={[GlobalStyles.sectionView, { zIndex: 2 }]}>
-                    <View style={GlobalStyles.justifiedRow}>
+                    <View style={[GlobalStyles.justifiedRow, {marginBottom: 10}]}>
                         <Text style={styles.headingText}>1. Guest Details</Text>
-                            <CreateUser/>
+                        {
+                            Object.keys(selectedCustomer).length > 0 ?
+                                <Text style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}
+                                    onPress={() => { 
+                                        dispatch(setShowUserProfileTopBar({showUserProfileTopBar: false}));
+                                        navigation.navigate("User History", {customerId: selectedCustomer.id})
+                                     }}
+                                >User History</Text> :
+                                <CreateUser />
+                        }
                     </View>
-                    <SearchModal data={customers} setSelectedIndex={(val: number) => setSelectedCustomer(customers[val])} type="customer" placeholderText="Search By Name Or Number" headerText="" />
+                    <SearchModal data={customers} setSelectedIndex={(val: number) => { setSelectedCustomer(customers[val]), console.log("#######", customers[val]) }} type="customer" placeholderText="Search By Name Or Number" headerText="" />
                 </View>
-
-                <View style={[GlobalStyles.sectionView, {zIndex: 2}]}>
+                <View style={[GlobalStyles.sectionView, { zIndex: 2 }]}>
                     <View style={[GlobalStyles.justifiedRow, { marginBottom: 10 }]}>
                         <Text style={styles.headingText}>2. Service Details</Text>
                         <View style={GlobalStyles.justifiedRow}>
@@ -96,7 +99,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
                     </View>
                     {/* will be iterated for multiple */}
                     <SearchModal data={services} type="service" placeholderText="Search Service By Name" headerText="Service 1" />
-                    <SearchModal data={route.params.staffObjects} type="expert" placeholderText="Search Expert" headerText="Expert 1" selectedValue={selectedExperts.name} setSelectedIndex={(val) => setSelectedExperts(route.params.staffObjects[val])}/>
+                    <SearchModal data={route.params.staffObjects} type="expert" placeholderText="Search Expert" headerText="Expert 1" selectedValue={selectedExperts.name} setSelectedIndex={(val) => setSelectedExperts(route.params.staffObjects[val])} />
 
                     <Text onPress={() => { }} style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}>Add Expert</Text>
                     <View style={[GlobalStyles.justifiedRow, { marginTop: 20 }]}>
@@ -122,8 +125,8 @@ const CreateAppointment = ({ navigation, route }: any) => {
                 </View>
             </ScrollView>
             <View style={{ backgroundColor: '#fff', padding: 20, alignItems: 'center' }}>
-                <View style={[GlobalStyles.justifiedRow, {justifyContent: 'space-between', width: '100%', marginBottom: 20}]}>
-                    <View style={[GlobalStyles.justifiedRow, {width: '35%'}]}>
+                <View style={[GlobalStyles.justifiedRow, { justifyContent: 'space-between', width: '100%', marginBottom: 20 }]}>
+                    <View style={[GlobalStyles.justifiedRow, { width: '35%' }]}>
                         <Checkbox
                             color={"#4FACFE"}
                             style={{ borderColor: 'gray', borderRadius: 2, borderWidth: 0.5 }}
@@ -132,10 +135,10 @@ const CreateAppointment = ({ navigation, route }: any) => {
                         />
                         <Text>{"SMS\nConfirmation"}</Text>
                     </View>
-                    <Text onPress={() => {}} style={{color: GlobalColors.blue, textDecorationLine: 'underline'}}>Membership Validation</Text>
+                    <Text onPress={() => { }} style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}>Membership Validation</Text>
                 </View>
-                <TouchableOpacity style={{width: '100%', backgroundColor: GlobalColors.blue, paddingVertical: 10, borderRadius: 5, marginBottom: 5}}>
-                    <Text style={{color: "#fff", textAlign: "center", fontSize: FontSize.large, fontWeight: '500'}}>Create</Text>
+                <TouchableOpacity style={{ width: '100%', backgroundColor: GlobalColors.blue, paddingVertical: 10, borderRadius: 5, marginBottom: 5 }}>
+                    <Text style={{ color: "#fff", textAlign: "center", fontSize: FontSize.large, fontWeight: '500' }}>Create</Text>
                 </TouchableOpacity>
             </View>
         </View>

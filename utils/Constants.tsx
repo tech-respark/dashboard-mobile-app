@@ -30,3 +30,7 @@ export const appointmentColorCodes: { [key: string]: string } = {
 export const genderOptions: string[] = ["both", "male", "female"];
 
 export const APPOINTMENT_FETCH_INTERVAL: number = 250000
+
+export const REGULAR_EXP: {[key: string] : any} = {
+    mobile: /^[0-9]{10}$/
+}

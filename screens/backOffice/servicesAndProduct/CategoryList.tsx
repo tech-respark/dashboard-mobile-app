@@ -4,10 +4,7 @@ import { FontSize, GlobalColors, GradientButtonColor } from "../../../Styles/Glo
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import UpdateProductStockModal from "./updateProductStockModal";
-import { ProgressBar } from "react-native-paper";
-import { useAppSelector } from "../../../redux/Hooks";
-import { selectIsLoading } from "../../../redux/state/UIStates";
-import { GlobalStyles } from "../../../Styles/Styles";
+import LoadingState from "../../../components/LoadingState";
 
 type CategoryListType = {
     dataList: { [key: string]: any }[],
@@ -41,12 +38,7 @@ const CategoryList: FC<CategoryListType> = ({ dataList, onTextClickHandler, butt
                     ))}
                 </ScrollView>
                 :
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    {loader &&
-                        <ActivityIndicator color={GlobalColors.blueLight} />
-                    }
-                    <Text style={{ textAlign: 'center', fontSize: FontSize.large }}>{loader ? "Loading" : "No Data Found"}</Text>
-                </View>
+                <LoadingState loader={loader}/>
             }
             <TouchableOpacity style={{ marginHorizontal: 40, marginBottom: 15 }}
                 onPress={buttonClickHandler}

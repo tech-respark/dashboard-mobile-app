@@ -23,8 +23,8 @@ const UISlice = createSlice({
         setShowBackOfficeCategories: (state) => {
             state.showBackOfficeCategories = !state.showBackOfficeCategories;
         },
-        setShowUserProfileTopBar: (state) => {
-            state.showUserProfileTopBar = !state.showUserProfileTopBar;
+        setShowUserProfileTopBar: (state, action: PayloadAction<UIStates>) => {
+            state.showUserProfileTopBar = action.payload.showUserProfileTopBar;
         }
     }
 });
