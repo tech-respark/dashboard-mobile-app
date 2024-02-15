@@ -7,6 +7,12 @@ export const GlobalStyles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: "#fff"
   },
+  modalbackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)'
+},
   isLoading: {
     position: 'absolute',
     left: 0,

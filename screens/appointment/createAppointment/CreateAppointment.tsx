@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import { useIsFocused } from "@react-navigation/native";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
@@ -30,6 +30,8 @@ const CreateAppointment = ({ navigation, route }: any) => {
     const [instructions, setInstructions] = useState<string>('');
     const [enableSMS, setEnableSMS] = useState<boolean>(true);
     const [selectedModal, setSelectedModal] = useState<'guest' | 'service'>('guest');
+
+    const [modalVisible, setModalVisible] = useState<boolean>(false);
 
     const getCustomersData = async () => {
         const url = environment.guestUrl + `customer/getByTenantStoreMinimal?tenantId=${tenantId}&storeId=${storeId}`;
@@ -64,31 +66,31 @@ const CreateAppointment = ({ navigation, route }: any) => {
     }, [navigation]);
 
     useEffect(() => {
-            getCustomersData();
-            getServices();
+        getCustomersData();
+        getServices();
     }, []);
 
     return (
         <View style={{ flex: 1 }}>
             <ScrollView style={styles.container}>
-                <View style={[GlobalStyles.sectionView, {zIndex: selectedModal=='guest' ? 2 : 1}]}>
-                    <View style={[GlobalStyles.justifiedRow, {marginBottom: 10}]}>
+                <View style={[GlobalStyles.sectionView, { zIndex: selectedModal == 'guest' ? 2 : 1 }]}>
+                    <View style={[GlobalStyles.justifiedRow, { marginBottom: 10 }]}>
                         <Text style={styles.headingText}>1. Guest Details</Text>
                         {
                             Object.keys(selectedCustomer).length > 0 ?
                                 <Text style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}
-                                    onPress={() => { 
-                                        dispatch(setShowUserProfileTopBar({showUserProfileTopBar: false}));
-                                        navigation.navigate("User History", {customerId: selectedCustomer.id})
-                                     }}
+                                    onPress={() => {
+                                        dispatch(setShowUserProfileTopBar({ showUserProfileTopBar: false }));
+                                        navigation.navigate("User History", { customerId: selectedCustomer.id })
+                                    }}
                                 >User History</Text> :
                                 <CreateUser />
                         }
                     </View>
-                    <SearchModal data={customers} setSelected={(val) => {setSelectedCustomer(val)}} type="customer" placeholderText="Search By Name Or Number" headerText="" setModal={setSelectedModal}/>
+                    <SearchModal data={customers} setSelected={(val) => { setSelectedCustomer(val) }} type="customer" placeholderText="Search By Name Or Number" headerText="" setModal={setSelectedModal} />
                 </View>
 
-                <View style={[GlobalStyles.sectionView, {zIndex: selectedModal=='service' ? 2 : 1}]}>
+                <View style={[GlobalStyles.sectionView, { zIndex: selectedModal == 'service' ? 2 : 1 }]}>
                     <View style={[GlobalStyles.justifiedRow, { marginBottom: 10 }]}>
                         <Text style={styles.headingText}>2. Service Details</Text>
                         <View style={GlobalStyles.justifiedRow}>
@@ -100,8 +102,8 @@ const CreateAppointment = ({ navigation, route }: any) => {
                         </View>
                     </View>
                     {/* will be iterated for multiple */}
-                    <SearchModal data={services} type="service" placeholderText="Search Service By Name" headerText="Service 1" setSelected={(val) => {}} setModal={setSelectedModal}/>
-                    <SearchModal data={route.params.staffObjects} type="expert" placeholderText="Search Expert" headerText="Expert 1" selectedValue={selectedExperts.name} setSelected={(val) => setSelectedExperts(val)} setModal={setSelectedModal}/>
+                    <SearchModal data={services} type="service" placeholderText="Search Service By Name" headerText="Service 1" setSelected={(val) => { }} setModal={setSelectedModal} />
+                    <SearchModal data={route.params.staffObjects} type="expert" placeholderText="Search Expert" headerText="Expert 1" selectedValue={selectedExperts.name} setSelected={(val) => setSelectedExperts(val)} setModal={setSelectedModal} />
 
                     <Text onPress={() => { }} style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}>Add Expert</Text>
                     <View style={[GlobalStyles.justifiedRow, { marginTop: 20 }]}>
@@ -139,10 +141,43 @@ const CreateAppointment = ({ navigation, route }: any) => {
                     </View>
                     <Text onPress={() => { }} style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}>Membership Validation</Text>
                 </View>
-                <TouchableOpacity style={{ width: '100%', backgroundColor: GlobalColors.blue, paddingVertical: 10, borderRadius: 5, marginBottom: 5 }}>
+                <TouchableOpacity style={{ width: '100%', backgroundColor: GlobalColors.blue, paddingVertical: 10, borderRadius: 5, marginBottom: 5 }}
+                    onPress={()=>{
+                        //perform validation
+                        setModalVisible(true);
+                    }}
+                >
                     <Text style={{ color: "#fff", textAlign: "center", fontSize: FontSize.large, fontWeight: '500' }}>Create</Text>
                 </TouchableOpacity>
             </View>
+
+            <Modal
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(!modalVisible);
+                }}>
+                <View style={[GlobalStyles.modalbackground]}>
+                    <View style={styles.modalView}>
+                        <Text style={{textAlign: 'center', fontSize: FontSize.headingX, fontWeight: '500', marginBottom: 20}}>{"Create & Confirm \n Appointment"}</Text>
+                        <Text style={{textAlign: 'center', fontSize: FontSize.medium, fontWeight: '300'}}>{"Are you sure, you want to \n create & confirm an appointment"}</Text>
+                        <View style={{width: '100%', backgroundColor: 'lightgray', height: 1, marginVertical: 20}}/>
+                        <View style={[GlobalStyles.justifiedRow, {width: '95%', marginBottom: 10}]}>
+                            <TouchableOpacity style={[styles.buttonContainer]}
+                                onPress={()=>{setModalVisible(false)}}>
+                                <Text style={styles.buttonText}>No</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.buttonContainer, { backgroundColor: GlobalColors.blue }]}
+                                onPress={()=> {
+                                    //perform api 
+                                }}>
+                                <Text style={[styles.buttonText, { color: '#fff' }]}>Yes</Text>
+                            </TouchableOpacity>
+                        </View>
+                    
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 };
@@ -167,7 +202,27 @@ const styles = StyleSheet.create({
     circleIcon: {
         backgroundColor: GlobalColors.blue,
         borderRadius: 20, padding: 3
-    }
+    },
+    modalView: {
+        width: '80%',
+        margin: 5,
+        backgroundColor: '#fff',
+        borderRadius: 5,
+        padding: 20,
+        alignItems: 'center',
+    },
+    buttonContainer: {
+        borderWidth: 1,
+        borderColor: GlobalColors.blue,
+        borderRadius: 5,
+        width: '45%'
+    },
+    buttonText: {
+        fontSize: FontSize.large,
+        textAlign: "center",
+        paddingVertical: 5,
+        color: GlobalColors.blue
+    },
 });
 
 export default CreateAppointment;

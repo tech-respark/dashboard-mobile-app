@@ -49,6 +49,8 @@ const CalendarEntries: FC<ICalenderEntries> = ({ selectedStaffIndex, staffObject
         if (staffObjects.length > 0) {
             setTimeSlotsInTable(timeIntervals, staffObjects);
             getExpertAppointmentTimes(appointmentsData);
+        }else{
+            setTimeSlots([]);
         }
     }, [selectedStaffIndex, appointmentsData]);
 
@@ -109,8 +111,8 @@ const CalendarEntries: FC<ICalenderEntries> = ({ selectedStaffIndex, staffObject
                     }
                 </ScrollView> :
                 <View style={styles.loaderView}>
-                    <ActivityIndicator color={GlobalColors.blueLight} />
-                    <Text style={{ margin: 10 }}>Loading Calendar</Text>
+                    {staffObjects.length > 0 && <ActivityIndicator color={GlobalColors.blueLight} />}
+                    <Text style={{ margin: 10, textAlign: 'center' }}>{staffObjects.length > 0 ? "Loading Calendar" : "No Expert available today\n Try other date"}</Text>
                 </View>
             }
         </View>

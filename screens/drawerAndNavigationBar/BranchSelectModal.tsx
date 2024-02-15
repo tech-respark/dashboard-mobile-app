@@ -4,6 +4,7 @@ import { FontSize, GlobalColors } from "../../Styles/GlobalStyleConfigs";
 import { useAppDispatch, useAppSelector } from "../../redux/Hooks";
 import { selectCurrentBranch, selectStoreData, setCurrentBranch } from "../../redux/state/UserStates";
 import Toast from "react-native-root-toast";
+import { GlobalStyles } from "../../Styles/Styles";
 
 type BranchSelectModalProp = {
     showBranchModal: boolean;
@@ -22,7 +23,7 @@ const BranchSelectModal: FC<BranchSelectModalProp> = ({ showBranchModal, setShow
             onRequestClose={() => {
                 setShowBranchModal(!showBranchModal);
             }}>
-            <View style={styles.centeredView}>
+            <View style={GlobalStyles.modalbackground}>
                 <View style={styles.modalView}>
                     {branchesData?.map((branch: { [key: string]: any }, index: number) => (
                         <TouchableOpacity key={index} style={[{ paddingVertical: 15, width: '100%', alignItems: 'center' }, index != branchesData!.length - 1 ? { borderBottomWidth: 0.5, borderColor: 'lightgray' } : {}]}
@@ -42,11 +43,6 @@ const BranchSelectModal: FC<BranchSelectModalProp> = ({ showBranchModal, setShow
 };
 
 const styles = StyleSheet.create({
-    centeredView: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
     modalView: {
         margin: 20,
         backgroundColor: 'white',

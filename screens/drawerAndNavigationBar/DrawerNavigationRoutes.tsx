@@ -1,22 +1,19 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import POSMainScreen from '../pos/PosMain';
 import BackOfficeMainScreen from '../backOffice/BackOfficeMain';
 import { FontSize, GlobalColors } from '../../Styles/GlobalStyleConfigs';
-import { useAppDispatch, useAppSelector } from '../../redux/Hooks';
-import { selectShowUserProfileTopBar, setIsLoading } from '../../redux/state/UIStates';
-import { makeAPIRequest } from '../../utils/Helper';
-import { environment, mainTabsIconsMap } from '../../utils/Constants';
-import { selectBranchId, selectTenantId, setConfig, setCurrrentStoreConfig, setStaffData } from '../../redux/state/UserStates';
+import { useAppSelector } from '../../redux/Hooks';
+import { selectShowUserProfileTopBar } from '../../redux/state/UIStates';
+import { mainTabsIconsMap } from '../../utils/Constants';
 import CustomDrawerContent from './SideDrawer';
 import UserProfileBottomSheet from './UserProfileBottomSheet';
 import BottomSheet from '@gorhom/bottom-sheet';
 import AppointmentMain from '../appointment/AppointmentMain';
 import CrmMain from '../crm/CrmMain';
 import BranchSelectModal from './BranchSelectModal';
-import { setSegments } from '../../redux/state/AppointmentStates';
 import useInitialDataFetch from '../../customHooks/InitialDataFetch';
 
 const Drawer = createDrawerNavigator();
@@ -62,7 +59,7 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
       }
     )
 
-  }
+  };
 
   return (
     <View style={{ flex: 1 }}>

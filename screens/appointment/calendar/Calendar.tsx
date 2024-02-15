@@ -36,8 +36,11 @@ const AppointmentCalendar = ({ navigation }: any) => {
     const getStaffShifts = async () => {
         const url = environment.sqlBaseUri + `staffshifts/${tenantId}/${storeId}/${selectedDate}`;
         let response = await makeAPIRequest(url, null, "GET");
+        console.log(response)
         if (response) {
+            console.log("here 2")
             let filteredList = getActiveStaffsForAppointment(response, staffList!);
+            console.log(filteredList)
             setStaffObjects(filteredList);
             return filteredList;
         } else {

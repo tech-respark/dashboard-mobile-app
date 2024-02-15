@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { GlobalStyles } from "../../../Styles/Styles";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from "moment";
-import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
+import { useAppSelector } from "../../../redux/Hooks";
 import { selectCustomerSources, selectSegments } from "../../../redux/state/AppointmentStates";
 import RadioButtonGroup from "../../../components/RadioButtonGroup";
 import { REGULAR_EXP, environment } from "../../../utils/Constants";
@@ -129,7 +129,7 @@ const CreateUser = () => {
                 onRequestClose={() => {
                     setModalVisible(!modalVisible);
                 }}>
-                <View style={styles.centeredView}>
+                <View style={[GlobalStyles.modalbackground]}>
                     <View style={styles.modalView}>
                         <Text style={styles.addUser}>Add User</Text>
                         <View style={[styles.rowViews, GlobalStyles.justifiedRow]}>
@@ -287,11 +287,6 @@ const styles = StyleSheet.create({
     circleIcon: {
         backgroundColor: GlobalColors.blue,
         borderRadius: 20, padding: 3
-    },
-    centeredView: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     modalView: {
         width: '95%',
