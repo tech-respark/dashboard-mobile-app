@@ -12,6 +12,7 @@ export interface UserStates {
     staffData?: { [key: string]: any }[],
     currentStoreConfig?: {[key: string]: any},
     storeCount?: number,
+    productServiceCategories?: { [key: string]: any }[],
 }
 
 const initialState: UserStates = {
@@ -24,7 +25,8 @@ const initialState: UserStates = {
     storeID: 0,
     staffData: [],
     currentStoreConfig: {},
-    storeCount: 0
+    storeCount: 0,
+    productServiceCategories: [],
 }
 
 const UserSlice = createSlice({
@@ -57,10 +59,13 @@ const UserSlice = createSlice({
         setStoreCount: (state, action: PayloadAction<UserStates>) => {
             state.storeCount = action.payload.storeCount;
         },
+        setProductServiceCategories: (state, action: PayloadAction<UserStates>) => {
+            state.productServiceCategories = action.payload.productServiceCategories;
+        },
     },
 });
 
-export const { setUserData, setConfig, setStoreIdData, setCurrentBranch, setStaffData, setCurrrentStoreConfig, setStoreCount } = UserSlice.actions;
+export const { setUserData, setConfig, setStoreIdData, setCurrentBranch, setStaffData, setCurrrentStoreConfig, setStoreCount, setProductServiceCategories } = UserSlice.actions;
 
 
 export const selectUserData = (state: RootState) => state.UserStates.userData;
@@ -73,5 +78,6 @@ export const selectStaffData = (state: RootState) => state.UserStates.staffData;
 export const selectCurrentStoreConfig = (state: RootState) => state.UserStates.currentStoreConfig;
 export const selectConfig = (state: RootState) => state.UserStates.configs;
 export const selectStoreCount = (state: RootState) => state.UserStates.storeCount;
+export const selectProductServiceCategories = (state: RootState) => state.UserStates.productServiceCategories;
 
 export default UserSlice.reducer;

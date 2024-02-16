@@ -7,7 +7,7 @@ import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { setShowUserProfileTopBar } from "../../../redux/state/UIStates";
 import { GlobalStyles } from "../../../Styles/Styles";
 import { environment } from "../../../utils/Constants";
-import { selectBranchId, selectTenantId } from "../../../redux/state/UserStates";
+import { selectBranchId, selectProductServiceCategories, selectTenantId } from "../../../redux/state/UserStates";
 import { makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
 import { TimerWithBorderHeader } from "../../../components/HeaderTextField";
@@ -15,21 +15,31 @@ import SearchModal from "./SearchModal";
 import Checkbox from 'expo-checkbox';
 import CreateUser from "./CreateUser";
 
+type ServiceDetailsType = {
+    service: { [key: string]: any },
+    experts: { [key: string]: any }[],
+    fromTime: string,
+    toTime: string
+};
+
 const CreateAppointment = ({ navigation, route }: any) => {
 
     const dispatch = useAppDispatch();
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
-
+    const services = useAppSelector(selectProductServiceCategories);
+    console.log(services)
     const [customers, setCustomers] = useState<{ [key: string]: any }[]>([]);
-    const [services, setServices] = useState<{ [key: string]: any }[]>([]);
     const [selectedCustomer, setSelectedCustomer] = useState<{ [key: string]: any }>({});
-    const [selectedExperts, setSelectedExperts] = useState<{ [key: string]: any }>(route.params.staffObjects[route.params.selectedStaffIndex]);
-    const [fromTime, setFromTime] = useState<string>(route.params.from);
-    const [toTime, setToTime] = useState<string>(route.params.to);
     const [instructions, setInstructions] = useState<string>('');
     const [enableSMS, setEnableSMS] = useState<boolean>(true);
     const [selectedModal, setSelectedModal] = useState<'guest' | 'service'>('guest');
+    const [serviceDetails, setServiceDetails] = useState<ServiceDetailsType[]>([{
+        service: {},
+        experts: [route.params.staffObjects[route.params.selectedStaffIndex]],
+        fromTime: route.params.from,
+        toTime: route.params.to
+    }]);
 
     const [modalVisible, setModalVisible] = useState<boolean>(false);
 
@@ -43,14 +53,15 @@ const CreateAppointment = ({ navigation, route }: any) => {
         }
     };
 
-    const getServices = async () => {
-        const url = environment.documentBaseUri + `stores/getStoreByTenantAndStoreId?storeId=${storeId}&tenantId=${tenantId}`;
-        let response = await makeAPIRequest(url, null, "GET")
-        if (response) {
-            setServices(response.categories);
-        } else {
-            Toast.show("Encountered issue", { backgroundColor: GlobalColors.error });
+    const addEmptyService = () => {
+        let lastObj = serviceDetails[serviceDetails.length - 1];
+        console.log(lastObj)
+        let errorMsg = Object.keys(lastObj.service).length == 0 ? "Select Service" : (lastObj.experts.length == 0 ? "Select Expert" : (!lastObj.fromTime ? "Select From Time" : (!lastObj.toTime ? "Select To Time" : null)));
+        if (errorMsg) {
+            Toast.show(errorMsg, { backgroundColor: GlobalColors.error, duration: Toast.durations.LONG });
+            return;
         }
+        setServiceDetails([...serviceDetails, { service: {}, experts: [], fromTime: "", toTime: "" }]);
     };
 
     useLayoutEffect(() => {
@@ -67,7 +78,6 @@ const CreateAppointment = ({ navigation, route }: any) => {
 
     useEffect(() => {
         getCustomersData();
-        getServices();
     }, []);
 
     return (
@@ -96,20 +106,92 @@ const CreateAppointment = ({ navigation, route }: any) => {
                         <View style={GlobalStyles.justifiedRow}>
                             <Text style={{ color: GlobalColors.blue, marginRight: 10 }}>Add Service</Text>
                             <TouchableOpacity style={styles.circleIcon}
-                                onPress={() => { }}>
+                                onPress={addEmptyService}>
                                 <Ionicons name="add" size={25} color="#fff" />
                             </TouchableOpacity>
                         </View>
                     </View>
                     {/* will be iterated for multiple */}
-                    <SearchModal data={services} type="service" placeholderText="Search Service By Name" headerText="Service 1" setSelected={(val) => { }} setModal={setSelectedModal} />
-                    <SearchModal data={route.params.staffObjects} type="expert" placeholderText="Search Expert" headerText="Expert 1" selectedValue={selectedExperts.name} setSelected={(val) => setSelectedExperts(val)} setModal={setSelectedModal} />
+                    {
+                        serviceDetails.map((serviceDetailsObj: ServiceDetailsType, sIndex: number) => (
+                            <View style={{ borderWidth: 1, borderRadius: 5, borderColor: 'lightgray', padding: 5, marginVertical: 5 }}>
+                                <SearchModal data={services} type="service" placeholderText="Search Service By Name" headerText={`Service ${sIndex + 1}`} setModal={setSelectedModal}
+                                    setSelected={(val) => {
+                                        console.log(val);
+                                        setServiceDetails(prev => {
+                                            const updated = [...prev];
+                                            console.log(updated[sIndex].service)
+                                            updated[sIndex].service = val;
+                                            return updated
+                                        })
+                                    }}
+                                />
+                                {serviceDetailsObj.experts.map((expert: { [key: string]: any }, eIndex: number) => (
+                                    <View style={GlobalStyles.justifiedRow}>
+                                        <View style={{ width: eIndex == 0 ? '100%' : '90%' }}>
+                                            <SearchModal data={route.params.staffObjects} type="expert" placeholderText="Search Expert" headerText={`Expert ${eIndex + 1}`} selectedValue={expert.name} setModal={setSelectedModal}
+                                                setSelected={(val) => {
+                                                    setServiceDetails(prev => {
+                                                        const updated = [...prev];
+                                                        updated[sIndex].experts[eIndex] = val;
+                                                        return updated
+                                                    })
+                                                }}
+                                            />
+                                        </View>
+                                        {eIndex != 0 &&
+                                            <TouchableOpacity style={{ backgroundColor: GlobalColors.error, borderRadius: 20, padding: 2 }}>
+                                                <Ionicons name="close" size={20} color="#fff"
+                                                    onPress={() => {
+                                                        setServiceDetails(prev => {
+                                                            const updated = [...prev];
+                                                            console.log(eIndex)
+                                                            updated[sIndex].experts.splice(eIndex, 1); //bug here
+                                                            return updated
+                                                        })
+                                                    }} />
+                                            </TouchableOpacity>
+                                        }
+                                    </View>
+                                ))}
+                                <Text style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}
+                                    onPress={() => {
+                                        if (Object.keys(serviceDetailsObj.experts[serviceDetailsObj.experts.length - 1]).length > 0) {
+                                            setServiceDetails(prev => {
+                                                const updated = [...prev];
+                                                updated[sIndex].experts.push({});
+                                                return updated;
+                                            });
+                                        }else{
+                                            Toast.show(`Select Expert before adding more experts`, {backgroundColor: GlobalColors.error});
+                                        }
+                                    }}>Add Expert</Text>
+                                <View style={[GlobalStyles.justifiedRow, { marginTop: 20 }]}>
+                                    <TimerWithBorderHeader value={serviceDetails[sIndex].fromTime} header="From Time"
+                                        setValue={(val) => {
+                                            setServiceDetails(prev => {
+                                                const updated = [...prev];
+                                                updated[sIndex].fromTime = val;
+                                                return updated;
+                                            })
+                                        }}
+                                    />
+                                    <TimerWithBorderHeader value={serviceDetails[sIndex].toTime} header="To Time"
+                                        setValue={(val) => {
+                                            setServiceDetails(prev => {
+                                                const updated = [...prev];
+                                                updated[sIndex].toTime = val;
+                                                return updated;
+                                            })
+                                        }}
+                                    />
+                                </View>
 
-                    <Text onPress={() => { }} style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}>Add Expert</Text>
-                    <View style={[GlobalStyles.justifiedRow, { marginTop: 20 }]}>
-                        <TimerWithBorderHeader value={fromTime} setValue={(val) => { setFromTime(val) }} header="From Time" />
-                        <TimerWithBorderHeader value={toTime} setValue={(val) => { setToTime(val) }} header="To Time" />
-                    </View>
+                            </View>
+                        ))
+                    }
+
+
                 </View>
 
                 <View style={GlobalStyles.sectionView}>
@@ -142,7 +224,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
                     <Text onPress={() => { }} style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}>Membership Validation</Text>
                 </View>
                 <TouchableOpacity style={{ width: '100%', backgroundColor: GlobalColors.blue, paddingVertical: 10, borderRadius: 5, marginBottom: 5 }}
-                    onPress={()=>{
+                    onPress={() => {
                         //perform validation
                         setModalVisible(true);
                     }}
@@ -159,22 +241,22 @@ const CreateAppointment = ({ navigation, route }: any) => {
                 }}>
                 <View style={[GlobalStyles.modalbackground]}>
                     <View style={styles.modalView}>
-                        <Text style={{textAlign: 'center', fontSize: FontSize.headingX, fontWeight: '500', marginBottom: 20}}>{"Create & Confirm \n Appointment"}</Text>
-                        <Text style={{textAlign: 'center', fontSize: FontSize.medium, fontWeight: '300'}}>{"Are you sure, you want to \n create & confirm an appointment"}</Text>
-                        <View style={{width: '100%', backgroundColor: 'lightgray', height: 1, marginVertical: 20}}/>
-                        <View style={[GlobalStyles.justifiedRow, {width: '95%', marginBottom: 10}]}>
+                        <Text style={{ textAlign: 'center', fontSize: FontSize.headingX, fontWeight: '500', marginBottom: 20 }}>{"Create & Confirm \n Appointment"}</Text>
+                        <Text style={{ textAlign: 'center', fontSize: FontSize.medium, fontWeight: '300' }}>{"Are you sure, you want to \n create & confirm an appointment"}</Text>
+                        <View style={{ width: '100%', backgroundColor: 'lightgray', height: 1, marginVertical: 20 }} />
+                        <View style={[GlobalStyles.justifiedRow, { width: '95%', marginBottom: 10 }]}>
                             <TouchableOpacity style={[styles.buttonContainer]}
-                                onPress={()=>{setModalVisible(false)}}>
+                                onPress={() => { setModalVisible(false) }}>
                                 <Text style={styles.buttonText}>No</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={[styles.buttonContainer, { backgroundColor: GlobalColors.blue }]}
-                                onPress={()=> {
+                                onPress={() => {
                                     //perform api 
                                 }}>
                                 <Text style={[styles.buttonText, { color: '#fff' }]}>Yes</Text>
                             </TouchableOpacity>
                         </View>
-                    
+
                     </View>
                 </View>
             </Modal>

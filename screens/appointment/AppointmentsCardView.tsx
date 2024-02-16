@@ -16,7 +16,7 @@ const AppointmentsCardView: FC<IAppointmentsCardView> = ({ selectedView, appoint
                 {
                     appointments.map((appointment, index) => (
                         <View key={index} style={{ width: '100%', elevation: 2, borderRadius: 5, backgroundColor: '#fff', shadowColor: "black", shadowOffset: { width: 0, height: 0.2 }, shadowOpacity: 0.5, shadowRadius: 1, paddingVertical: 15, marginVertical: 8 }}>
-                            {selectedView == "completed" ?
+                            {selectedView == "completed" || appointment.status.slice(-1)[0]['status'].toLowerCase() == "completed" ?
                                 <>
                                     <View style={[styles.justifiedRow, { paddingRight: 15 }]}>
                                         <View style={{ width: 5, backgroundColor: 'red', height: '95%', borderTopRightRadius: 5, borderBottomRightRadius: 5 }} />

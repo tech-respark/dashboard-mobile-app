@@ -33,13 +33,19 @@ const CalendarEntries: FC<ICalenderEntries> = ({ selectedStaffIndex, staffObject
         setTimeSlots(initialTimeSlots);
     };
 
+    //TODO: handle appointment overlapping
     const getExpertAppointmentTimes = (appointments: { [key: string]: any }[]) => {
         let newAppointments: { [key: string]: any } = {};
         appointments.forEach(appointment => {
             let currentExpertId = staffObjects[selectedStaffIndex]['staffId'];
             if (moment(appointment.appointmentDay).format('YYYY-MM-DD') == selectedDate) {
-                let expertAppoint = appointment.expertAppointments.find((expert: any) => expert.expertId === currentExpertId);
-                expertAppoint ? newAppointments[expertAppoint.slot] = appointment : null;
+                appointment.expertAppointments.forEach((expertAppoint: any) => {
+                    expertAppoint.contributions.forEach((contributor: any) => {
+                        if(contributor.expertId === currentExpertId){
+                            newAppointments[contributor.slot] = appointment
+                        }
+                    })
+                })   
             }
         });
         setExpertAppointments(newAppointments);

@@ -27,6 +27,13 @@ export const appointmentColorCodes: { [key: string]: string } = {
     "COMPLETED": "#6cd6cc"
 };
 
+export const appointmentTabsColorCode: {[key: string]: string} = {
+    "future": "#A020F0",
+    "completed": "#197af1",
+    "cancelled": "red",
+    "confirmed": "#FFFF00"
+}
+
 export const genderOptions: string[] = ["both", "male", "female"];
 
 export const APPOINTMENT_FETCH_INTERVAL: number = 250000

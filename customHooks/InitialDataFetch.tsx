@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from '../redux/Hooks';
 import { setIsLoading } from '../redux/state/UIStates';
 import { environment } from '../utils/Constants';
 import { makeAPIRequest } from '../utils/Helper';
-import { selectBranchId, selectTenantId, setConfig, setCurrrentStoreConfig, setStaffData, setStoreCount } from '../redux/state/UserStates';
+import { selectBranchId, selectTenantId, setConfig, setCurrrentStoreConfig, setProductServiceCategories, setStaffData, setStoreCount } from '../redux/state/UserStates';
 import { setCustomerSources, setSegments } from '../redux/state/AppointmentStates';
 
 const useInitialDataFetch = () => {
@@ -66,6 +66,14 @@ const useInitialDataFetch = () => {
         }
     };
 
+    const getProductAndServiceCategories = async () => {
+        const url = environment.documentBaseUri + `stores/getStoreByTenantAndStoreId?storeId=${storeId}&tenantId=${tenantId}`;
+        let response = await makeAPIRequest(url, null, "GET")
+        if (response) {
+            setProductServiceCategories({productServiceCategories: response.categories});
+        }
+    };
+
     useEffect(() => {
         dispatch(setIsLoading({ isLoading: true }));
         getUserConfig();
@@ -74,6 +82,7 @@ const useInitialDataFetch = () => {
         getSegmentAndItsTypes();
         getCustomerSources();
         getStoreCount();
+        getProductAndServiceCategories();
         dispatch(setIsLoading({ isLoading: false }));
     }, []);
 };

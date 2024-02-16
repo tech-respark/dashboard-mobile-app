@@ -46,6 +46,7 @@ const SearchModal: FC<SearchModalType> = ({ data, placeholderText, type, headerT
                 <TouchableOpacity key={serviceIndex} style={{flexDirection: 'row', width: '100%', borderWidth: 1, borderColor: 'lightgray', padding: 10, justifyContent: 'space-between', borderRadius: 2, marginVertical: 5, elevation: 2, backgroundColor: '#fff', shadowColor: "black", shadowOffset: { width: 0, height: 0.2 }, shadowOpacity: 0.2, shadowRadius: 1}}
                 onPress={() => {
                     //set value to later remind selected data
+                    setSelected!(item);
                     setSearchValue(service.name);
                     setModalVisible(false);
                 }}

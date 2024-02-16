@@ -13,9 +13,6 @@ import DateAndDropdown from "./DateAndDropdown";
 import CalendarEntries from "./CalendarEntries";
 import AppointmentsCardView from "../AppointmentsCardView";
 
-type AppointmentCategoriesType =  {
-    confirmed: number, online: number, future: number, completed: number, cancelled: number, total: number
-}
 const AppointmentCalendar = ({ navigation }: any) => {
     const staffList = useAppSelector(selectStaffData);
     const storeConfig = useAppSelector(selectCurrentStoreConfig);
@@ -36,11 +33,11 @@ const AppointmentCalendar = ({ navigation }: any) => {
     const getStaffShifts = async () => {
         const url = environment.sqlBaseUri + `staffshifts/${tenantId}/${storeId}/${selectedDate}`;
         let response = await makeAPIRequest(url, null, "GET");
-        console.log(response)
         if (response) {
-            console.log("here 2")
             let filteredList = getActiveStaffsForAppointment(response, staffList!);
-            console.log(filteredList)
+            if(filteredList.length <= selectedStaffIndex){
+                setSelectedStaffIndex(0);
+            }
             setStaffObjects(filteredList);
             return filteredList;
         } else {
@@ -73,6 +70,7 @@ const AppointmentCalendar = ({ navigation }: any) => {
         appointments.forEach(appointment => {
             if(moment(appointment.appointmentDay).format('YYYY-MM-DD')==selectedDate){
                 let status = appointment.status.slice(-1)[0]['status'].toLowerCase();
+                status = status=="checkin" ? "confirmed" : status;
                 tempData[status]?.push(appointment);
                 tempCategory[status] = (tempCategory[status] || 0) + 1;
             }else{
