@@ -33,3 +33,15 @@ export const useTimeIntervalList = () => {
 
     return timeIntervals;
 };
+
+export const useDebounce = ({value, delay=500}: any) => {
+    const [debouncedVal, setDebouncedVal] = useState<string>(value);
+
+    useEffect(()=>{
+        const timeout = setTimeout(() => {
+            setDebouncedVal(value);
+        }, delay);
+
+        return () => clearTimeout(timeout);
+    }, [value]);
+};

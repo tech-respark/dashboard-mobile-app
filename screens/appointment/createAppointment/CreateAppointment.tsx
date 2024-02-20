@@ -11,9 +11,10 @@ import { selectBranchId, selectProductServiceCategories, selectTenantId } from "
 import { makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
 import { TimerWithBorderHeader } from "../../../components/HeaderTextField";
-import SearchModal from "./SearchModal";
+import ServiceSearchModal from "./ServiceSearchModal";
 import Checkbox from 'expo-checkbox';
 import CreateUser from "./CreateUser";
+import GuestExpertDropdown from "./GuestExpertDropdown";
 
 type ServiceDetailsType = {
     service: { [key: string]: any },
@@ -97,7 +98,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
                                 <CreateUser />
                         }
                     </View>
-                    <SearchModal data={customers} setSelected={(val) => { setSelectedCustomer(val) }} type="customer" placeholderText="Search By Name Or Number" headerText="" setModal={setSelectedModal} />
+                    <GuestExpertDropdown data={customers} placeholderText="Search By Name Or Number" type="guest" setSelected={(val) => { setSelectedCustomer(val) }} selectedValue={selectedCustomer.firstName} />
                 </View>
 
                 <View style={[GlobalStyles.sectionView, { zIndex: selectedModal == 'service' ? 2 : 1 }]}>
@@ -115,7 +116,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
                     {
                         serviceDetails.map((serviceDetailsObj: ServiceDetailsType, sIndex: number) => (
                             <View style={{ borderWidth: 1, borderRadius: 5, borderColor: 'lightgray', padding: 5, marginVertical: 5 }}>
-                                <SearchModal data={services} type="service" placeholderText="Search Service By Name" headerText={`Service ${sIndex + 1}`} setModal={setSelectedModal}
+                                <ServiceSearchModal data={services} type="service" placeholderText="Search Service By Name" headerText={`Service ${sIndex + 1}`} setModal={setSelectedModal}
                                     setSelected={(val) => {
                                         console.log(val);
                                         setServiceDetails(prev => {
@@ -129,7 +130,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
                                 {serviceDetailsObj.experts.map((expert: { [key: string]: any }, eIndex: number) => (
                                     <View style={GlobalStyles.justifiedRow}>
                                         <View style={{ width: eIndex == 0 ? '100%' : '90%' }}>
-                                            <SearchModal data={route.params.staffObjects} type="expert" placeholderText="Search Expert" headerText={`Expert ${eIndex + 1}`} selectedValue={expert.name} setModal={setSelectedModal}
+                                            <GuestExpertDropdown data={route.params.staffObjects} placeholderText="Search Expert" type="expert" selectedValue={expert.name} headerText={`Expert ${eIndex + 1}`}
                                                 setSelected={(val) => {
                                                     setServiceDetails(prev => {
                                                         const updated = [...prev];
@@ -162,8 +163,8 @@ const CreateAppointment = ({ navigation, route }: any) => {
                                                 updated[sIndex].experts.push({});
                                                 return updated;
                                             });
-                                        }else{
-                                            Toast.show(`Select Expert before adding more experts`, {backgroundColor: GlobalColors.error});
+                                        } else {
+                                            Toast.show(`Select Expert before adding more experts`, { backgroundColor: GlobalColors.error });
                                         }
                                     }}>Add Expert</Text>
                                 <View style={[GlobalStyles.justifiedRow, { marginTop: 20 }]}>

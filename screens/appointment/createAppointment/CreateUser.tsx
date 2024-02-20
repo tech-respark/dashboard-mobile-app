@@ -260,7 +260,7 @@ const CreateUser = () => {
                             >
                                 <Text style={[styles.buttonText, { color: '#fff' }]}>Add</Text>
                             </Pressable>
-                        </View>
+                        </View> 
                     </View>
                     {loader &&
                         <View style={GlobalStyles.isLoading}>

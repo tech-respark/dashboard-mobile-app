@@ -13,10 +13,9 @@ import { makeAPIRequest, sleep } from "../../../../utils/Helper";
 import Toast from "react-native-root-toast";
 import LoadingState from "../../../../components/LoadingState";
 import AboutUser from "./AboutUser";
+import Membership from "./Membership";
 
 const UserHistory = ({ navigation, route }: any) => {
-    const isFocused = useIsFocused();
-    const dispatch = useAppDispatch();
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
 
@@ -31,7 +30,7 @@ const UserHistory = ({ navigation, route }: any) => {
         "Profile Info": <ProfileInfo customer={customerData!}/>,
         "Orders": <Orders ordersHistory={orderHistory}/>,
         "About User": <AboutUser />,
-        "Membership": <AboutUser />,
+        "Membership": <Membership customer={customerData!}/>,
         "Advance": <AboutUser />,
         "Due Balance": <AboutUser />
     }

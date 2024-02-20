@@ -7,7 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { GlobalStyles } from "../../../Styles/Styles";
 import { HeaderedComponent } from "../../../components/HeaderTextField";
 
-type SearchModalType = {
+type ServiceSearchModalType = {
     data: { [key: string]: any }[],
     placeholderText: string,
     type: string,
@@ -17,7 +17,7 @@ type SearchModalType = {
     setModal: (val: 'guest'| 'service') => void,
 }
 
-const SearchModal: FC<SearchModalType> = ({ data, placeholderText, type, headerText, selectedValue = '', setSelected, setModal }) => {
+const ServiceSearchModal: FC<ServiceSearchModalType> = ({ data, placeholderText, type, headerText, selectedValue = '', setSelected, setModal }) => {
     const [modalVisible, setModalVisible] = useState(false);
     const [searchValue, setSearchValue] = useState<string>(selectedValue);
     const [viewPosition, setViewPosition] = useState({ top: 0, left: 0, width: 0 });
@@ -182,4 +182,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default SearchModal;
+export default ServiceSearchModal;

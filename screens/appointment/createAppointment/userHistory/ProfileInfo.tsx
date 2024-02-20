@@ -14,14 +14,14 @@ const ProfileInfo: FC<IProfileInfo> = ({ customer }) => {
     return (
         <View style={[styles.cardView, GlobalStyles.shadow]}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <View style={{maxWidth: '48%'}}>
+                <View style={{ maxWidth: '48%' }}>
                     <View style={styles.row}>
                         <Text style={{}}>Name: </Text>
-                        <Text style={styles.text}>{customer.firstName}</Text>
+                        <Text style={[styles.text, { maxWidth: '90%' }]}>{customer.firstName}</Text>
                     </View>
                     <View style={styles.row}>
                         <Text>Email: </Text>
-                        <Text style={styles.text}>{customer.email}</Text>
+                        <Text style={[styles.text, { maxWidth: '90%' }]}>{customer.email}</Text>
                     </View>
                     <View style={styles.row}>
                         <Text>Birth Date: </Text>
@@ -35,12 +35,8 @@ const ProfileInfo: FC<IProfileInfo> = ({ customer }) => {
                         <Text>Loyalty Points: </Text>
                         <Text style={styles.text}>{customer.loyalty.availablePointsAll}</Text>
                     </View>
-                    <View style={styles.row}>
-                        <Text>Customer Note: </Text>
-                        <Text style={styles.text}>{customer.notes}</Text>
-                    </View>
                 </View>
-                <View style={{maxWidth: '48%'}}>
+                <View style={{ maxWidth: '48%' }}>
                     <View style={styles.row}>
                         <Text>Phone: </Text>
                         <Text style={styles.text}>{customer.mobileNo}</Text>
@@ -59,12 +55,16 @@ const ProfileInfo: FC<IProfileInfo> = ({ customer }) => {
                     </View>
                     <View style={styles.row}>
                         <Text>Referral Code: </Text>
-                        <Text style={styles.text}>{customer.referralCode}</Text>
+                        <Text style={[styles.text, { maxWidth: '45%' }]}>{customer.referralCode}</Text>
                     </View>
                 </View>
             </View>
-            <View style={[styles.row, {marginTop: 20}]}>
-                <Text style={{marginRight: 10}}>Edit Profile</Text>
+            <View style={styles.row}>
+                <Text>Customer Note: </Text>
+                <Text style={[styles.text, {maxWidth: '70%'}]}>{customer.notes}</Text>
+            </View>
+            <View style={[styles.row, { marginTop: 20 }]}>
+                <Text style={{ marginRight: 10 }}>Edit Profile</Text>
                 <TouchableOpacity style={{ padding: 5, borderWidth: 0.5, borderColor: GlobalColors.blue, borderRadius: 5 }}>
                     <Ionicons name="pencil" size={20} color={GlobalColors.blue} />
                 </TouchableOpacity>
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     },
     text: {
         fontWeight: '300',
-        flexWrap: 'wrap'
+        flexWrap: 'wrap',
     }
 });
 
