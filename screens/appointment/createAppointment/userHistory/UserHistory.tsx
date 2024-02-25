@@ -47,10 +47,8 @@ const UserHistory = ({ navigation, route }: any) => {
 
     const getUserOrdersHistory = async () => {
         const url = environment.appointmentUri + `sorder/tenantguest/${tenantId}/${route.params.customerId}`;
-        console.log(url)
         let response = await makeAPIRequest(url, null, "GET");
         if (response) {
-            console.log(response.length)
             setOrderHistory(response);
         } else {
             Toast.show("Encountered issue", { backgroundColor: GlobalColors.error });

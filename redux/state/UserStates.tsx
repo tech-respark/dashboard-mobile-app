@@ -13,6 +13,7 @@ export interface UserStates {
     currentStoreConfig?: {[key: string]: any},
     storeCount?: number,
     productServiceCategories?: { [key: string]: any }[],
+    paymentTypes?: { [key: string]: any }[],
 }
 
 const initialState: UserStates = {
@@ -27,6 +28,7 @@ const initialState: UserStates = {
     currentStoreConfig: {},
     storeCount: 0,
     productServiceCategories: [],
+    paymentTypes: []
 }
 
 const UserSlice = createSlice({
@@ -51,7 +53,11 @@ const UserSlice = createSlice({
             state.storeID = storeData ? storeData.storeId : 0;
         },
         setStaffData : (state, action: PayloadAction<UserStates>) => {
-            state.staffData = action.payload.staffData;
+            let staffData = action.payload.staffData;
+            staffData!.forEach((staff) => {
+                staff.name = `${staff.firstName} ${staff.lastName}`;
+            });
+            state.staffData = staffData;
         },
         setCurrrentStoreConfig : (state, action: PayloadAction<UserStates>) => {
             state.currentStoreConfig = action.payload.currentStoreConfig;
@@ -62,10 +68,13 @@ const UserSlice = createSlice({
         setProductServiceCategories: (state, action: PayloadAction<UserStates>) => {
             state.productServiceCategories = action.payload.productServiceCategories;
         },
+        setPaymentTypes: (state, action: PayloadAction<UserStates>) => {
+            state.paymentTypes = action.payload.paymentTypes;
+        },
     },
 });
 
-export const { setUserData, setConfig, setStoreIdData, setCurrentBranch, setStaffData, setCurrrentStoreConfig, setStoreCount, setProductServiceCategories } = UserSlice.actions;
+export const { setUserData, setConfig, setStoreIdData, setCurrentBranch, setStaffData, setCurrrentStoreConfig, setStoreCount, setProductServiceCategories, setPaymentTypes } = UserSlice.actions;
 
 
 export const selectUserData = (state: RootState) => state.UserStates.userData;
@@ -79,5 +88,7 @@ export const selectCurrentStoreConfig = (state: RootState) => state.UserStates.c
 export const selectConfig = (state: RootState) => state.UserStates.configs;
 export const selectStoreCount = (state: RootState) => state.UserStates.storeCount;
 export const selectProductServiceCategories = (state: RootState) => state.UserStates.productServiceCategories;
+export const selectPaymentTypes = (state: RootState) => state.UserStates.paymentTypes;
+
 
 export default UserSlice.reducer;
