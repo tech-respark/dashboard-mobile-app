@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import { TextInput, TouchableOpacity } from "react-native-gesture-handler";
@@ -16,14 +16,18 @@ import { selectBranchId, selectStoreCount, selectTenantId } from "../../../redux
 import Checkbox from "expo-checkbox";
 import CustomDropdown2 from "../../../components/CustomDropdown2";
 
-const CreateUser = () => {
+interface ICreateUser {
+    modalVisible: boolean,
+    setModalVisible: (val: boolean) => void;
+};
+
+const CreateUser: FC<ICreateUser> = ({ modalVisible, setModalVisible }) => {
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
     const segments = useAppSelector(selectSegments);
     const storeCount = useAppSelector(selectStoreCount);
     const sources = useAppSelector(selectCustomerSources);
 
-    const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [selectedDateLabel, setSelectedDateLabel] = useState<string>("");
     const [isDatePickerVisible, setIsDatePickerVisible] = useState<boolean>(false);
     const [form, setForm] = useState<{ [key: string]: any }>({});
@@ -115,161 +119,152 @@ const CreateUser = () => {
     }, [modalVisible])
 
     return (
-        <View style={[GlobalStyles.justifiedRow]}>
-            <Text style={{ color: GlobalColors.blue, marginRight: 10 }}>Add User</Text>
-            <TouchableOpacity style={styles.circleIcon}
-                onPress={() => {
-                    setModalVisible(true);
-                }}>
-                <Ionicons name="add" size={25} color="#fff" />
-            </TouchableOpacity>
-            <Modal
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => {
-                    setModalVisible(!modalVisible);
-                }}>
-                <View style={[GlobalStyles.modalbackground]}>
-                    <View style={styles.modalView}>
-                        <Text style={styles.addUser}>Add User</Text>
-                        <View style={[styles.rowViews, GlobalStyles.justifiedRow]}>
-                            <View style={{width: storeCount! > 1 ? '70%': '100%'}}>
-                                <View style={{ flexDirection: 'row' }}>
-                                    <Text>Mobile Number</Text>
-                                    <Text style={{ color: 'red' }}>*</Text>
-                                </View>
-                                <TextInput
-                                    style={[styles.textInput]}
-                                    placeholder={'Mobile Number'}
-                                    keyboardType={'phone-pad'}
-                                    value={form.mobileNo}
-                                    dataDetectorTypes={'phoneNumber'}
-                                    placeholderTextColor="gray"
-                                    underlineColorAndroid="transparent"
-                                    onChangeText={(value) => handleFormChange('mobileNo', value)}
-                                />
-                            </View>
-                            {
-                                (storeCount && storeCount > 1) &&
-                                <View style={[GlobalStyles.justifiedRow, {width: '25%'}]}>
-                                    <Text>Is Global</Text>
-                                    <Checkbox
-                                        color={"#4FACFE"}
-                                        style={{ borderColor: 'gray', borderRadius: 2, borderWidth: 0.5 }}
-                                        value={form.isGlobal}
-                                        onValueChange={() => handleFormChange('isGlobal', !form.isGlobal)}
-                                    />
-                                </View>
-                            }
-                        </View>
-
-                        <View style={styles.rowViews}>
+        <Modal
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => {
+                setModalVisible(!modalVisible);
+            }}>
+            <View style={[GlobalStyles.modalbackground]}>
+                <View style={styles.modalView}>
+                    <Text style={styles.addUser}>Add User</Text>
+                    <View style={[styles.rowViews, GlobalStyles.justifiedRow]}>
+                        <View style={{ width: storeCount! > 1 ? '70%' : '100%' }}>
                             <View style={{ flexDirection: 'row' }}>
-                                <Text>Name</Text>
+                                <Text>Mobile Number</Text>
                                 <Text style={{ color: 'red' }}>*</Text>
                             </View>
                             <TextInput
                                 style={[styles.textInput]}
-                                placeholder={'Name'}
-                                value={form.firstName}
+                                placeholder={'Mobile Number'}
+                                keyboardType={'phone-pad'}
+                                value={form.mobileNo}
+                                dataDetectorTypes={'phoneNumber'}
                                 placeholderTextColor="gray"
                                 underlineColorAndroid="transparent"
-                                onChangeText={(value) => handleFormChange('firstName', value)}
+                                onChangeText={(value) => handleFormChange('mobileNo', value)}
                             />
                         </View>
-
-                        <View style={[GlobalStyles.justifiedRow, styles.rowViews]}>
-                            <View style={{ width: '45%' }}>
-                                <Text>Email</Text>
-                                <TextInput
-                                    style={[styles.textInput]}
-                                    placeholder={'example@gmail.com'}
-                                    value={form.email}
-                                    placeholderTextColor="gray"
-                                    underlineColorAndroid="transparent"
-                                    onChangeText={(value) => handleFormChange('email', value)}
+                        {
+                            (storeCount && storeCount > 1) &&
+                            <View style={[GlobalStyles.justifiedRow, { width: '25%' }]}>
+                                <Text>Is Global</Text>
+                                <Checkbox
+                                    color={"#4FACFE"}
+                                    style={{ borderColor: 'gray', borderRadius: 2, borderWidth: 0.5 }}
+                                    value={form.isGlobal}
+                                    onValueChange={() => handleFormChange('isGlobal', !form.isGlobal)}
                                 />
                             </View>
-                            <View style={{ width: '45%' }}>
-                                <Text>DOB</Text>
-                                <TouchableOpacity style={[styles.textInput]} onPress={() => {
-                                    setSelectedDateLabel('dob')
-                                    setIsDatePickerVisible(true)
-                                }}>
-                                    <Text style={{ color: form.dob ? '#000' : 'gray' }}>{form.dob ? moment(form.dob).format('DD/MM/YYYY') : "DD/MM/YYYY"}</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-
-                        <View style={[GlobalStyles.justifiedRow, styles.rowViews]}>
-                            <View style={{ width: '45%' }}>
-                                <Text>Anniversary Date</Text>
-                                <TouchableOpacity style={[styles.textInput]} onPress={() => {
-                                    setSelectedDateLabel('aniversaryDate')
-                                    setIsDatePickerVisible(true)
-                                }}>
-                                    <Text style={{ color: form.aniversaryDate ? '#000' : 'gray' }}>{form.aniversaryDate ? moment(form.aniversaryDate).format('DD/MM/YYYY') : "DD/MM/YYYY"}</Text>
-                                </TouchableOpacity>
-                            </View>
-                            <View style={{ width: '45%' }}>
-                                <Text>GST Number</Text>
-                                <TextInput
-                                    style={[styles.textInput]}
-                                    placeholder={'GST No'}
-                                    value={form.gstNumber}
-                                    placeholderTextColor="gray"
-                                    underlineColorAndroid="transparent"
-                                    onChangeText={(value) => handleFormChange('gstNumber', value)}
-                                />
-                            </View>
-                        </View>
-                        <DateTimePickerModal
-                            isVisible={isDatePickerVisible}
-                            mode="date"
-                            onConfirm={(date) => {
-                                handleFormChange(selectedDateLabel, date)
-                                setIsDatePickerVisible(false);
-                            }}
-                            onCancel={() => setIsDatePickerVisible(false)}
-                        />
-                        <View style={[GlobalStyles.justifiedRow, styles.rowViews]}>
-                            <View style={{ width: '45%' }}>
-                                <Text>Source</Text>
-                                <CustomDropdown2 setSelectedItem={(val: { [key: string]: any }) => { handleFormChange('source', val.name)}} options={sources!} labelKey={'name'} />
-                            </View>
-                            <View style={{ width: '45%' }}>
-                                <Text>Gender</Text>
-                                <RadioButtonGroup
-                                    options={["female", "male"]}
-                                    selectedOption={form.gender}
-                                    onSelect={(val: string) => {
-                                        handleFormChange('gender', val)
-                                    }}
-                                />
-                            </View>
-                        </View>
-                        {renderSegments()}
-                        <View style={[GlobalStyles.justifiedRow, { justifyContent: "flex-end", width: "100%" }]}>
-                            <Pressable style={[styles.buttonContainer, { marginRight: 20 }]}
-                                onPress={() => { setModalVisible(false) }}
-                            >
-                                <Text style={styles.buttonText}>Cancel</Text>
-                            </Pressable>
-                            <Pressable style={[styles.buttonContainer, { backgroundColor: GlobalColors.blue }]}
-                                onPress={async () => { await createUser() }}
-                            >
-                                <Text style={[styles.buttonText, { color: '#fff' }]}>Add</Text>
-                            </Pressable>
-                        </View> 
+                        }
                     </View>
-                    {loader &&
-                        <View style={GlobalStyles.isLoading}>
-                            <ActivityIndicator color={GlobalColors.blue} size={"large"} />
+
+                    <View style={styles.rowViews}>
+                        <View style={{ flexDirection: 'row' }}>
+                            <Text>Name</Text>
+                            <Text style={{ color: 'red' }}>*</Text>
                         </View>
-                    }
+                        <TextInput
+                            style={[styles.textInput]}
+                            placeholder={'Name'}
+                            value={form.firstName}
+                            placeholderTextColor="gray"
+                            underlineColorAndroid="transparent"
+                            onChangeText={(value) => handleFormChange('firstName', value)}
+                        />
+                    </View>
+
+                    <View style={[GlobalStyles.justifiedRow, styles.rowViews]}>
+                        <View style={{ width: '45%' }}>
+                            <Text>Email</Text>
+                            <TextInput
+                                style={[styles.textInput]}
+                                placeholder={'example@gmail.com'}
+                                value={form.email}
+                                placeholderTextColor="gray"
+                                underlineColorAndroid="transparent"
+                                onChangeText={(value) => handleFormChange('email', value)}
+                            />
+                        </View>
+                        <View style={{ width: '45%' }}>
+                            <Text>DOB</Text>
+                            <TouchableOpacity style={[styles.textInput]} onPress={() => {
+                                setSelectedDateLabel('dob')
+                                setIsDatePickerVisible(true)
+                            }}>
+                                <Text style={{ color: form.dob ? '#000' : 'gray' }}>{form.dob ? moment(form.dob).format('DD/MM/YYYY') : "DD/MM/YYYY"}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    <View style={[GlobalStyles.justifiedRow, styles.rowViews]}>
+                        <View style={{ width: '45%' }}>
+                            <Text>Anniversary Date</Text>
+                            <TouchableOpacity style={[styles.textInput]} onPress={() => {
+                                setSelectedDateLabel('aniversaryDate')
+                                setIsDatePickerVisible(true)
+                            }}>
+                                <Text style={{ color: form.aniversaryDate ? '#000' : 'gray' }}>{form.aniversaryDate ? moment(form.aniversaryDate).format('DD/MM/YYYY') : "DD/MM/YYYY"}</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={{ width: '45%' }}>
+                            <Text>GST Number</Text>
+                            <TextInput
+                                style={[styles.textInput]}
+                                placeholder={'GST No'}
+                                value={form.gstNumber}
+                                placeholderTextColor="gray"
+                                underlineColorAndroid="transparent"
+                                onChangeText={(value) => handleFormChange('gstNumber', value)}
+                            />
+                        </View>
+                    </View>
+                    <DateTimePickerModal
+                        isVisible={isDatePickerVisible}
+                        mode="date"
+                        onConfirm={(date) => {
+                            handleFormChange(selectedDateLabel, date)
+                            setIsDatePickerVisible(false);
+                        }}
+                        onCancel={() => setIsDatePickerVisible(false)}
+                    />
+                    <View style={[GlobalStyles.justifiedRow, styles.rowViews]}>
+                        <View style={{ width: '45%' }}>
+                            <Text>Source</Text>
+                            <CustomDropdown2 setSelectedItem={(val: { [key: string]: any }) => { handleFormChange('source', val.name) }} options={sources!} labelKey={'name'} />
+                        </View>
+                        <View style={{ width: '45%' }}>
+                            <Text>Gender</Text>
+                            <RadioButtonGroup
+                                options={["female", "male"]}
+                                selectedOption={form.gender}
+                                onSelect={(val: string) => {
+                                    handleFormChange('gender', val)
+                                }}
+                            />
+                        </View>
+                    </View>
+                    {renderSegments()}
+                    <View style={[GlobalStyles.justifiedRow, { justifyContent: "flex-end", width: "100%" }]}>
+                        <Pressable style={[styles.buttonContainer, { marginRight: 20 }]}
+                            onPress={() => { setModalVisible(false) }}
+                        >
+                            <Text style={styles.buttonText}>Cancel</Text>
+                        </Pressable>
+                        <Pressable style={[styles.buttonContainer, { backgroundColor: GlobalColors.blue }]}
+                            onPress={async () => { await createUser() }}
+                        >
+                            <Text style={[styles.buttonText, { color: '#fff' }]}>Add</Text>
+                        </Pressable>
+                    </View>
                 </View>
-            </Modal>
-        </View>
+                {loader &&
+                    <View style={GlobalStyles.isLoading}>
+                        <ActivityIndicator color={GlobalColors.blue} size={"large"} />
+                    </View>
+                }
+            </View>
+        </Modal>
     );
 };
 

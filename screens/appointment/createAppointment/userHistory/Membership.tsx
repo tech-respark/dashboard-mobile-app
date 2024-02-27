@@ -1,15 +1,21 @@
 import React, { FC, useEffect, useState } from "react";
-import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { FlatList, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { FontSize, GlobalColors } from "../../../../Styles/GlobalStyleConfigs";
 import { GlobalStyles } from "../../../../Styles/Styles";
 import moment from "moment";
 import { MEMBERSHIPCOLORS, environment } from "../../../../utils/Constants";
-import { useAppSelector } from "../../../../redux/Hooks";
-import { selectBranchId, selectPaymentTypes, selectStaffData, selectTenantId } from "../../../../redux/state/UserStates";
+import { useAppDispatch, useAppSelector } from "../../../../redux/Hooks";
+import { selectBranchId, selectPaymentTypes, selectStaffData, selectTenantId, selectUserData } from "../../../../redux/state/UserStates";
 import { makeAPIRequest } from "../../../../utils/Helper";
 import { Svg, Path } from "react-native-svg";
 import GuestExpertDropdown from "../GuestExpertDropdown";
+import LoadingState from "../../../../components/LoadingState";
+import Toast from "react-native-root-toast";
+import { setIsLoading } from "../../../../redux/state/UIStates";
+import { Ionicons } from "@expo/vector-icons";
+import { MultiSelect } from 'react-native-element-dropdown';
+import AddFamilyMemberModal from "../../../../components/AddFamilyMemberModal";
 
 interface IMembership {
     customer: { [key: string]: any }
@@ -20,13 +26,20 @@ const Membership: FC<IMembership> = ({ customer }) => {
     const tenantId = useAppSelector(selectTenantId);
     const staffList = useAppSelector(selectStaffData);
     const paymentTypes = useAppSelector(selectPaymentTypes);
+    const loggedInUser = useAppSelector(selectUserData);
+    const dispatch = useAppDispatch();
 
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [membershipDetails, setMembershipDetails] = useState<{ [key: string]: any }[]>([]);
+    const [selectedMembership, setSelectedMembership] = useState<{ [key: string]: any }>({});
     const [validity, setValidity] = useState<string>("");
     const [price, setPrice] = useState<string>("");
     const [expert, setExpert] = useState<{ [key: string]: any }>({});
     const [remark, setRemark] = useState<string>('');
+    const [addMember, setAddMember] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [selectedFamily, setSelectedFamily] = useState([]);
+    const [secondModal, setSecondModal] = useState<boolean>(false);
 
     const getMemberships = async () => {
         const url = environment.documentBaseUri + `membership/${tenantId}/${storeId}`;
@@ -34,11 +47,112 @@ const Membership: FC<IMembership> = ({ customer }) => {
         if (response.code == 200) {
             setMembershipDetails(response.data);
         }
+        setLoading(false);
     };
 
+    const validateModalData = () => {
+        if (!price) {
+            Toast.show("Enter Price", { backgroundColor: GlobalColors.error });
+            return false;
+        }
+        if (!validity) {
+            Toast.show("Enter validity", { backgroundColor: GlobalColors.error });
+            return false;
+        }
+        if (Object.keys(expert).length === 0) {
+            Toast.show("Select staff", { backgroundColor: GlobalColors.error });
+            return false;
+        }
+        if (!paymode) {
+            Toast.show("Please select paymode", { backgroundColor: GlobalColors.error });
+            return false;
+        }
+        return true;
+    };
+
+    const addMembershipToUser = async () => {
+        const url = environment.guestUrl + `guestmembership`;
+        if (validateModalData()) {
+            dispatch(setIsLoading({ isLoading: true }));
+            const benifitedAmt = selectedMembership.typeId == 1 ? (Number(selectedMembership.membershipFee) + Number(selectedMembership.benefit)) : 0;
+            let dateString = moment().toISOString();
+            const toDate = moment().add(Number(selectedMembership.validity), 'days').toISOString();
+            const txnObj = {
+                "active": true,
+                "balanceAmount": benifitedAmt,
+                "benefitAmount": selectedMembership.typeId == 1 ? selectedMembership.benefit : 0,
+                "createdBy": loggedInUser!.id,
+                "createdOn": dateString,
+                "guestId": customer.id,
+                "guestName": customer.firstName,
+                "membershipName": selectedMembership.name,
+                "membershipPlanId": selectedMembership.id,
+                "modifiedBy": loggedInUser!.id,
+                "modifiedOn": dateString,
+                "purchaseAmount": selectedMembership.purchaseAmount + (selectedMembership.isInclusive ? 0 : selectedMembership.taxesTotal),
+                "remark": remark,
+                "fromDate": moment().toISOString(),
+                "toDate": toDate,
+                "staffId": expert.id,
+                "storeId": storeId,
+                "tenantId": tenantId,
+                "terminatedOn": null,
+                // "txchrgs": membership.txchrgs,
+                "membershipFee": selectedMembership.membershipFee,
+                // "payments": paymodeDivRef.current.getPaymentsAndPaymode().payments,
+                'sharedMembers': [], // will be updated for isHsared profiles
+                'typeId': selectedMembership.typeId,
+            }
+            let response = await makeAPIRequest(url, txnObj, "POST");
+            if (response && response.code == 200) {
+                // setUserDetails({ ...userDetails, membership: { balanceAmount: txnObj.balanceAmount, membershipName: txnObj.membershipName } })
+                Toast.show("Membership assigned", { backgroundColor: GlobalColors.success });
+            } else {
+                Toast.show("Error Encountered", { backgroundColor: GlobalColors.error });
+            }
+            dispatch(setIsLoading({ isLoading: false }));
+        }
+    };
+
+    const renderItem = ({ item, index }: any) => {
+        return (
+            <Pressable key={index} style={{ width: 280, backgroundColor: MEMBERSHIPCOLORS[index % MEMBERSHIPCOLORS.length].shade1, borderRadius: 5, margin: 10 }}
+                onPress={() => {
+                    setSelectedMembership(item);
+                    setValidity(item.validity.toString());
+                    setPrice(item.membershipFee.toString());
+                    setAddMember(item.isSharable);
+                }}
+            >
+                <Svg height={280} width={280} viewBox="0 0 1440 320">
+                    <Path
+                        fill={MEMBERSHIPCOLORS[index % MEMBERSHIPCOLORS.length].shade2}
+                        d="M0,160L48,181.3C96,203,192,245,288,250.7C384,256,480,224,576,192C672,160,768,128,864,106.7C960,85,1056,75,1152,96C1248,117,1344,171,1392,197.3L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+                    />
+                </Svg>
+                <View style={{ zIndex: 2, position: 'absolute', paddingVertical: 10, paddingHorizontal: 10 }}>
+                    <Text style={{ fontSize: FontSize.headingX, marginBottom: 10 }}>{item.name}</Text>
+                    <Text style={{ fontWeight: '300', marginBottom: 10 }}>Pay ₹{item.membershipFee} & Get ₹{item.membershipFee + item.benefit}</Text>
+                    <View style={[GlobalStyles.justifiedRow, { marginBottom: 10 }]}>
+                        <Text style={{ fontWeight: '300', marginRight: 10 }}>Validity: {item.validity} Days</Text>
+                        <Text style={{ fontWeight: '300' }}>Benefit: ₹{item.benefit} Extra</Text>
+                    </View>
+                    {item.txchrgs.length > 0 &&
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <Text style={{ fontWeight: '300' }}>Taxes: </Text>
+                            {item.txchrgs.map((tax: any, index: number) => (
+                                <Text key={index} style={{ fontWeight: '300' }}>₹{tax.value} {tax.isInclusive && `(Inclusive)`}</Text>
+                            ))}
+                        </View>}
+                    <View style={{ marginTop: 10, borderColor: MEMBERSHIPCOLORS[index % MEMBERSHIPCOLORS.length].shade3, borderWidth: 1, width: '55%', borderRadius: 5 }}>
+                        <Text style={{ fontSize: FontSize.heading, padding: 5, textAlign: 'center' }}>Fee ₹{item.membershipFee}</Text>
+                    </View>
+                </View>
+            </Pressable>
+        );
+    }
+
     useEffect(() => {
-        // if (!customer.membershipHistory)
-        //     setModalVisible(true);
         if (modalVisible) {
             getMemberships();
         }
@@ -80,106 +194,134 @@ const Membership: FC<IMembership> = ({ customer }) => {
                 onRequestClose={() => {
                     setModalVisible(!modalVisible);
                 }}>
+                   {
+                    secondModal && <AddFamilyMemberModal modalVisible={secondModal} setModalVisible={setSecondModal}/>
+                   } 
                 <View style={[GlobalStyles.modalbackground]}>
                     <View style={styles.modalView}>
-                        <Text style={styles.heading}>Add Membership</Text>
-                        <ScrollView horizontal style={{ width: '100%', height: '35%' }}>
-                            {
-                                membershipDetails.map((membership: any, index: number) => (
-                                    <View key={index} style={{ width: 280, backgroundColor: MEMBERSHIPCOLORS[index % MEMBERSHIPCOLORS.length].shade1, borderRadius: 5, margin: 10 }}>
-                                        <Svg height={280} width={280} viewBox="0 0 1440 320">
-                                            <Path
-                                                fill={MEMBERSHIPCOLORS[index % MEMBERSHIPCOLORS.length].shade2}
-                                                d="M0,160L48,181.3C96,203,192,245,288,250.7C384,256,480,224,576,192C672,160,768,128,864,106.7C960,85,1056,75,1152,96C1248,117,1344,171,1392,197.3L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-                                            />
-                                        </Svg>
-                                        <View style={{ zIndex: 2, position: 'absolute', paddingVertical: 10, paddingHorizontal: 10 }}>
-                                            <Text style={{ fontSize: FontSize.headingX, marginBottom: 15 }}>{membership.name}</Text>
-                                            <Text style={{ fontWeight: '300', marginBottom: 10 }}>Pay ₹{membership.membershipFee} & Get ₹{membership.membershipFee + membership.benefit}</Text>
-                                            <View style={[GlobalStyles.justifiedRow, { maxWidth: '95%' }]}>
-                                                <Text style={{ fontWeight: '300' }}>Validity: {membership.validity} Days</Text>
-                                                <Text style={{ fontWeight: '300' }}>Benefit: ₹{membership.benefit} Extra</Text>
-                                            </View>
-                                            <View style={{ marginTop: 20, borderColor: MEMBERSHIPCOLORS[index % MEMBERSHIPCOLORS.length].shade3, borderWidth: 1, width: '55%', borderRadius: 5 }}>
-                                                <Text style={{ fontSize: FontSize.heading, padding: 5, textAlign: 'center' }}>Fee ₹{membership.membershipFee}</Text>
-                                            </View>
+                        {loading ?
+                            <LoadingState loader={loading} />
+                            : <>
+                                <Text style={styles.heading}>Add Membership</Text>
+                                <ScrollView>
+                                    <FlatList
+                                        data={membershipDetails}
+                                        renderItem={renderItem}
+                                        keyExtractor={(item, index) => index.toString()}
+                                        style={{ maxHeight: '30%' }}
+                                        horizontal
+                                    />
+                                    <View style={{ paddingHorizontal: 10, width: '100%', marginVertical: 10 }}>
+                                        <View style={{ borderTopWidth: 1, borderBottomWidth: 1, borderColor: 'lightgray', padding: 10, marginBottom: 10 }}>
+                                            <Text style={{ fontSize: FontSize.heading, fontWeight: '500' }}>Advance: {customer.advanceAmount}</Text>
                                         </View>
-                                    </View>
-                                ))
-                            }
-                        </ScrollView>
-                        <ScrollView style={{ paddingHorizontal: 10, width: '100%', marginVertical: 10 }}>
-                            <View style={{ borderTopWidth: 1, borderBottomWidth: 1, borderColor: 'lightgray', padding: 10, marginBottom: 10 }}>
-                                <Text style={{ fontSize: FontSize.heading, fontWeight: '500' }}>Advance: {customer.advanceAmount}</Text>
-                            </View>
-                            <View style={GlobalStyles.justifiedRow}>
-                                <View style={{ width: '45%' }}>
-                                    <Text style={{fontSize: FontSize.medium}}>Validity (Days)</Text>
-                                    <TextInput
-                                        style={styles.textInput}
-                                        value={validity}
-                                        placeholderTextColor="gray"
-                                        underlineColorAndroid="transparent"
-                                        onChangeText={(val) => {
-                                            setValidity(val);
-                                        }}
-                                    />
-                                </View>
-                                <View style={{ width: '45%' }}>
-                                    <Text style={{fontSize: FontSize.medium}}>Price</Text>
-                                    <TextInput
-                                        style={styles.textInput}
-                                        value={price}
-                                        placeholderTextColor="gray"
-                                        underlineColorAndroid="transparent"
-                                        onChangeText={(val) => {
-                                            setPrice(val);
-                                        }}
-                                    />
-                                </View>
-                            </View>
-                            <View style={{ marginVertical: 15 }}>
-                                <Text style={{fontSize: FontSize.medium}}>Staff</Text>
-                                <GuestExpertDropdown data={staffList!} placeholderText="Select Staff" type="expert" selectedValue={expert.name} setSelected={setExpert} />
-                            </View>
-                            <View>
-                                <Text style={{fontSize: FontSize.large, marginBottom: 10}}>Payment Details:</Text>
-                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 15 }}>
-                                    {paymentTypes?.map((type: { [key: string]: any }, index: number) => (
-                                        <View style={{margin: 10, width: '25%'}} key={index}>
-                                            <Text>{type.name}</Text>
-                                            <View style={[{borderWidth: 0.5, borderColor: 'lightgray', borderRadius: 2, padding: 3, marginVertical: 5, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-evenly'}]}>
-                                                <Image source={{uri: type.img}} style={{width: 25, height: 25}}/>
+                                        <View style={GlobalStyles.justifiedRow}>
+                                            <View style={{ width: '45%' }}>
+                                                <Text style={{ fontSize: FontSize.medium }}>Validity (Days)</Text>
                                                 <TextInput
-                                                    style={{borderBottomWidth: 0.5, width: '50%', borderColor: 'gray'}}
+                                                    style={styles.textInput}
+                                                    value={validity}
+                                                    placeholderTextColor="gray"
+                                                    underlineColorAndroid="transparent"
+                                                    onChangeText={(val) => {
+                                                        setValidity(val);
+                                                    }}
+                                                />
+                                            </View>
+                                            <View style={{ width: '45%' }}>
+                                                <Text style={{ fontSize: FontSize.medium }}>Price</Text>
+                                                <TextInput
+                                                    style={styles.textInput}
+                                                    value={price}
+                                                    placeholderTextColor="gray"
+                                                    underlineColorAndroid="transparent"
+                                                    onChangeText={(val) => {
+                                                        setPrice(val);
+                                                    }}
                                                 />
                                             </View>
                                         </View>
-                                    ))}
+                                        <View style={{ marginVertical: 15 }}>
+                                            <Text style={{ fontSize: FontSize.medium }}>Staff</Text>
+                                            <GuestExpertDropdown data={staffList!} placeholderText="Select Staff" type="expert" selectedValue={expert.name} setSelected={setExpert} />
+                                        </View>
+                                        <View style={{ marginBottom: 15, width: '100%', alignSelf: 'center',borderWidth: 0.5, padding: 10, borderColor: 'lightgray', borderRadius: 2 }}>
+                                            <View style={GlobalStyles.justifiedRow}>
+                                                <Text style={{ fontSize: FontSize.medium, width: '70%', fontWeight: '500' }}>Add Family Members To Share Membership</Text>
+                                                <TouchableOpacity style={{ backgroundColor: GlobalColors.blue, padding: 5, borderRadius: 20 }}
+                                                    onPress={() => { setSecondModal(true)}}
+                                                >
+                                                    <Ionicons name="add" size={20} color="#fff" />
+                                                </TouchableOpacity>
+                                            </View>
+                                            <View style={[{ marginTop: 10 }]}>
+                                                <View style={styles.container}>
+                                                    <MultiSelect
+                                                        style={styles.dropdown}
+                                                        data={customer.familyMembers}
+                                                        labelField="name"
+                                                        valueField="name"
+                                                        placeholder="Select Member"
+                                                        value={selectedFamily}
+                                                        onChange={item => {
+                                                            setSelectedFamily(item);
+                                                        }}
+                                                        selectedTextStyle={{color: '#000'}}
+                                                        selectedStyle={styles.selectedStyle}
+                                                        placeholderStyle={{color: 'gray'}}
+                                                        iconColor={GlobalColors.blue}
+                                                    />
+                                                </View>
+                                            </View>
+                                        </View>
+                                        <View>
+                                            <Text style={{ fontSize: FontSize.large, marginBottom: 10 }}>Payment Details:</Text>
+                                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 15 }}>
+                                                {paymentTypes?.map((type: { [key: string]: any }, index: number) => (
+                                                    <Pressable style={{ margin: 10, width: '25%' }} key={index}
+                                                        onPress={() => {
+
+                                                        }}
+                                                    >
+                                                        <Text>{type.name}</Text>
+                                                        <View style={[{ borderWidth: 0.5, borderColor: 'lightgray', borderRadius: 2, padding: 3, marginVertical: 5, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-evenly' }]}>
+                                                            <Image source={{ uri: type.img }} style={{ width: 25, height: 25 }} />
+                                                            <TextInput
+                                                                style={{ borderBottomWidth: 0.5, width: '50%', borderColor: 'gray' }}
+                                                            />
+                                                        </View>
+                                                    </Pressable>
+                                                ))}
+                                            </View>
+                                            <View>
+                                                <Text style={{ fontSize: FontSize.large, marginBottom: 10 }}>Remark:</Text>
+                                                <TextInput
+                                                    style={styles.textInput}
+                                                    placeholder="Enter Remark"
+                                                    value={remark}
+                                                    onChangeText={setRemark}
+                                                />
+                                            </View>
+                                        </View>
+                                    </View>
+                                </ScrollView>
+                                <View style={[GlobalStyles.justifiedRow, { justifyContent: "flex-end", width: "100%", paddingTop: 15, borderTopColor: 'lightgray', borderTopWidth: 2 }]}>
+                                    <Pressable style={[styles.buttonContainer, { marginRight: 20, width: '30%' }]}
+                                        onPress={() => { setModalVisible(false) }}
+                                    >
+                                        <Text style={styles.buttonText}>Cancel</Text>
+                                    </Pressable>
+                                    <Pressable style={[styles.buttonContainer, { backgroundColor: GlobalColors.blue, marginRight: 20, width: '40%' }]}
+                                        onPress={async () => {
+                                            await addMembershipToUser();
+                                            setModalVisible(false);
+                                        }}
+                                    >
+                                        <Text style={[styles.buttonText, { color: '#fff' }]}>Add Membership</Text>
+                                    </Pressable>
                                 </View>
-                                <View>
-                                    <Text style={{fontSize: FontSize.large, marginBottom: 10}}>Remark:</Text>
-                                    <TextInput
-                                        style={styles.textInput}
-                                        placeholder="Enter Remark"
-                                        value={remark}
-                                        onChangeText={setRemark}
-                                    />
-                                </View>
-                            </View>
-                        </ScrollView>
-                        <View style={[GlobalStyles.justifiedRow, { justifyContent: "flex-end", width: "100%", paddingTop: 15, borderTopColor: 'lightgray', borderTopWidth: 2}]}>
-                            <Pressable style={[styles.buttonContainer, { marginRight: 20, width: '30%' }]}
-                                onPress={() => { setModalVisible(false) }}
-                            >
-                                <Text style={styles.buttonText}>Cancel</Text>
-                            </Pressable>
-                            <Pressable style={[styles.buttonContainer, { backgroundColor: GlobalColors.blue, marginRight: 20, width: '40%'}]}
-                                onPress={async () => {  }}
-                            >
-                                <Text style={[styles.buttonText, { color: '#fff' }]}>Add Membership</Text>
-                            </Pressable>
-                        </View> 
+                            </>
+                        }
                     </View>
                 </View>
             </Modal>
@@ -246,6 +388,21 @@ const styles = StyleSheet.create({
         textAlign: "center",
         paddingVertical: 5,
         color: GlobalColors.blue
+    },
+    container: { width: '100%' },
+    dropdown: {
+        width: '60%',
+        backgroundColor: 'transparent',
+        borderColor: 'lightgray',
+        borderWidth: 0.5,
+        borderRadius: 5,
+        paddingHorizontal: 5,
+        marginBottom: 5
+    },
+    selectedStyle: {
+        borderRadius: 15,
+        backgroundColor: GlobalColors.lightGray2,
+        borderColor: '#fff'
     },
 });
 
