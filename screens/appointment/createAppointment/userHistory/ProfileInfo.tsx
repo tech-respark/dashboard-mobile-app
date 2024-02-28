@@ -33,7 +33,7 @@ const ProfileInfo: FC<IProfileInfo> = ({ customer }) => {
                     </View>
                     <View style={styles.row}>
                         <Text>Loyalty Points: </Text>
-                        <Text style={styles.text}>{customer.loyalty.availablePointsAll}</Text>
+                        <Text style={styles.text}>{customer?.loyalty?.availablePointsAll}</Text>
                     </View>
                 </View>
                 <View style={{ maxWidth: '48%' }}>

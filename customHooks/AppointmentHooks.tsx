@@ -50,7 +50,7 @@ export const useDebounce = ({value, delay=500}: any) => {
     }, [value]);
 };
 
-export const useCustomerData = () => {
+export const useCustomerData = (modalVisible: boolean = false) => {
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
     const [customers, setCustomers] = useState<{ [key: string]: any }[]>([]);
@@ -66,8 +66,12 @@ export const useCustomerData = () => {
     };
 
     useEffect(()=>{
+        if(!modalVisible){
+            console.log("####5", modalVisible)
+
         getCustomersData();
-    }, []);
+        }
+    }, [modalVisible]);
 
     return customers;
 };
