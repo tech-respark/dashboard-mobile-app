@@ -9,15 +9,23 @@ interface IOrders {
 }
 
 const Orders: FC<IOrders> = ({ ordersHistory }) => {
-    const renderItem = ({ item, index }: any) => {
+    console.log("#######", ordersHistory.length)
+
+    const showProductOrService = (type: string, item: any) => {
+        let isTextShown = false;
         return (
-            <View style={[styles.cardView, GlobalStyles.shadow, { marginVertical: 8 }]}>
-                <Text style={{ color: GlobalColors.blue, marginBottom: 10 }}>{moment(item.orderDay).format("YYYY-MM-DD")}</Text>
-                <Text style={{ fontSize: FontSize.medium, fontWeight: '500', marginBottom: 5 }}>Service</Text>
-                {/* TODO chnage service to dynamic*/}
-                {
-                    item.products?.map((product: any, index: number) => (
-                        <View key={index} style={{ marginVertical: 5 }}>
+            <View>
+                {item.products && item.products?.map((product: any, sindex: number) => (
+                    product.type == type &&
+                    <>
+                        {!isTextShown && (
+                            <React.Fragment>
+                                {isTextShown = true}
+                                <Text style={{ fontSize: FontSize.medium, fontWeight: '500', textTransform: 'capitalize' }}>{type}</Text>
+                            </React.Fragment>
+                        )
+                        }
+                        <View key={sindex} style={{ marginVertical: 5 }}>
                             <Text>{product.category}</Text>
                             <View style={GlobalStyles.justifiedRow}>
                                 <View style={{ flexDirection: 'row' }}>
@@ -26,17 +34,30 @@ const Orders: FC<IOrders> = ({ ordersHistory }) => {
                                 </View>
                                 <Text>₹{product.billingPrice}</Text>
                             </View>
-                            {product.variations.length > 0 && <Text style={{ fontWeight: '300' }}>({product.variations[0].name})</Text>}
+                            {product.variations?.length > 0 && <Text style={{ fontWeight: '300' }}>({product.variations[0].name})</Text>}
                         </View>
-                    ))
-                }
+                    </>
+                )
+                )}
+            </View>
+        );
+    };
+
+    const renderItem = ({ item, index }: any) => {
+        return (
+            <View key={index} style={[styles.cardView, GlobalStyles.shadow, { marginVertical: 8 }]}>
+                <Text style={{ color: GlobalColors.blue, marginBottom: 10 }}>{moment(item.orderDay).format("YYYY-MM-DD")}</Text>
+                {showProductOrService('service', item)}
+                {showProductOrService('product', item)}
                 <View style={{ borderWidth: 0.5, marginVertical: 10, borderColor: 'lightgray', borderStyle: 'dotted', width: '100%', backgroundColor: 'lightgray' }} />
                 <View style={[GlobalStyles.justifiedRow, {}]}>
-                    <View style={{ flexDirection: 'row', maxWidth: '70%' }}>
+                    <View style={{ flexDirection: 'row', width: '70%' }}>
                         <Text style={{ fontWeight: '300' }}>Paymode: </Text>
-                        {item.payments.map((payment: any, index: number) => (
-                            <Text style={{ fontWeight: '300' }}>{`${payment.name} (${payment.payment}), `}</Text>
-                        ))}
+                        <View style={{ width: '75%', flexDirection: 'row', flexWrap: 'wrap' }}>
+                            {item.payments.map((payment: any, tindex: number) => (
+                                <Text key={tindex} style={{ fontWeight: '300' }}>{`${payment.name} (${payment.payment}), `}</Text>
+                            ))}
+                        </View>
                     </View>
                     <Text style={{ fontWeight: '500' }}>Total  ₹{item.paidAmount}</Text>
                 </View>

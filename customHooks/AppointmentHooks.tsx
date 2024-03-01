@@ -1,6 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAppSelector } from '../redux/Hooks';
-import { selectCurrentStoreConfig } from '../redux/state/UserStates';
+import { selectBranchId, selectCurrentStoreConfig, selectTenantId } from '../redux/state/UserStates';
+import { environment } from '../utils/Constants';
+import { makeAPIRequest } from '../utils/Helper';
+import { GlobalColors } from '../Styles/GlobalStyleConfigs';
+import Toast from 'react-native-root-toast';
 
 export const useTimeIntervalList = () => {
     const storeConfig = useAppSelector(selectCurrentStoreConfig);
@@ -44,4 +48,30 @@ export const useDebounce = ({value, delay=500}: any) => {
 
         return () => clearTimeout(timeout);
     }, [value]);
+};
+
+export const useCustomerData = (modalVisible: boolean = false) => {
+    const storeId = useAppSelector(selectBranchId);
+    const tenantId = useAppSelector(selectTenantId);
+    const [customers, setCustomers] = useState<{ [key: string]: any }[]>([]);
+
+    const getCustomersData = async () => {
+        const url = environment.guestUrl + `customer/getByTenantStoreMinimal?tenantId=${tenantId}&storeId=${storeId}`;
+        let response = await makeAPIRequest(url, null, "GET");
+        if (response) {
+            setCustomers(response);
+        } else {
+            Toast.show("Encountered issue", { backgroundColor: GlobalColors.error });
+        }
+    };
+
+    useEffect(()=>{
+        if(!modalVisible){
+            console.log("####5", modalVisible)
+
+        getCustomersData();
+        }
+    }, [modalVisible]);
+
+    return customers;
 };

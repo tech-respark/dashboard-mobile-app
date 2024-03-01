@@ -47,4 +47,12 @@ export const GlobalStyles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
+  cardView: {
+    borderWidth: 1,
+    borderColor: 'lightgray',
+    borderRadius: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 5,
+    marginBottom: 10
+},
 })

@@ -15,6 +15,7 @@ import ServiceSearchModal from "./ServiceSearchModal";
 import Checkbox from 'expo-checkbox';
 import CreateUser from "./CreateUser";
 import GuestExpertDropdown from "./GuestExpertDropdown";
+import { useCustomerData } from "../../../customHooks/AppointmentHooks";
 
 type ServiceDetailsType = {
     service: { [key: string]: any },
@@ -29,12 +30,15 @@ const CreateAppointment = ({ navigation, route }: any) => {
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
     const services = useAppSelector(selectProductServiceCategories);
-    console.log(services)
-    const [customers, setCustomers] = useState<{ [key: string]: any }[]>([]);
+    const customers = useCustomerData();
+
     const [selectedCustomer, setSelectedCustomer] = useState<{ [key: string]: any }>({});
     const [instructions, setInstructions] = useState<string>('');
     const [enableSMS, setEnableSMS] = useState<boolean>(true);
     const [selectedModal, setSelectedModal] = useState<'guest' | 'service'>('guest');
+    const [modalVisible, setModalVisible] = useState<boolean>(false);
+    const [createUserModal, setCreateUserModal] = useState<boolean>(false);
+
     const [serviceDetails, setServiceDetails] = useState<ServiceDetailsType[]>([{
         service: {},
         experts: [route.params.staffObjects[route.params.selectedStaffIndex]],
@@ -42,17 +46,6 @@ const CreateAppointment = ({ navigation, route }: any) => {
         toTime: route.params.to
     }]);
 
-    const [modalVisible, setModalVisible] = useState<boolean>(false);
-
-    const getCustomersData = async () => {
-        const url = environment.guestUrl + `customer/getByTenantStoreMinimal?tenantId=${tenantId}&storeId=${storeId}`;
-        let response = await makeAPIRequest(url, null, "GET");
-        if (response) {
-            setCustomers(response);
-        } else {
-            Toast.show("Encountered issue", { backgroundColor: GlobalColors.error });
-        }
-    };
 
     const addEmptyService = () => {
         let lastObj = serviceDetails[serviceDetails.length - 1];
@@ -77,12 +70,9 @@ const CreateAppointment = ({ navigation, route }: any) => {
         });
     }, [navigation]);
 
-    useEffect(() => {
-        getCustomersData();
-    }, []);
-
     return (
         <View style={{ flex: 1 }}>
+            {createUserModal && <CreateUser setModalVisible={setCreateUserModal} modalVisible={createUserModal}/>}
             <ScrollView style={styles.container}>
                 <View style={[GlobalStyles.sectionView, { zIndex: selectedModal == 'guest' ? 2 : 1 }]}>
                     <View style={[GlobalStyles.justifiedRow, { marginBottom: 10 }]}>
@@ -95,7 +85,15 @@ const CreateAppointment = ({ navigation, route }: any) => {
                                         navigation.navigate("User History", { customerId: selectedCustomer.id })
                                     }}
                                 >User History</Text> :
-                                <CreateUser />
+                                <View style={[GlobalStyles.justifiedRow]}>
+                                    <Text style={{ color: GlobalColors.blue, marginRight: 10 }}>Add User</Text>
+                                    <TouchableOpacity style={styles.circleIcon}
+                                        onPress={() => {
+                                            setCreateUserModal(true);
+                                        }}>
+                                        <Ionicons name="add" size={25} color="#fff" />
+                                    </TouchableOpacity>
+                                </View>
                         }
                     </View>
                     <GuestExpertDropdown data={customers} placeholderText="Search By Name Or Number" type="guest" setSelected={(val) => { setSelectedCustomer(val) }} selectedValue={selectedCustomer.firstName} />

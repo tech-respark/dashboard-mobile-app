@@ -14,6 +14,7 @@ import Toast from "react-native-root-toast";
 import LoadingState from "../../../../components/LoadingState";
 import AboutUser from "./AboutUser";
 import Membership from "./Membership";
+import FamilyMembers from "./FamilyMembers";
 
 const UserHistory = ({ navigation, route }: any) => {
     const storeId = useAppSelector(selectBranchId);
@@ -24,15 +25,16 @@ const UserHistory = ({ navigation, route }: any) => {
     const [orderHistory, setOrderHistory] = useState<{ [key: string]: any }[]>([]);
     const [loader, setLoader] = useState<boolean>(false);
 
-    const userHistorySections = ["Profile Info", "Orders", "About User", "Membership", "Advance", "Due Balance"];
-    const sectionIcons = ["person-outline", "receipt-outline", "information-circle-outline", "ribbon-outline", "cash-outline", "wallet-outline"];
+    const userHistorySections = ["Profile Info", "Orders", "About User", "Membership", "Advance", "Due Balance", "Family Members"];
+    const sectionIcons = ["person-outline", "receipt-outline", "information-circle-outline", "ribbon-outline", "cash-outline", "wallet-outline", "people-outline"];
     const sectionViewMap: { [key: string]: any } = {
         "Profile Info": <ProfileInfo customer={customerData!}/>,
         "Orders": <Orders ordersHistory={orderHistory}/>,
         "About User": <AboutUser />,
-        "Membership": <Membership customer={customerData!}/>,
+        "Membership": <Membership customer={customerData!} setCustomer={setCustomerData}/>,
         "Advance": <AboutUser />,
-        "Due Balance": <AboutUser />
+        "Due Balance": <AboutUser />,
+        "Family Members": <FamilyMembers customer={customerData!} setCustomer={setCustomerData}/>
     }
 
     const getUserData = async () => {
@@ -50,8 +52,6 @@ const UserHistory = ({ navigation, route }: any) => {
         let response = await makeAPIRequest(url, null, "GET");
         if (response) {
             setOrderHistory(response);
-        } else {
-            Toast.show("Encountered issue", { backgroundColor: GlobalColors.error });
         }
     };
 
