@@ -4,7 +4,7 @@ import { GlobalStyles } from "../Styles/Styles";
 import { FontSize, GlobalColors } from "../Styles/GlobalStyleConfigs";
 import GuestExpertDropdown from "../screens/appointment/createAppointment/GuestExpertDropdown";
 import { useCustomerData } from "../customHooks/AppointmentHooks";
-import CreateUser from "../screens/appointment/createAppointment/CreateUser";
+import AddUpdateUser from "../screens/appointment/createAppointment/AddUpdateUser";
 import { environment } from "../utils/Constants";
 import { makeAPIRequest } from "../utils/Helper";
 import Toast from "react-native-root-toast";
@@ -57,7 +57,7 @@ const AddFamilyMemberModal: FC<IAddFamilyMemberModal> = ({ modalVisible, setModa
             onRequestClose={() => {
                 setModalVisible(!modalVisible);
             }}>
-            {createUserModal && <CreateUser setModalVisible={setCreateUserModal} modalVisible={createUserModal} />}
+            {createUserModal && <AddUpdateUser setModalVisible={setCreateUserModal} modalVisible={createUserModal} />}
             <View style={[GlobalStyles.modalbackground]}>
                 <View style={styles.modalView}>
                     <Text style={{ width: '100%', textAlign: 'center', fontWeight: '600', fontSize: FontSize.large }}>Add Family Member</Text>

@@ -1,18 +1,23 @@
 import { Ionicons } from "@expo/vector-icons";
 import moment from "moment";
-import React, { FC } from "react";
+import React, { FC, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { GlobalColors } from "../../../../Styles/GlobalStyleConfigs";
 import { GlobalStyles } from "../../../../Styles/Styles";
+import AddUpdateUser from "../AddUpdateUser";
 
 interface IProfileInfo {
-    customer: { [key: string]: any }
+    customer: { [key: string]: any },
+    setCustomer: (val: any) => void,
 }
 
-const ProfileInfo: FC<IProfileInfo> = ({ customer }) => {
+const ProfileInfo: FC<IProfileInfo> = ({ customer, setCustomer }) => {
+    const [modalVisible, setModalVisible] = useState<boolean>(false);
+
     return (
         <View style={[styles.cardView, GlobalStyles.shadow]}>
+            {modalVisible && <AddUpdateUser modalVisible={modalVisible} setModalVisible={setModalVisible} isEdit={true} userDetails={customer} setUserDetails={setCustomer}/>}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <View style={{ maxWidth: '48%' }}>
                     <View style={styles.row}>
@@ -65,7 +70,9 @@ const ProfileInfo: FC<IProfileInfo> = ({ customer }) => {
             </View>
             <View style={[styles.row, { marginTop: 20 }]}>
                 <Text style={{ marginRight: 10 }}>Edit Profile</Text>
-                <TouchableOpacity style={{ padding: 5, borderWidth: 0.5, borderColor: GlobalColors.blue, borderRadius: 5 }}>
+                <TouchableOpacity style={{ padding: 5, borderWidth: 0.5, borderColor: GlobalColors.blue, borderRadius: 5 }}
+                onPress={()=>{setModalVisible(true)}}
+                >
                     <Ionicons name="pencil" size={20} color={GlobalColors.blue} />
                 </TouchableOpacity>
             </View>

@@ -13,7 +13,7 @@ import Toast from "react-native-root-toast";
 import { TimerWithBorderHeader } from "../../../components/HeaderTextField";
 import ServiceSearchModal from "./ServiceSearchModal";
 import Checkbox from 'expo-checkbox';
-import CreateUser from "./CreateUser";
+import AddUpdateUser from "./AddUpdateUser";
 import GuestExpertDropdown from "./GuestExpertDropdown";
 import { useCustomerData } from "../../../customHooks/AppointmentHooks";
 
@@ -72,7 +72,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
 
     return (
         <View style={{ flex: 1 }}>
-            {createUserModal && <CreateUser setModalVisible={setCreateUserModal} modalVisible={createUserModal}/>}
+            {createUserModal && <AddUpdateUser setModalVisible={setCreateUserModal} modalVisible={createUserModal}/>}
             <ScrollView style={styles.container}>
                 <View style={[GlobalStyles.sectionView, { zIndex: selectedModal == 'guest' ? 2 : 1 }]}>
                     <View style={[GlobalStyles.justifiedRow, { marginBottom: 10 }]}>

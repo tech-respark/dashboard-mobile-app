@@ -28,7 +28,7 @@ const UserHistory = ({ navigation, route }: any) => {
     const userHistorySections = ["Profile Info", "Orders", "About User", "Membership", "Advance", "Due Balance", "Family Members"];
     const sectionIcons = ["person-outline", "receipt-outline", "information-circle-outline", "ribbon-outline", "cash-outline", "wallet-outline", "people-outline"];
     const sectionViewMap: { [key: string]: any } = {
-        "Profile Info": <ProfileInfo customer={customerData!}/>,
+        "Profile Info": <ProfileInfo customer={customerData!} setCustomer={setCustomerData}/>,
         "Orders": <Orders ordersHistory={orderHistory}/>,
         "About User": <AboutUser />,
         "Membership": <Membership customer={customerData!} setCustomer={setCustomerData}/>,

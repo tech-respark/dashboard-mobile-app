@@ -7,9 +7,10 @@ interface ICustomDropdown2 {
     options: {[key: string]: any}[],
     labelKey: string,
     setSelectedItem: (val: {[key: string]: any}) => void,
+    selectedValue: string
 }
 
-const CustomDropdown2: FC<ICustomDropdown2> = ({options, setSelectedItem, labelKey}) => {
+const CustomDropdown2: FC<ICustomDropdown2> = ({options, setSelectedItem, labelKey, selectedValue}) => {
     return (
         <Dropdown
         style={styles.dropdown}
@@ -17,6 +18,7 @@ const CustomDropdown2: FC<ICustomDropdown2> = ({options, setSelectedItem, labelK
         iconColor={GlobalColors.blue}
         selectedTextStyle={{textTransform: 'capitalize'}}
         data={options}
+        value={selectedValue}
         labelField={labelKey}
         valueField={labelKey}
         onChange={item => {
