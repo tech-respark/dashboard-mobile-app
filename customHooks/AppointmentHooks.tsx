@@ -67,9 +67,7 @@ export const useCustomerData = (modalVisible: boolean = false) => {
 
     useEffect(()=>{
         if(!modalVisible){
-            console.log("####5", modalVisible)
-
-        getCustomersData();
+            getCustomersData();
         }
     }, [modalVisible]);
 

@@ -1,10 +1,36 @@
-import React, { useState } from "react";
+import React, { FC, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { FontSize, GlobalColors } from "../../../../Styles/GlobalStyleConfigs";
 import { GlobalStyles } from "../../../../Styles/Styles";
+import { useAppDispatch } from "../../../../redux/Hooks";
+import { setIsLoading } from "../../../../redux/state/UIStates";
+import { makeAPIRequest } from "../../../../utils/Helper";
+import { environment } from "../../../../utils/Constants";
+import Toast from "react-native-root-toast";
 
-const AboutUser = () => {
-    const [aboutUser, setAboutUser] = useState<string>("");
+interface IAboutUser {
+    customer: { [key: string]: any },
+    setCustomer: (val: any) => void,
+}
+
+const AboutUser: FC<IAboutUser> = ({customer, setCustomer}) => {
+    const dispatch = useAppDispatch();
+    const [aboutUser, setAboutUser] = useState<string>(customer.notes);
+
+    const updateAboutUser = async() => {
+        dispatch(setIsLoading({ isLoading: true }));
+        const url = environment.guestUrl + `customers`;
+        let tempCustomer = {...customer};
+        tempCustomer["notes"] = aboutUser
+        let response = await makeAPIRequest(url, tempCustomer, "POST");
+        if (response) {
+            setCustomer(response);
+            Toast.show("User information updated", { backgroundColor: GlobalColors.success, opacity: 1 });
+        }
+        else
+            Toast.show("Encountered Error", { backgroundColor: GlobalColors.error, opacity: 1 });
+        dispatch(setIsLoading({ isLoading: true }));
+    };
 
     return (
         <View style={{ width: '100%', flex: 1, alignItems: 'center', padding: 10 }}>
@@ -20,12 +46,12 @@ const AboutUser = () => {
             </View>
             <View style={[GlobalStyles.justifiedRow, { justifyContent: "flex-end", width: "100%"}]}>
                 <Pressable style={[styles.buttonContainer, { marginRight: 20 }]}
-                    onPress={() => { }}
+                   onPress={()=>{setAboutUser("")}}
                 >
                     <Text style={styles.buttonText}>Reset</Text>
                 </Pressable>
                 <Pressable style={[styles.buttonContainer, { backgroundColor: GlobalColors.blue }]}
-                    onPress={()=>{setAboutUser("")}}
+                 onPress={updateAboutUser}
                 >
                     <Text style={[styles.buttonText, { color: '#fff' }]}>Update</Text>
                 </Pressable>

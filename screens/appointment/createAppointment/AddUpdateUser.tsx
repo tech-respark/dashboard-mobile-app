@@ -87,7 +87,7 @@ const AddUpdateUser: FC<IAddUpdateUser> = ({ modalVisible, setModalVisible, user
         const keys = Object.keys(segments!);
         for (let i = 0; i < keys.length; i += 2) {
             rows.push(
-                <View style={[GlobalStyles.justifiedRow, styles.rowViews]}>
+                <View style={[GlobalStyles.justifiedRow, styles.rowViews]} key={i}>
                     <View style={{ width: '45%' }}>
                         <Text style={styles.marginBt5}>{keys[i]}</Text>
                         <CustomDropdown2 setSelectedItem={(val: { [key: string]: any }) => { handleSegmentsChange(keys[i], val) }} options={segments![keys[i]]} labelKey={'segTypeName'} selectedValue={selectedSegments[keys[i]]?.segTypeName} />

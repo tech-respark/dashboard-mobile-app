@@ -13,7 +13,9 @@ export const makeAPIRequest = async (url: string, body?: any, method: string = "
   let response;
   try {
     response = await fetch(url, options);
+    console.log("STATUS:", response.status)
     if (response.status != 200 || (!allowEmptyRes && response.headers.get('content-length') === '0')) {
+      console.log("500 code of: ", url)
       return null;
     }
   } catch (error) {

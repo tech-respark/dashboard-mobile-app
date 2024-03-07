@@ -30,7 +30,6 @@ const CreateAppointment = ({ navigation, route }: any) => {
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
     const services = useAppSelector(selectProductServiceCategories);
-    const customers = useCustomerData();
 
     const [selectedCustomer, setSelectedCustomer] = useState<{ [key: string]: any }>({});
     const [instructions, setInstructions] = useState<string>('');
@@ -38,7 +37,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
     const [selectedModal, setSelectedModal] = useState<'guest' | 'service'>('guest');
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [createUserModal, setCreateUserModal] = useState<boolean>(false);
-
+    const customers = useCustomerData(createUserModal);
     const [serviceDetails, setServiceDetails] = useState<ServiceDetailsType[]>([{
         service: {},
         experts: [route.params.staffObjects[route.params.selectedStaffIndex]],

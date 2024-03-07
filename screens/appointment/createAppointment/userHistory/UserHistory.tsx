@@ -15,6 +15,7 @@ import LoadingState from "../../../../components/LoadingState";
 import AboutUser from "./AboutUser";
 import Membership from "./Membership";
 import FamilyMembers from "./FamilyMembers";
+import AdvanceOrBalance from "./AdvanceOrBalance";
 
 const UserHistory = ({ navigation, route }: any) => {
     const storeId = useAppSelector(selectBranchId);
@@ -30,10 +31,10 @@ const UserHistory = ({ navigation, route }: any) => {
     const sectionViewMap: { [key: string]: any } = {
         "Profile Info": <ProfileInfo customer={customerData!} setCustomer={setCustomerData}/>,
         "Orders": <Orders ordersHistory={orderHistory}/>,
-        "About User": <AboutUser />,
+        "About User": <AboutUser customer={customerData!} setCustomer={setCustomerData}/>,
         "Membership": <Membership customer={customerData!} setCustomer={setCustomerData}/>,
-        "Advance": <AboutUser />,
-        "Due Balance": <AboutUser />,
+        "Advance": <AdvanceOrBalance isAdvance={true} customer={customerData!} setCustomer={setCustomerData}/>,
+        "Due Balance": <AdvanceOrBalance isAdvance={false} customer={customerData!} setCustomer={setCustomerData}/>,
         "Family Members": <FamilyMembers customer={customerData!} setCustomer={setCustomerData}/>
     }
 
@@ -48,7 +49,7 @@ const UserHistory = ({ navigation, route }: any) => {
     };
 
     const getUserOrdersHistory = async () => {
-        const url = environment.appointmentUri + `sorder/tenantguest/${tenantId}/${route.params.customerId}`;
+        const url = environment.txnUrl + `sorder/tenantguest/${tenantId}/${route.params.customerId}`;
         let response = await makeAPIRequest(url, null, "GET");
         if (response) {
             setOrderHistory(response);

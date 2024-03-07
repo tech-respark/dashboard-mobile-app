@@ -2,11 +2,11 @@ export const environment = {
     sqlBaseUri: "https://dev-respark.respark.in:8081/pcs/v1/",
     documentBaseUri: "https://dev-respark.respark.in:8082/pcs-catalog/v1/",
     guestUrl: "https://dev-respark.respark.in:8083/pcs-guest/v1/",
-    appointmentUri: "https://dev-respark.respark.in:8084/pcs-txn/v1/"
+    txnUrl: "https://dev-respark.respark.in:8084/pcs-txn/v1/"
     // sqlBaseUri: "https://qa.respark.in:8081/pcs/v1/",
     // documentBaseUri: "https://qa.respark.in:8082/pcs-catalog/v1/",
     // guestUrl: "https://qa.respark.in:8083/pcs-guest/v1/",
-    // appointmentUri: "https://qa.respark.in:8084/pcs-txn/v1/"
+    // txnUrl: "https://qa.respark.in:8084/pcs-txn/v1/"
 }
 
 export const mainTabsIconsMap: {[key: string]: string} = {
