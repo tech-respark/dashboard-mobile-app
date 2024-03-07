@@ -63,7 +63,7 @@ const AdvanceOrBalance: FC<IAdvanceOrBalance> = ({ isAdvance, customer, setCusto
         let response = await makeAPIRequest(url, body, "POST");
         setLoader2(false);
         if (response && response.code == 200) {
-            let tempCus = { ...customer, ...(isAdvance ? { advanceAmount: customer.advanceAmount + parseInt(amount) } : { paidBalanceAmount: customer.balAmount - parseInt(amount) }) }
+            let tempCus = { ...customer, ...(isAdvance ? { advanceAmount: customer.advanceAmount + parseInt(amount) } : { balAmount: customer.balAmount - parseInt(amount) }) }
             setCustomer(tempCus);
             setModalVisible(false);
             Toast.show(isAdvance ? "Advance Added Successfully" : "Due Balance Cleared Successfully", { backgroundColor: GlobalColors.success, opacity: 1.0 });
@@ -75,13 +75,12 @@ const AdvanceOrBalance: FC<IAdvanceOrBalance> = ({ isAdvance, customer, setCusto
 
     useEffect(() => {
         if (!modalVisible) {
-            console.log("________________")
             fetchHistory();
             setAmount("");
             setRemark("");
             setPaymode("");
         }
-    }, [modalVisible])
+    }, [modalVisible, isAdvance])
 
     return (
         <View style={{ width: '100%', flex: 1, paddingVertical: 20, paddingHorizontal: 10 }}>
@@ -98,28 +97,28 @@ const AdvanceOrBalance: FC<IAdvanceOrBalance> = ({ isAdvance, customer, setCusto
             <Text style={{ fontSize: FontSize.medium, fontWeight: '500', marginBottom: 10 }}>{isAdvance ? "Advance" : "Due Balance"} History</Text>
             {
                 history.length > 0 ?
-                    <View style={[GlobalStyles.cardView, GlobalStyles.shadow]}>
-                        <View style={[GlobalStyles.justifiedRow, { padding: 10, backgroundColor: 'lightgray', borderRadius: 5, marginBottom: 5 }]}>
-                            <Text>Date</Text>
-                            <Text>Credit Amount</Text>
-                            <Text>Debited Amount</Text>
-                            <Text>Transaction Type</Text>
-                            <Text>Remark</Text>
+                    <ScrollView style={[GlobalStyles.cardView, GlobalStyles.shadow]}>
+                        <View style={[{ paddingVertical: 10, backgroundColor: 'lightgray', borderRadius: 5, marginBottom: 5, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-evenly' }]}>
+                            <Text style={styles.tableHeaderCell}>Date</Text>
+                            <Text style={styles.tableHeaderCell}>Credit Amount</Text>
+                            <Text style={styles.tableHeaderCell}>Debited Amount</Text>
+                            <Text style={styles.tableHeaderCell}>Type</Text>
+                            <Text style={styles.tableHeaderCell}>Remark</Text>
                         </View>
                         <ScrollView>
                             {
                                 history.map((data: any, index: number) => (
                                     <View key={index} style={[GlobalStyles.justifiedRow, { paddingHorizontal: 10, paddingVertical: 10, borderBottomWidth: 0.5, borderColor: 'gray' }]}>
-                                        <Text>{data.date}</Text>
-                                        <Text>{data.creditAmount}</Text>
-                                        <Text>{data.debitAmount}</Text>
-                                        <Text>{data.transactionType}</Text>
-                                        <Text>{data.remark}</Text>
+                                        <Text style={[styles.tableHeaderCell, {fontSize: FontSize.small}]}>{data.date}</Text>
+                                        <Text style={[styles.tableHeaderCell, {fontSize: FontSize.small}]}>{data.creditAmount}</Text>
+                                        <Text style={[styles.tableHeaderCell, {fontSize: FontSize.small}]}>{data.debitAmount}</Text>
+                                        <Text style={[styles.tableHeaderCell, {fontSize: FontSize.small}]}>{data.transactionType}</Text>
+                                        <Text style={[styles.tableHeaderCell, {fontSize: FontSize.small}]}>{data.remark}</Text>
                                     </View>
                                 ))
                             }
                         </ScrollView>
-                    </View>
+                    </ScrollView>
                     :
                     <LoadingState loader={loader} />
             }
@@ -259,6 +258,10 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
         color: GlobalColors.blue
     },
+    tableHeaderCell: {
+        width: '20%',
+        textAlign: 'center'
+    }
 });
 
 export default AdvanceOrBalance;

@@ -1,12 +1,12 @@
 export const environment = {
-    sqlBaseUri: "https://dev-respark.respark.in:8081/pcs/v1/",
-    documentBaseUri: "https://dev-respark.respark.in:8082/pcs-catalog/v1/",
-    guestUrl: "https://dev-respark.respark.in:8083/pcs-guest/v1/",
-    txnUrl: "https://dev-respark.respark.in:8084/pcs-txn/v1/"
-    // sqlBaseUri: "https://qa.respark.in:8081/pcs/v1/",
-    // documentBaseUri: "https://qa.respark.in:8082/pcs-catalog/v1/",
-    // guestUrl: "https://qa.respark.in:8083/pcs-guest/v1/",
-    // txnUrl: "https://qa.respark.in:8084/pcs-txn/v1/"
+    // sqlBaseUri: "https://dev-respark.respark.in:8081/pcs/v1/",
+    // documentBaseUri: "https://dev-respark.respark.in:8082/pcs-catalog/v1/",
+    // guestUrl: "https://dev-respark.respark.in:8083/pcs-guest/v1/",
+    // txnUrl: "https://dev-respark.respark.in:8084/pcs-txn/v1/"
+    sqlBaseUri: "https://qa.respark.in:8081/pcs/v1/",
+    documentBaseUri: "https://qa.respark.in:8082/pcs-catalog/v1/",
+    guestUrl: "https://qa.respark.in:8083/pcs-guest/v1/",
+    txnUrl: "https://qa.respark.in:8084/pcs-txn/v1/"
 }
 
 export const mainTabsIconsMap: {[key: string]: string} = {
@@ -50,3 +50,5 @@ export const MEMBERSHIPCOLORS = [
      {shade1: '#c8f4ed', shade2: '#6ff0dc', shade3: "#197063"},
      {shade1: '#cdf9d9', shade2: '#6ff093', shade3: "#1c8539"}
     ]
+
+export const SHOW_SHIFT_MEMBERSHIP_AFTER_DAYS: number = 10

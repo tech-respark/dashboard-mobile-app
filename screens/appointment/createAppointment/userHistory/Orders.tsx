@@ -9,8 +9,6 @@ interface IOrders {
 }
 
 const Orders: FC<IOrders> = ({ ordersHistory }) => {
-    console.log("#######", ordersHistory.length)
-
     const showProductOrService = (type: string, item: any) => {
         let isTextShown = false;
         return (
@@ -21,7 +19,7 @@ const Orders: FC<IOrders> = ({ ordersHistory }) => {
                         {!isTextShown && (
                             <React.Fragment>
                                 {isTextShown = true}
-                                <Text style={{ fontSize: FontSize.medium, fontWeight: '500', textTransform: 'capitalize' }}>{type}</Text>
+                                <Text key={sindex} style={{ fontSize: FontSize.medium, fontWeight: '500', textTransform: 'capitalize' }}>{type}</Text>
                             </React.Fragment>
                         )
                         }
@@ -54,7 +52,7 @@ const Orders: FC<IOrders> = ({ ordersHistory }) => {
                     <View style={{ flexDirection: 'row', width: '70%' }}>
                         <Text style={{ fontWeight: '300' }}>Paymode: </Text>
                         <View style={{ width: '75%', flexDirection: 'row', flexWrap: 'wrap' }}>
-                            {item.payments.map((payment: any, tindex: number) => (
+                            {item.payments?.map((payment: any, tindex: number) => (
                                 <Text key={tindex} style={{ fontWeight: '300' }}>{`${payment.name} (${payment.payment}), `}</Text>
                             ))}
                         </View>

@@ -13,7 +13,7 @@ import { makeAPIRequest, sleep } from "../../../../utils/Helper";
 import Toast from "react-native-root-toast";
 import LoadingState from "../../../../components/LoadingState";
 import AboutUser from "./AboutUser";
-import Membership from "./Membership";
+import Membership from "./membership/Membership";
 import FamilyMembers from "./FamilyMembers";
 import AdvanceOrBalance from "./AdvanceOrBalance";
 
