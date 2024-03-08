@@ -22,9 +22,14 @@ const AddFamilyMemberModal: FC<IAddFamilyMemberModal> = ({ modalVisible, setModa
     const [createUserModal, setCreateUserModal] = useState<boolean>(false);
     const [relation, setRelation] = useState<string>("");
     const [updatedGuests, setUpdatedGuests] =  useState<{[key: string]: any}[]>([]);
+    const [showError, setShowError] = useState<boolean>(false);
     const guests = useCustomerData(createUserModal);
 
     const addMember = async () => {
+        if(!relation){
+            setShowError(true);
+            return
+        }
         let members = [...customer.familyMembers];
         members.push(
             {
@@ -35,8 +40,9 @@ const AddFamilyMemberModal: FC<IAddFamilyMemberModal> = ({ modalVisible, setModa
                 relation: relation
             }
         );
-        let url = environment.guestUrl + `familyMembers?guestId=${customer.id}`;
-        let response = await makeAPIRequest(url, members, "PUT");
+        let tempCus = {...customer, ...{familyMembers: members}};
+        let url = environment.guestUrl + `customers`;
+        let response = await makeAPIRequest(url, tempCus, "POST");
         if (response) {
             setCustomer(response);
             setModalVisible(false);
@@ -67,7 +73,7 @@ const AddFamilyMemberModal: FC<IAddFamilyMemberModal> = ({ modalVisible, setModa
                         <GuestExpertDropdown data={updatedGuests} placeholderText="Search By Name Or Number" type="guest" setSelected={(val) => { setSelectedCustomer(val) }} selectedValue={selectedCustomer.firstName} />
                     </View>
                     <View style={{ marginBottom: 10 }}>
-                        <Text>Relation</Text>
+                        <Text>Relation*</Text>
                         <TextInput
                             style={styles.textInput}
                             placeholder="Mother, Father, etc..."
@@ -75,6 +81,7 @@ const AddFamilyMemberModal: FC<IAddFamilyMemberModal> = ({ modalVisible, setModa
                             placeholderTextColor="lightgray"
                             onChangeText={setRelation}
                         />
+                        {showError && <Text style={{fontSize: FontSize.small, color: GlobalColors.error}}>Please enter relation</Text>}
                     </View>
                     <View style={[GlobalStyles.justifiedRow, { justifyContent: "flex-end", width: "100%", paddingTop: 15, borderTopColor: 'lightgray', borderTopWidth: 2 }]}>
                         <Pressable style={[styles.buttonContainer, { marginRight: 20, width: '30%' }]}

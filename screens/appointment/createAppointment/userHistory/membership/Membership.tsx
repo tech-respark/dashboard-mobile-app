@@ -15,21 +15,11 @@ interface IMembership {
 
 const Membership: FC<IMembership> = ({ customer, setCustomer }) => {
     const [modalVisible, setModalVisible] = useState<boolean>(false);
-    const [shiftMembership, setShiftMembership] = useState<boolean>(false);
-    const [daysDiff, setDaysDiff] = useState<number|null>(null);
-
-    useEffect(()=>{
-        if(customer.membership){
-            const daysDifference = moment(customer.membership.toDate).diff(moment(customer.membership.fromDate), 'days');
-            daysDifference<=SHOW_SHIFT_MEMBERSHIP_AFTER_DAYS ? setShiftMembership(true) : null;
-            setDaysDiff(daysDifference);
-        }
-    }, []);
 
     return (
-        <View style={{ width: '100%', flex: 1, paddingVertical: 20, paddingHorizontal: 10 }}>
-            {shiftMembership ? 
-            <ShiftMembership customer={customer} setCustomer={setCustomer} days={daysDiff}/>
+        <ScrollView style={{ width: '100%', flex: 1, paddingVertical: 20, paddingHorizontal: 10 }}>
+            {customer.membership ? 
+            <ShiftMembership customer={customer} setCustomer={setCustomer}/>
             :
             <View style={{ justifyContent: 'flex-end', flexDirection: 'row', marginBottom: 15 }}>
                 <TouchableOpacity style={{ backgroundColor: GlobalColors.blue, borderRadius: 5 }}
@@ -66,7 +56,7 @@ const Membership: FC<IMembership> = ({ customer, setCustomer }) => {
                     </View>
             }
             {modalVisible && <MembershipModal modalVisible={modalVisible} setModalVisible={setModalVisible} customer={customer} setCustomer={setCustomer}/>}
-        </View>
+        </ScrollView>
     );
 };
 
