@@ -59,7 +59,6 @@ const AdvanceOrBalance: FC<IAdvanceOrBalance> = ({ isAdvance, customer, setCusto
             tenantId: tenantId,
             ...(isAdvance ? { advanceAmount: amount } : { paidBalanceAmount: amount })
         }
-        console.log(body)
         let response = await makeAPIRequest(url, body, "POST");
         setLoader2(false);
         if (response && response.code == 200) {
@@ -88,8 +87,8 @@ const AdvanceOrBalance: FC<IAdvanceOrBalance> = ({ isAdvance, customer, setCusto
                 : (customer.balAmount ? `Total Due Balance: ₹${customer.balAmount}` : "No Due Balance")}
             </Text>
             <View style={{ justifyContent: 'flex-end', flexDirection: 'row', marginBottom: 15 }}>
-                <TouchableOpacity style={{ backgroundColor: GlobalColors.blue, borderRadius: 5 }}
-                    onPress={() => { setModalVisible(true) }}
+                <TouchableOpacity style={{ backgroundColor: history.length>0 || isAdvance ? GlobalColors.blue : 'lightgray', borderRadius: 5 }}
+                    onPress={() => { setModalVisible(true) }} disabled={history.length==0 && !isAdvance}
                 >
                     <Text style={{ color: "#fff", padding: 10, fontSize: FontSize.medium }}>{isAdvance ? "Add Advance" : "Clear Balance"}</Text>
                 </TouchableOpacity>

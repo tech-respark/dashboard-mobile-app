@@ -16,6 +16,7 @@ import AboutUser from "./AboutUser";
 import Membership from "./membership/Membership";
 import FamilyMembers from "./FamilyMembers";
 import AdvanceOrBalance from "./AdvanceOrBalance";
+import Packages from "./Packages";
 
 const UserHistory = ({ navigation, route }: any) => {
     const storeId = useAppSelector(selectBranchId);
@@ -26,8 +27,8 @@ const UserHistory = ({ navigation, route }: any) => {
     const [orderHistory, setOrderHistory] = useState<{ [key: string]: any }[]>([]);
     const [loader, setLoader] = useState<boolean>(false);
 
-    const userHistorySections = ["Profile Info", "Orders", "About User", "Membership", "Advance", "Due Balance", "Family Members"];
-    const sectionIcons = ["person-outline", "receipt-outline", "information-circle-outline", "ribbon-outline", "cash-outline", "wallet-outline", "people-outline"];
+    const userHistorySections = ["Profile Info", "Orders", "About User", "Membership", "Advance", "Due Balance", "Family Members", "Packages"];
+    const sectionIcons = ["person-outline", "receipt-outline", "information-circle-outline", "ribbon-outline", "cash-outline", "wallet-outline", "people-outline", "basket-outline"];
     const sectionViewMap: { [key: string]: any } = {
         "Profile Info": <ProfileInfo customer={customerData!} setCustomer={setCustomerData}/>,
         "Orders": <Orders ordersHistory={orderHistory}/>,
@@ -35,7 +36,8 @@ const UserHistory = ({ navigation, route }: any) => {
         "Membership": <Membership customer={customerData!} setCustomer={setCustomerData}/>,
         "Advance": <AdvanceOrBalance isAdvance={true} customer={customerData!} setCustomer={setCustomerData}/>,
         "Due Balance": <AdvanceOrBalance isAdvance={false} customer={customerData!} setCustomer={setCustomerData}/>,
-        "Family Members": <FamilyMembers customer={customerData!} setCustomer={setCustomerData}/>
+        "Family Members": <FamilyMembers customer={customerData!} setCustomer={setCustomerData}/>,
+        "Packages": <Packages customer={customerData!} setCustomer={setCustomerData} />
     }
 
     const getUserData = async () => {
