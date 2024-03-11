@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import { useIsFocused } from "@react-navigation/native";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
@@ -10,19 +10,14 @@ import { environment } from "../../../utils/Constants";
 import { selectBranchId, selectProductServiceCategories, selectTenantId } from "../../../redux/state/UserStates";
 import { makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
-import { TimerWithBorderHeader } from "../../../components/HeaderTextField";
+import { HeaderedComponent, TimerWithBorderHeader } from "../../../components/HeaderTextField";
 import ServiceSearchModal from "./ServiceSearchModal";
 import Checkbox from 'expo-checkbox';
 import AddUpdateUser from "./AddUpdateUser";
 import GuestExpertDropdown from "./GuestExpertDropdown";
 import { useCustomerData } from "../../../customHooks/AppointmentHooks";
+import { ServiceDetailsType } from "../../../utils/Types";
 
-type ServiceDetailsType = {
-    service: { [key: string]: any },
-    experts: { [key: string]: any }[],
-    fromTime: string,
-    toTime: string
-};
 
 const CreateAppointment = ({ navigation, route }: any) => {
 
@@ -34,7 +29,6 @@ const CreateAppointment = ({ navigation, route }: any) => {
     const [selectedCustomer, setSelectedCustomer] = useState<{ [key: string]: any }>({});
     const [instructions, setInstructions] = useState<string>('');
     const [enableSMS, setEnableSMS] = useState<boolean>(true);
-    const [selectedModal, setSelectedModal] = useState<'guest' | 'service'>('guest');
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [createUserModal, setCreateUserModal] = useState<boolean>(false);
     const customers = useCustomerData(createUserModal);
@@ -44,7 +38,6 @@ const CreateAppointment = ({ navigation, route }: any) => {
         fromTime: route.params.from,
         toTime: route.params.to
     }]);
-
 
     const addEmptyService = () => {
         let lastObj = serviceDetails[serviceDetails.length - 1];
@@ -71,9 +64,9 @@ const CreateAppointment = ({ navigation, route }: any) => {
 
     return (
         <View style={{ flex: 1 }}>
-            {createUserModal && <AddUpdateUser setModalVisible={setCreateUserModal} modalVisible={createUserModal}/>}
+            {createUserModal && <AddUpdateUser setModalVisible={setCreateUserModal} modalVisible={createUserModal} />}
             <ScrollView style={styles.container}>
-                <View style={[GlobalStyles.sectionView, { zIndex: selectedModal == 'guest' ? 2 : 1 }]}>
+                <View style={[GlobalStyles.sectionView]}>
                     <View style={[GlobalStyles.justifiedRow, { marginBottom: 10 }]}>
                         <Text style={styles.headingText}>1. Guest Details</Text>
                         {
@@ -98,7 +91,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
                     <GuestExpertDropdown data={customers} placeholderText="Search By Name Or Number" type="guest" setSelected={(val) => { setSelectedCustomer(val) }} selectedValue={selectedCustomer.firstName} />
                 </View>
 
-                <View style={[GlobalStyles.sectionView, { zIndex: selectedModal == 'service' ? 2 : 1 }]}>
+                <View style={[GlobalStyles.sectionView]}>
                     <View style={[GlobalStyles.justifiedRow, { marginBottom: 10 }]}>
                         <Text style={styles.headingText}>2. Service Details</Text>
                         <View style={GlobalStyles.justifiedRow}>
@@ -109,25 +102,23 @@ const CreateAppointment = ({ navigation, route }: any) => {
                             </TouchableOpacity>
                         </View>
                     </View>
-                    {/* will be iterated for multiple */}
                     {
                         serviceDetails.map((serviceDetailsObj: ServiceDetailsType, sIndex: number) => (
-                            <View style={{ borderWidth: 1, borderRadius: 5, borderColor: 'lightgray', padding: 5, marginVertical: 5 }}>
-                                <ServiceSearchModal data={services} type="service" placeholderText="Search Service By Name" headerText={`Service ${sIndex + 1}`} setModal={setSelectedModal}
-                                    setSelected={(val) => {
-                                        console.log(val);
+                            <View style={{ borderWidth: 1, borderRadius: 5, borderColor: 'lightgray', padding: 5, marginVertical: 5 }} key={sIndex}>
+                                <ServiceSearchModal data={services!} headerText={`Service ${sIndex + 1}`} selectedValue={serviceDetailsObj.service?.name}
+                                    setSelectedValue={(val) => {
                                         setServiceDetails(prev => {
                                             const updated = [...prev];
-                                            console.log(updated[sIndex].service)
                                             updated[sIndex].service = val;
                                             return updated
                                         })
                                     }}
                                 />
                                 {serviceDetailsObj.experts.map((expert: { [key: string]: any }, eIndex: number) => (
-                                    <View style={GlobalStyles.justifiedRow}>
+                                    <View style={GlobalStyles.justifiedRow} key={eIndex}>
                                         <View style={{ width: eIndex == 0 ? '100%' : '90%' }}>
                                             <GuestExpertDropdown data={route.params.staffObjects} placeholderText="Search Expert" type="expert" selectedValue={expert.name} headerText={`Expert ${eIndex + 1}`}
+                                                currentExperts={serviceDetailsObj.experts}
                                                 setSelected={(val) => {
                                                     setServiceDetails(prev => {
                                                         const updated = [...prev];
@@ -151,7 +142,8 @@ const CreateAppointment = ({ navigation, route }: any) => {
                                             </TouchableOpacity>
                                         }
                                     </View>
-                                ))}
+                                ))
+                                }
                                 <Text style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}
                                     onPress={() => {
                                         if (Object.keys(serviceDetailsObj.experts[serviceDetailsObj.experts.length - 1]).length > 0) {
@@ -164,8 +156,10 @@ const CreateAppointment = ({ navigation, route }: any) => {
                                             Toast.show(`Select Expert before adding more experts`, { backgroundColor: GlobalColors.error });
                                         }
                                     }}>Add Expert</Text>
+
                                 <View style={[GlobalStyles.justifiedRow, { marginTop: 20 }]}>
-                                    <TimerWithBorderHeader value={serviceDetails[sIndex].fromTime} header="From Time"
+                                    <TimerWithBorderHeader header="From Time" isFrom={true}
+                                        serviceObj={serviceDetailsObj}
                                         setValue={(val) => {
                                             setServiceDetails(prev => {
                                                 const updated = [...prev];
@@ -174,7 +168,8 @@ const CreateAppointment = ({ navigation, route }: any) => {
                                             })
                                         }}
                                     />
-                                    <TimerWithBorderHeader value={serviceDetails[sIndex].toTime} header="To Time"
+                                    <TimerWithBorderHeader header="To Time" isFrom={false}      
+                                        serviceObj={serviceDetailsObj}
                                         setValue={(val) => {
                                             setServiceDetails(prev => {
                                                 const updated = [...prev];
@@ -302,6 +297,27 @@ const styles = StyleSheet.create({
         textAlign: "center",
         paddingVertical: 5,
         color: GlobalColors.blue
+    },
+    inputContainer: {
+        borderRadius: 5,
+        borderWidth: 1,
+        borderColor: 'lightgray',
+        flexDirection: "row",
+        alignItems: "center",
+        paddingHorizontal: 10,
+        width: '50%'
+    },
+    header: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        position: 'absolute',
+        zIndex: 1,
+        marginLeft: 15,
+        marginTop: -8,
+        paddingHorizontal: 5
+    },
+    headerText: {
+        color: GlobalColors.blue,
     },
 });
 

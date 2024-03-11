@@ -42,11 +42,11 @@ const AddFamilyMemberModal: FC<IAddFamilyMemberModal> = ({ modalVisible, setModa
         let url = environment.guestUrl + `customers`;
         console.log("HEllo", tempCus, url)
         let response = await makeAPIRequest(url, tempCus, "POST");
-        // if (response) {
-        //     setCustomer(response);
-        //     setModalVisible(false);
-        //     Toast.show("Member Added", { backgroundColor: GlobalColors.success });
-        // }
+        if (response) {
+            setCustomer(response);
+            setModalVisible(false);
+            Toast.show("Member Added", { backgroundColor: GlobalColors.success });
+        }
     };
 
     useEffect(()=>{

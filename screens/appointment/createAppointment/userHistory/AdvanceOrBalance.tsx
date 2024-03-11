@@ -87,8 +87,8 @@ const AdvanceOrBalance: FC<IAdvanceOrBalance> = ({ isAdvance, customer, setCusto
                 : (customer.balAmount ? `Total Due Balance: ₹${customer.balAmount}` : "No Due Balance")}
             </Text>
             <View style={{ justifyContent: 'flex-end', flexDirection: 'row', marginBottom: 15 }}>
-                <TouchableOpacity style={{ backgroundColor: history.length>0 || isAdvance ? GlobalColors.blue : 'lightgray', borderRadius: 5 }}
-                    onPress={() => { setModalVisible(true) }} disabled={history.length==0 && !isAdvance}
+                <TouchableOpacity style={{ backgroundColor: history.length > 0 || isAdvance ? GlobalColors.blue : 'lightgray', borderRadius: 5 }}
+                    onPress={() => { setModalVisible(true) }} disabled={history.length == 0 && !isAdvance}
                 >
                     <Text style={{ color: "#fff", padding: 10, fontSize: FontSize.medium }}>{isAdvance ? "Add Advance" : "Clear Balance"}</Text>
                 </TouchableOpacity>
@@ -108,11 +108,11 @@ const AdvanceOrBalance: FC<IAdvanceOrBalance> = ({ isAdvance, customer, setCusto
                             {
                                 history.map((data: any, index: number) => (
                                     <View key={index} style={[GlobalStyles.justifiedRow, { paddingHorizontal: 10, paddingVertical: 10, borderBottomWidth: 0.5, borderColor: 'gray' }]}>
-                                        <Text style={[styles.tableHeaderCell, {fontSize: FontSize.small}]}>{data.date}</Text>
-                                        <Text style={[styles.tableHeaderCell, {fontSize: FontSize.small}]}>{data.creditAmount}</Text>
-                                        <Text style={[styles.tableHeaderCell, {fontSize: FontSize.small}]}>{data.debitAmount}</Text>
-                                        <Text style={[styles.tableHeaderCell, {fontSize: FontSize.small}]}>{data.transactionType}</Text>
-                                        <Text style={[styles.tableHeaderCell, {fontSize: FontSize.small}]}>{data.remark}</Text>
+                                        <Text style={[styles.tableHeaderCell, { fontSize: FontSize.small }]}>{data.date}</Text>
+                                        <Text style={[styles.tableHeaderCell, { fontSize: FontSize.small }]}>{data.creditAmount}</Text>
+                                        <Text style={[styles.tableHeaderCell, { fontSize: FontSize.small }]}>{data.debitAmount}</Text>
+                                        <Text style={[styles.tableHeaderCell, { fontSize: FontSize.small }]}>{data.transactionType}</Text>
+                                        <Text style={[styles.tableHeaderCell, { fontSize: FontSize.small }]}>{data.remark}</Text>
                                     </View>
                                 ))
                             }
@@ -130,7 +130,7 @@ const AdvanceOrBalance: FC<IAdvanceOrBalance> = ({ isAdvance, customer, setCusto
                 <View style={[GlobalStyles.modalbackground]}>
                     <View style={[styles.modalView]}>
                         {loader2 &&
-                            <View style={[GlobalStyles.isLoading, {backgroundColor: '',}]}>
+                            <View style={[GlobalStyles.isLoading, { backgroundColor: '', }]}>
                                 <ActivityIndicator color={GlobalColors.blue} size={"large"} />
                             </View>
                         }
@@ -226,8 +226,21 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         color: GlobalColors.blue
     },
-    buttonsView: { justifyContent: "flex-end", width: "100%", paddingTop: 15, borderTopColor: 'lightgray', borderTopWidth: 2 },
-    paymentView: { margin: 10, borderWidth: 0.5, justifyContent: 'space-evenly', padding: 5, borderColor: 'lightgray', borderRadius: 2 },
+    buttonsView: {
+        justifyContent: "flex-end",
+        width: "100%",
+        paddingTop: 15,
+        borderTopColor: 'lightgray',
+        borderTopWidth: 2
+    },
+    paymentView: {
+        margin: 10,
+        borderWidth: 0.5,
+        justifyContent: 'space-evenly',
+        padding: 5,
+        borderColor: 'lightgray',
+        borderRadius: 2
+    },
     textInput: {
         paddingHorizontal: 10,
         paddingVertical: 8,

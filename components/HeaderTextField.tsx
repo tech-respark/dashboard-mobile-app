@@ -3,6 +3,10 @@ import { ColorValue, Pressable, StyleSheet, Text, TextInput, View } from "react-
 import { FontSize, GlobalColors } from "../Styles/GlobalStyleConfigs";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Ionicons } from "@expo/vector-icons";
+import TimeSlotModal from "../screens/appointment/createAppointment/TimeSlotModal";
+import Toast from "react-native-root-toast";
+import { useExpertTimeInterval } from "../customHooks/AppointmentHooks";
+import { ServiceDetailsType } from "../utils/Types";
 
 type TextFieldWithBorderHeaderProps = {
   value: string,
@@ -18,10 +22,11 @@ type TextFieldWithBorderHeaderProps = {
 }
 
 type TimerWithBorderHeaderProps = {
-  value: string,
   setValue: (val: string) => void,
   header: string,
   width?: number,
+  isFrom: boolean,
+  serviceObj: ServiceDetailsType
 }
 
 export const TextFieldWithBorderHeader: FC<TextFieldWithBorderHeaderProps> = ({ value, setValue, header, showSymbol, index, setValueWithIndex, width, headerBackground = "#fff", setValueWithIndexAndType, type }) => {
@@ -47,28 +52,28 @@ export const TextFieldWithBorderHeader: FC<TextFieldWithBorderHeaderProps> = ({ 
   );
 };
 
-export const TimerWithBorderHeader: FC<TimerWithBorderHeaderProps> = ({ value, setValue, header, width }) => {
-  const [isTimePickerVisible, setIsTimePickerVisible] = useState<boolean>(false);
+export const TimerWithBorderHeader: FC<TimerWithBorderHeaderProps> = ({ serviceObj, setValue, header, width, isFrom }) => {
+  const expertTime = serviceObj.experts.length ? serviceObj.experts[0].slot : null
+  const timeInterval = useExpertTimeInterval(expertTime);
+  const [timeSlotModal, setTimeSlotModal] = useState<boolean>(false);
   return (
     <View style={[styles.container, { width: width ?? "40%" }]}>
       <View style={[styles.header, { backgroundColor: "#fff" }]}>
         <Text style={styles.headerText}>{header}</Text>
       </View>
       <Pressable style={[styles.inputContainer, {padding: 10, justifyContent: 'space-between'}]}
-        onPress={()=>setIsTimePickerVisible(true)}
+        onPress={()=>{
+          if(expertTime)
+            setTimeSlotModal(true)
+          else
+          Toast.show("Select Expert First", {backgroundColor: GlobalColors.error, opacity: 1.0})
+        }}
       >
-          <Text>{value}</Text>
+          <Text>{isFrom ? serviceObj.fromTime: serviceObj.toTime}</Text>
           <Ionicons name="timer-outline" size={20} color={GlobalColors.blue}/>
       </Pressable>
-      <DateTimePickerModal
-        isVisible={isTimePickerVisible}
-        mode="time"
-        onConfirm={async (time) => {
-          setValue(time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }));
-          setIsTimePickerVisible(false);
-        }}
-        onCancel={() => setIsTimePickerVisible(false)}
-      />
+      {timeSlotModal && <TimeSlotModal modalVisible={timeSlotModal} setModalVisible={setTimeSlotModal} isFrom={isFrom} timeInterval={timeInterval} setValue={setValue} 
+        serviceObj={serviceObj}/>}
     </View>
   );
 };
