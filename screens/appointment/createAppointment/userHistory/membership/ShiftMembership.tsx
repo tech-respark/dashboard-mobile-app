@@ -10,7 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { selectUserData } from "../../../../../redux/state/UserStates";
 import { useAppSelector } from "../../../../../redux/Hooks";
-import { makeAPIRequest } from "../../../../../utils/Helper";
+import { getAddedMembersObjects, makeAPIRequest } from "../../../../../utils/Helper";
 import Toast from "react-native-root-toast";
 import FamilyMembers from "../FamilyMembers";
 import AlertModal from "../../../../../components/AlertModal";
@@ -38,19 +38,6 @@ const ShiftMembership: FC<IShiftMembership> = ({ customer, setCustomer }) => {
         setDaysRemaining(daysDifference);
     };
 
-    const getAddedMembersObjects = () => {
-        const objects = selectedFamily.map(item => {
-            const foundObject = customer.familyMembers.find((obj:any) => obj.name === item);
-            if (foundObject) {
-                const { id, ...rest } = foundObject; 
-                return { ...rest, sharedId: id }; 
-            } else {
-                return null;
-            }
-        });
-        return objects;
-    };
-
     const updateMembership = async () => {
         if(!remark){
             setShowError(true);
@@ -62,7 +49,7 @@ const ShiftMembership: FC<IShiftMembership> = ({ customer, setCustomer }) => {
             balanceMinutes: null,
             editRemark: remark,
             modifiedBy: loggedInUser!.id,
-            newSharedMembers: getAddedMembersObjects(),
+            newSharedMembers: getAddedMembersObjects(selectedFamily, customer),
             toDate: expiryDate
         }
         const response = await makeAPIRequest(url, data, "PUT");
@@ -81,7 +68,7 @@ const ShiftMembership: FC<IShiftMembership> = ({ customer, setCustomer }) => {
             setCustomer(tempCus);
             Toast.show("Membership Deleted Successfully", { backgroundColor: GlobalColors.success, opacity: 1.0 });
         }else{
-            Toast.show("Encountered Error", { backgroundColor: GlobalColors.error, opacity:1.0 });
+            Toast.show("Encountered Error", { backgroundColor: GlobalColors.error, opacity: 1.0 });
         }
     };
 

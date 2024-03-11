@@ -6,7 +6,7 @@ import moment from "moment";
 import { MEMBERSHIPCOLORS, environment } from "../../../../../utils/Constants";
 import { useAppDispatch, useAppSelector } from "../../../../../redux/Hooks";
 import { selectBranchId, selectPaymentTypes, selectStaffData, selectTenantId, selectUserData } from "../../../../../redux/state/UserStates";
-import { makeAPIRequest } from "../../../../../utils/Helper";
+import { getAddedMembersObjects, makeAPIRequest } from "../../../../../utils/Helper";
 import { Svg, Path } from "react-native-svg";
 import GuestExpertDropdown from "../../GuestExpertDropdown";
 import LoadingState from "../../../../../components/LoadingState";
@@ -133,7 +133,7 @@ const MembershipModal: FC<IMembershipModal> = ({ modalVisible, setModalVisible, 
                 "txchrgs": selectedMembership?.txchrgs,
                 "membershipFee": selectedMembership?.membershipFee,
                 "payments": paymentSetter(),
-                'sharedMembers': [], // will be updated for isHsared profiles
+                'sharedMembers': getAddedMembersObjects(selectedFamily, customer),
                 'typeId': selectedMembership?.typeId,
             }
             let response = await makeAPIRequest(url, txnObj, "POST");

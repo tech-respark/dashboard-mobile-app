@@ -13,7 +13,6 @@ export const makeAPIRequest = async (url: string, body?: any, method: string = "
   let response;
   try {
     response = await fetch(url, options);
-    console.log("STATUS:", response.status)
     if (response.status != 200 || (!allowEmptyRes && response.headers.get('content-length') === '0')) {
       console.log("500 code of: ", url)
       return null;
@@ -113,4 +112,17 @@ export function getActiveStaffsForAppointment(latestStaffList: { [key: string]: 
     return false;
   });
   return commonStaffList;
-}
+};
+
+export const getAddedMembersObjects = (selectedFamily: string[], customer: {[key: string]: any}) => {
+  const objects = selectedFamily.map(item => {
+      const foundObject = customer.familyMembers.find((obj:any) => obj.name === item);
+      if (foundObject) {
+          const { id, ...rest } = foundObject; 
+          return { ...rest, sharedId: id }; 
+      } else {
+          return null;
+      }
+  });
+  return objects;
+};

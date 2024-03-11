@@ -15,26 +15,26 @@ const Orders: FC<IOrders> = ({ ordersHistory }) => {
             <View>
                 {item.products && item.products?.map((product: any, sindex: number) => (
                     product.type == type &&
-                    <>
+                    <View key={sindex}>
                         {!isTextShown && (
                             <React.Fragment>
                                 {isTextShown = true}
-                                <Text key={sindex} style={{ fontSize: FontSize.medium, fontWeight: '500', textTransform: 'capitalize' }}>{type}</Text>
+                                <Text style={{ fontSize: FontSize.medium, fontWeight: '500', textTransform: 'capitalize' }}>{type}</Text>
                             </React.Fragment>
                         )
                         }
-                        <View key={sindex} style={{ marginVertical: 5 }}>
+                        <View style={{ marginVertical: 5 }}>
                             <Text>{product.category}</Text>
                             <View style={GlobalStyles.justifiedRow}>
-                                <View style={{ flexDirection: 'row' }}>
-                                    <Text style={{ fontWeight: '300', marginRight: 15 }}>{product.name}</Text>
-                                    <Text style={{ fontWeight: '300' }}>{product.staff ? `(By ${product.staff})` : '-'}</Text>
+                                <View style={{ flexDirection: 'row', width: '80%', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <Text style={{ fontWeight: '300', width: '50%' }}>{product.name}</Text>
+                                    <Text style={{ fontWeight: '300', width: '50%' }}>{product.staff ? `(By ${product.staff})` : '-'}</Text>
                                 </View>
                                 <Text>₹{product.billingPrice}</Text>
                             </View>
                             {product.variations?.length > 0 && <Text style={{ fontWeight: '300' }}>({product.variations[0].name})</Text>}
                         </View>
-                    </>
+                    </View>
                 )
                 )}
             </View>

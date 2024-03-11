@@ -4,7 +4,6 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import { FontSize, GlobalColors } from "../../../../../Styles/GlobalStyleConfigs";
 import { GlobalStyles } from "../../../../../Styles/Styles";
 import moment from "moment";
-import { SHOW_SHIFT_MEMBERSHIP_AFTER_DAYS } from "../../../../../utils/Constants";
 import MembershipModal from "./MembershipModal";
 import ShiftMembership from "./ShiftMembership";
 

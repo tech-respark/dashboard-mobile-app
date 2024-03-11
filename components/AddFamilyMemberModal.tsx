@@ -29,30 +29,29 @@ const AddFamilyMemberModal: FC<IAddFamilyMemberModal> = ({ modalVisible, setModa
         if(!relation){
             setShowError(true);
             return
-        }
-        let members = [...customer.familyMembers];
-        members.push(
-            {
+        };
+        let members = customer.familyMembers ?? [];
+        members.push({
                 id: selectedCustomer.id,
                 mobileNo: selectedCustomer.mobileNo,
                 name: selectedCustomer.firstName,
                 optInForWapp: false,
                 relation: relation
-            }
-        );
+            });
         let tempCus = {...customer, ...{familyMembers: members}};
         let url = environment.guestUrl + `customers`;
+        console.log("HEllo", tempCus, url)
         let response = await makeAPIRequest(url, tempCus, "POST");
-        if (response) {
-            setCustomer(response);
-            setModalVisible(false);
-            Toast.show("Member Added", { backgroundColor: GlobalColors.success });
-        }
+        // if (response) {
+        //     setCustomer(response);
+        //     setModalVisible(false);
+        //     Toast.show("Member Added", { backgroundColor: GlobalColors.success });
+        // }
     };
 
     useEffect(()=>{
         if(guests.length > 0){
-            setUpdatedGuests(guests.filter(guest => !customer.familyMembers.some((item2: any) => guest.id === item2.id) && guest.id !== customer.id));
+            setUpdatedGuests(guests.filter(guest => !customer.familyMembers?.some((item2: any) => guest.id === item2.id) && guest.id !== customer.id));
         }
     }, [guests]);
 
