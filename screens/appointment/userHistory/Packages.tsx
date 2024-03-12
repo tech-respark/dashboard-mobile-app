@@ -1,6 +1,6 @@
 import React, { FC, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { FontSize, GlobalColors } from "../../../../Styles/GlobalStyleConfigs";
+import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import Toast from "react-native-root-toast";
 
 interface IPackages {

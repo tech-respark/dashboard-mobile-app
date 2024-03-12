@@ -1,8 +1,8 @@
 import React, { FC, useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { FontSize, GlobalColors } from "../../../../../Styles/GlobalStyleConfigs";
-import { GlobalStyles } from "../../../../../Styles/Styles";
+import { FontSize, GlobalColors } from "../../../../Styles/GlobalStyleConfigs";
+import { GlobalStyles } from "../../../../Styles/Styles";
 import moment from "moment";
 import MembershipModal from "./MembershipModal";
 import ShiftMembership from "./ShiftMembership";

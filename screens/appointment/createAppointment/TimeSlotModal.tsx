@@ -16,6 +16,7 @@ interface ITimeSlotModal {
 const TimeSlotModal: FC<ITimeSlotModal> = ({ modalVisible, setModalVisible, isFrom, timeInterval, setValue, serviceObj }) => {
     let validationOccurred = false;
 
+    console.log(serviceObj)
     const checkTimeValidation = (time: string) => {
         if (isFrom) {
             return true;
@@ -49,7 +50,7 @@ const TimeSlotModal: FC<ITimeSlotModal> = ({ modalVisible, setModalVisible, isFr
                         <View style={{ flexDirection: 'row', flexWrap: 'wrap', margin: 10, justifyContent: 'space-evenly' }}>
                             {Object.keys(timeInterval).map((time: string, index: number) => (
                                 checkTimeValidation(time) && 
-                                <TouchableOpacity key={index} style={[{ borderRadius: 2, borderWidth: 1, margin: 8, borderColor: isFrom ? (serviceObj.fromTime==time ? GlobalColors.blue : 'lightgray') : (serviceObj.toTime==time ? GlobalColors.blue : 'lightgray'), width: '40%' }]}
+                                <TouchableOpacity key={index} style={[{ borderRadius: 2, borderWidth: 1, margin: 8, borderColor: isFrom ? (serviceObj.fromTime==time ? GlobalColors.blue : 'lightgray') : (serviceObj.toTime==time ? GlobalColors.blue : 'lightgray'), width: '40%', alignItems: 'center' }]}
                                 onPress={()=>{
                                     setValue(time);
                                     setModalVisible(false);

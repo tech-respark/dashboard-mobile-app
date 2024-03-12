@@ -1,7 +1,7 @@
 import React, { FC } from "react";
 import { FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
-import { FontSize, GlobalColors } from "../../../../Styles/GlobalStyleConfigs";
-import { GlobalStyles } from "../../../../Styles/Styles";
+import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
+import { GlobalStyles } from "../../../Styles/Styles";
 import moment from "moment";
 
 interface IOrders {

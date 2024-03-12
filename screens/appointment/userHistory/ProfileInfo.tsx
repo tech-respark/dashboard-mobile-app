@@ -3,9 +3,9 @@ import moment from "moment";
 import React, { FC, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { GlobalColors } from "../../../../Styles/GlobalStyleConfigs";
-import { GlobalStyles } from "../../../../Styles/Styles";
-import AddUpdateUser from "../AddUpdateUser";
+import { GlobalColors } from "../../../Styles/GlobalStyleConfigs";
+import { GlobalStyles } from "../../../Styles/Styles";
+import AddUpdateUser from "../common/AddUpdateUser";
 
 interface IProfileInfo {
     customer: { [key: string]: any },

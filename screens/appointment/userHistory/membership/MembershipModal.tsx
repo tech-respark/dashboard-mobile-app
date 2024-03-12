@@ -1,16 +1,16 @@
 import React, { FC, useEffect, useState } from "react";
 import { FlatList, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import { FontSize, GlobalColors } from "../../../../../Styles/GlobalStyleConfigs";
-import { GlobalStyles } from "../../../../../Styles/Styles";
+import { FontSize, GlobalColors } from "../../../../Styles/GlobalStyleConfigs";
+import { GlobalStyles } from "../../../../Styles/Styles";
 import moment from "moment";
-import { MEMBERSHIPCOLORS, environment } from "../../../../../utils/Constants";
-import { useAppDispatch, useAppSelector } from "../../../../../redux/Hooks";
-import { selectBranchId, selectPaymentTypes, selectStaffData, selectTenantId, selectUserData } from "../../../../../redux/state/UserStates";
-import { getAddedMembersObjects, makeAPIRequest } from "../../../../../utils/Helper";
+import { MEMBERSHIPCOLORS, environment } from "../../../../utils/Constants";
+import { useAppDispatch, useAppSelector } from "../../../../redux/Hooks";
+import { selectBranchId, selectPaymentTypes, selectStaffData, selectTenantId, selectUserData } from "../../../../redux/state/UserStates";
+import { getAddedMembersObjects, makeAPIRequest } from "../../../../utils/Helper";
 import { Svg, Path } from "react-native-svg";
-import GuestExpertDropdown from "../../GuestExpertDropdown";
-import LoadingState from "../../../../../components/LoadingState";
-import { setIsLoading } from "../../../../../redux/state/UIStates";
+import GuestExpertDropdown from "../../createAppointment/GuestExpertDropdown";
+import LoadingState from "../../../../components/LoadingState";
+import { setIsLoading } from "../../../../redux/state/UIStates";
 import Toast from "react-native-root-toast";
 import AddMemberView from "./AddMemberView";
 

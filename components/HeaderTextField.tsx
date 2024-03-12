@@ -61,7 +61,7 @@ export const TimerWithBorderHeader: FC<TimerWithBorderHeaderProps> = ({ serviceO
       <View style={[styles.header, { backgroundColor: "#fff" }]}>
         <Text style={styles.headerText}>{header}</Text>
       </View>
-      <Pressable style={[styles.inputContainer, {padding: 10, justifyContent: 'space-between'}]}
+      <Pressable style={[styles.inputContainer, {padding: 10, justifyContent: 'space-evenly'}]}
         onPress={()=>{
           if(expertTime)
             setTimeSlotModal(true)

@@ -1,12 +1,12 @@
 import React, { FC, useEffect, useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { GlobalStyles } from "../Styles/Styles";
-import { FontSize, GlobalColors } from "../Styles/GlobalStyleConfigs";
-import GuestExpertDropdown from "../screens/appointment/createAppointment/GuestExpertDropdown";
-import { useCustomerData } from "../customHooks/AppointmentHooks";
-import AddUpdateUser from "../screens/appointment/createAppointment/AddUpdateUser";
-import { environment } from "../utils/Constants";
-import { makeAPIRequest } from "../utils/Helper";
+import { GlobalStyles } from "../../../Styles/Styles";
+import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
+import GuestExpertDropdown from "../createAppointment/GuestExpertDropdown";
+import { useCustomerData } from "../../../customHooks/AppointmentHooks";
+import AddUpdateUser from "./AddUpdateUser";
+import { environment } from "../../../utils/Constants";
+import { makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
 import { useIsFocused } from "@react-navigation/native";
 

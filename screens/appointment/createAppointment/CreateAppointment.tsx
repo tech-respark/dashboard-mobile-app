@@ -4,19 +4,22 @@ import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpa
 import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import { useIsFocused } from "@react-navigation/native";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
-import { setShowUserProfileTopBar } from "../../../redux/state/UIStates";
+import { setIsLoading, setShowUserProfileTopBar } from "../../../redux/state/UIStates";
 import { GlobalStyles } from "../../../Styles/Styles";
-import { environment } from "../../../utils/Constants";
-import { selectBranchId, selectProductServiceCategories, selectTenantId } from "../../../redux/state/UserStates";
+import { APPOINTMENT_CREATED, DEFAULT_SERVICE_DURATION, environment } from "../../../utils/Constants";
+import { selectBranchId, selectCurrentStoreConfig, selectProductServiceCategories, selectTenantId, selectUserData } from "../../../redux/state/UserStates";
 import { makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
 import { HeaderedComponent, TimerWithBorderHeader } from "../../../components/HeaderTextField";
 import ServiceSearchModal from "./ServiceSearchModal";
 import Checkbox from 'expo-checkbox';
-import AddUpdateUser from "./AddUpdateUser";
+import AddUpdateUser from "../common/AddUpdateUser";
 import GuestExpertDropdown from "./GuestExpertDropdown";
 import { useCustomerData } from "../../../customHooks/AppointmentHooks";
 import { ServiceDetailsType } from "../../../utils/Types";
+import { calculateTaxes } from "../../../utils/Appointment";
+import moment from "moment";
+import ConfirmationModal from "./ConfirmationModal";
 
 
 const CreateAppointment = ({ navigation, route }: any) => {
@@ -25,8 +28,11 @@ const CreateAppointment = ({ navigation, route }: any) => {
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
     const services = useAppSelector(selectProductServiceCategories);
+    const storeConfig = useAppSelector(selectCurrentStoreConfig);
+    const loggedInUser = useAppSelector(selectUserData);
 
-    const [selectedCustomer, setSelectedCustomer] = useState<{ [key: string]: any }>({});
+    const [selectedCustomer, setSelectedCustomer] = useState<{ [key: string]: any } | null>(null);
+    const [guestDetails, setGuestDetails] = useState<{ [key: string]: any }>({});
     const [instructions, setInstructions] = useState<string>('');
     const [enableSMS, setEnableSMS] = useState<boolean>(true);
     const [modalVisible, setModalVisible] = useState<boolean>(false);
@@ -50,85 +56,140 @@ const CreateAppointment = ({ navigation, route }: any) => {
         setServiceDetails([...serviceDetails, { service: {}, experts: [], fromTime: "", toTime: "" }]);
     };
 
+    const calculateContributions = (service: { [key: string]: any }, duration: number) => {
+        let contributions: any = [];
+        service.contributions && service.contributions.map((contributor: any, index: number) => {
+            contributions.push({
+                slot: `${service.fromTime}-${service.toTime}`,
+                duration: duration || DEFAULT_SERVICE_DURATION,
+                expertId: contributor.expertId,
+                expertName: contributor.expertName,
+                workPercentage: (100 / service.contributions.length).toFixed(2),
+                workAmount: service.salePrice || service.price,
+                specialist: index == 0 ? true : false
+            })
+        })
+        return contributions;
+    };
+
     const formValidation = () => {
-        if (!selectedCustomer?.name) {
+        if (Object.keys(guestDetails).length == 0) {
             Toast.show("Select Customer", { backgroundColor: GlobalColors.error, opacity: 1.0 })
             return false
         }
+        let isValid = true;
         serviceDetails.map((service: any, index: number) => {
+            console.log(service)
             let msg = !service.service ? "Select Service" : service.experts.length == 0 ? "Select Expert" : !service.fromTime ? "Select From Time" : !service.toTime ? "Select To Time" : "";
             if (msg) {
-                Toast.show(msg, { backgroundColor: GlobalColors.error, opacity: 1.0 })
-                return false
+                Toast.show(msg, { backgroundColor: GlobalColors.error, opacity: 1.0 });
+                isValid = false;
             }
         });
-        return true;
+        console.log("it is")
+        return isValid;
     };
 
-    // const createIndividualExpertService = (serviceObj: any) => {
-        
-    //     const duration = serviceObj.service.durationType === 'hrs' ? serviceObj.service.duration * 60 : serviceObj.service.duration
+    const createIndividualExpertService = (serviceObj: any) => {
+        const duration = serviceObj.service.durationType === 'hrs' ? serviceObj.service.duration * 60 : serviceObj.service.duration
+        const taxes = calculateTaxes(serviceObj.service.salePrice || serviceObj.service.price, storeConfig!);
+        const individualAppointmentObj = {
+            "appointmentTime": serviceObj.fromTime,
+            "duration": duration,
+            "serviceCategory": serviceObj.service.serviceCategory,
+            "service": serviceObj.service.name || serviceObj.service.service || serviceObj.serviceQuery,
+            "slot": `${serviceObj.fromTime}-${serviceObj.toTime}`,
+            "expertId": serviceObj.experts[0].id,
+            "expertName": serviceObj.experts[0].name,
+            "price": serviceObj.service.price,
+            "salePrice": serviceObj.service.salePrice,
+            "billingPrice": serviceObj.service.salePrice || serviceObj.service.price,
+            "quantity": 1,
+            "serviceCategoryId": serviceObj.service.serviceCategory,
+            "serviceId": serviceObj.service.id,
+            "txchrgs": taxes,
+            "variations": serviceObj.service.variations,
+            "consumables": serviceObj.service.consumables,
+            "contributions": calculateContributions(serviceObj, duration)
+        }
+        return individualAppointmentObj;
+    };
 
-    //     const individualAppointmentObj = {
-    //         "appointmentTime": serviceObj.fromTime,
-    //         "duration": duration,
-    //         // "serviceCategory": category,
-    //         "service": serviceObj.service.name || serviceObj.service.service || serviceObj.serviceQuery,
-    //         "slot": `${serviceObj.fromTime}-${serviceObj.toTime}`,
-    //         "expertId": serviceObj.experts[0].id,
-    //         "expertName": serviceObj.experts[0].name,
-    //         "price": serviceObj.service.price,
-    //         "salePrice": serviceObj.service.salePrice,
-    //         "billingPrice": serviceObj.service.salePrice || serviceObj.service.price,
-    //         // "quantity": quantity || 1,
-    //         // "serviceCategoryId": categoryId,
-    //         "serviceId": serviceId || id,
-    //         "txchrgs": txchrgs,
-    //         "variations": variations,
-    //         "consumables": consumables,
-    //         contributions
-    //     }
+    const getAppointmentStatus = (actionType: string) => {
+        const statusList = []; //update for updation
+        let newStatus = {
+            staff: loggedInUser!.id,
+            createdOn: new Date().toISOString(),
+            status: actionType
+        }
+        statusList.push(newStatus);
+        return statusList;
+    };
 
-    // };
+    const createAppointmentPayload = (actionType: string) => {
+        let appointmentsList: any = [];
+        serviceDetails.map((service: any) => {
+            appointmentsList.push(createIndividualExpertService(service));
+        })
+        const selectedDate = moment(route.params.selectedDate, 'YYYY-MM-DD').toISOString();
+        const appointmentObj: any = {
+            "appointmentDay": selectedDate,
+            "appointmentTime": appointmentsList[0].appointmentTime,
+            "duration": appointmentsList[0].duration,
+            "instruction": instructions,
+            "instrImages": [], //what is use of this
+            "slot": appointmentsList[0].slot,
+            "orderId": '', //maybe for update
+            "invoiceId": '', //maybe for update
+            "expertId": appointmentsList[0].expertId,
+            "expertName": appointmentsList[0].expertName,
+            "storeId": storeId,
+            "tenantId": tenantId,
+            "store": storeConfig!.store,
+            "tenant": storeConfig!.tenant,
+            "guestId": guestDetails.id,
+            "guestName": guestDetails.lastName ? `${guestDetails.firstName} ${guestDetails.lastName}` : guestDetails.firstName,
+            "guestMobile": guestDetails.mobileNo,
+            "guestEmail": guestDetails.email,
+            "guestGSTN": guestDetails.gstN,
+            "bookedFor": guestDetails.bookedFor || null,
+            "storeLocation": '', //maybe for update
+            "createdOn": new Date().toISOString(), //maybe for update,
+            "expertAppointments": appointmentsList,
+            "noOfRemindersSent": 0, //maybe for update
+            "rescheduled": false, //maybe for update
+            "feedbackLinkShared": false, //maybe for update
+            "type": "POS",
+            // "smsKeys": appointmentSMSConfigRef,
+            "status": getAppointmentStatus(actionType)
+        }
+        return appointmentObj;
+    };
 
-    // const createAppointmentPayload = () => {
-    //     if (formValidation()) {
-    //         let appointmentsList: any = [];
-    //         serviceDetails.map((service: any) => {
-    //             appointmentsList.push(createIndividualExpertService(service));
-    //         })
-    //         const appointmentObj: any = {
-    //             "appointmentDay": currentDate.newDate,
-    //             "appointmentTime": appointmentsList[0].appointmentTime,
-    //             "duration": appointmentsList[0].duration,
-    //             "instruction": appointmentInstruction,
-    //             "instrImages": instructionImages,
-    //             "slot": appointmentsList[0].slot,
-    //             "orderId": selectedStaffSlotDetails.apptOrder ? selectedStaffSlotDetails.apptOrder.orderId : '',
-    //             "invoiceId": selectedStaffSlotDetails.apptOrder ? selectedStaffSlotDetails.apptOrder.invoiceId : '',
-    //             "expertId": appointmentsList[0].expertId,
-    //             "expertName": appointmentsList[0].expertName,
-    //             "storeId": storageService.getStore().storeId,
-    //             "tenantId": storageService.getStore().tenantId,
-    //             "store": storageService.getStore().store,
-    //             "tenant": storageService.getStore().tenant,
-    //             "guestId": guestDetails.id,
-    //             "guestName": guestDetails.lastName ? `${guestDetails.firstName} ${guestDetails.lastName}` : guestDetails.firstName,
-    //             "guestMobile": guestDetails.mobileNo,
-    //             "guestEmail": guestDetails.email,
-    //             "guestGSTN": guestDetails.gstN,
-    //             "bookedFor": guestDetails.bookedFor || null,
-    //             "storeLocation": selectedStaffSlotDetails?.appointmentId ? selectedStaffSlotDetails?.apptOrder?.storeLocation : '',
-    //             "createdOn": selectedStaffSlotDetails?.appointmentId ? selectedStaffSlotDetails?.apptOrder.createdOn : new Date(),
-    //             "expertAppointments": appointmentsList,
-    //             "noOfRemindersSent": selectedStaffSlotDetails?.appointmentId ? selectedStaffSlotDetails?.apptOrder.noOfRemindersSent : 0,
-    //             "rescheduled": selectedStaffSlotDetails?.appointmentId ? selectedStaffSlotDetails?.apptOrder.rescheduled : false,
-    //             "feedbackLinkShared": selectedStaffSlotDetails?.appointmentId ? selectedStaffSlotDetails?.apptOrder.feedbackLinkShared : false,
-    //             "type": APPOINTMENT_TYPE_POS,
-    //             "smsKeys": appointmentSMSConfigRef
-    //         }
-    //     }
-    // };
+    const appointmentAPICall =  (actionType: string) => {
+        // dispatch(setIsLoading({isLoading: true}));
+        const url = environment.txnUrl + `appointments`;
+        const payload = createAppointmentPayload(actionType);
+        console.log(payload)
+        // let response = await makeAPIRequest(url, payload, "POST");
+        // dispatch(setIsLoading({isLoading: false}));
+        // if(response){
+        //     Toast.show(`Appointment created successfuly`, {backgroundColor: GlobalColors.success, opacity: 1.0});
+        // }else{
+        //     Toast.show("Encountered Error", {backgroundColor: GlobalColors.error, opacity: 1.0});
+        // }
+    };
+
+    const getGuestDetails = async () => {
+        const url = environment.guestUrl + `customers/userbyguestid?tenantId=${tenantId}&storeId=${storeId}&guestId=${selectedCustomer!.id}`;
+        let response = await makeAPIRequest(url, null, "GET");
+        if (response) {
+            setGuestDetails(response);
+        } else {
+            setGuestDetails({});
+            Toast.show("Encountered issue", { backgroundColor: GlobalColors.error });
+        }
+    };
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -142,6 +203,12 @@ const CreateAppointment = ({ navigation, route }: any) => {
         });
     }, [navigation]);
 
+    useEffect(()=>{
+        if(selectedCustomer){
+            Object.keys(selectedCustomer).length > 0 ? getGuestDetails() : setGuestDetails({});
+        }
+    }, [selectedCustomer]);
+
     return (
         <View style={{ flex: 1 }}>
             {createUserModal && <AddUpdateUser setModalVisible={setCreateUserModal} modalVisible={createUserModal} />}
@@ -150,11 +217,11 @@ const CreateAppointment = ({ navigation, route }: any) => {
                     <View style={[GlobalStyles.justifiedRow, { marginBottom: 10 }]}>
                         <Text style={styles.headingText}>1. Guest Details</Text>
                         {
-                            Object.keys(selectedCustomer).length > 0 ?
+                            Object.keys(guestDetails).length > 0 ?
                                 <Text style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}
                                     onPress={() => {
                                         dispatch(setShowUserProfileTopBar({ showUserProfileTopBar: false }));
-                                        navigation.navigate("User History", { customerId: selectedCustomer.id })
+                                        navigation.navigate("User History", { guestDetails: guestDetails })
                                     }}
                                 >User History</Text> :
                                 <View style={[GlobalStyles.justifiedRow]}>
@@ -168,7 +235,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
                                 </View>
                         }
                     </View>
-                    <GuestExpertDropdown data={customers} placeholderText="Search By Name Or Number" type="guest" setSelected={(val) => { setSelectedCustomer(val) }} selectedValue={selectedCustomer.firstName} />
+                    <GuestExpertDropdown data={customers} placeholderText="Search By Name Or Number" type="guest" setSelected={(val) => { setSelectedCustomer(val) }} selectedValue={selectedCustomer ? selectedCustomer.firstName : ""} />
                 </View>
 
                 <View style={[GlobalStyles.sectionView]}>
@@ -259,12 +326,9 @@ const CreateAppointment = ({ navigation, route }: any) => {
                                         }}
                                     />
                                 </View>
-
                             </View>
                         ))
                     }
-
-
                 </View>
 
                 <View style={GlobalStyles.sectionView}>
@@ -298,42 +362,14 @@ const CreateAppointment = ({ navigation, route }: any) => {
                 </View>
                 <TouchableOpacity style={{ width: '100%', backgroundColor: GlobalColors.blue, paddingVertical: 10, borderRadius: 5, marginBottom: 5 }}
                     onPress={() => {
-                        //perform validation
-                        setModalVisible(true);
+                        if(formValidation())
+                            setModalVisible(true);
                     }}
                 >
                     <Text style={{ color: "#fff", textAlign: "center", fontSize: FontSize.large, fontWeight: '500' }}>Create</Text>
                 </TouchableOpacity>
             </View>
-
-            <Modal
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => {
-                    setModalVisible(!modalVisible);
-                }}>
-                <View style={[GlobalStyles.modalbackground]}>
-                    <View style={styles.modalView}>
-                        <Text style={{ textAlign: 'center', fontSize: FontSize.headingX, fontWeight: '500', marginBottom: 20 }}>{"Create & Confirm \n Appointment"}</Text>
-                        <Text style={{ textAlign: 'center', fontSize: FontSize.medium, fontWeight: '300' }}>{"Are you sure, you want to \n create & confirm an appointment"}</Text>
-                        <View style={{ width: '100%', backgroundColor: 'lightgray', height: 1, marginVertical: 20 }} />
-                        <View style={[GlobalStyles.justifiedRow, { width: '95%', marginBottom: 10 }]}>
-                            <TouchableOpacity style={[styles.buttonContainer]}
-                                onPress={() => { setModalVisible(false) }}>
-                                <Text style={styles.buttonText}>No</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={[styles.buttonContainer, { backgroundColor: GlobalColors.blue }]}
-                                onPress={() => {
-                                    console.log("##333", serviceDetails)
-                                    //perform api 
-                                }}>
-                                <Text style={[styles.buttonText, { color: '#fff' }]}>Yes</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                    </View>
-                </View>
-            </Modal>
+            {modalVisible && <ConfirmationModal modalVisible={modalVisible} setModalVisible={setModalVisible} performAction={() => {appointmentAPICall(APPOINTMENT_CREATED)}}/>}
         </View>
     );
 };
@@ -358,47 +394,6 @@ const styles = StyleSheet.create({
     circleIcon: {
         backgroundColor: GlobalColors.blue,
         borderRadius: 20, padding: 3
-    },
-    modalView: {
-        width: '80%',
-        margin: 5,
-        backgroundColor: '#fff',
-        borderRadius: 5,
-        padding: 20,
-        alignItems: 'center',
-    },
-    buttonContainer: {
-        borderWidth: 1,
-        borderColor: GlobalColors.blue,
-        borderRadius: 5,
-        width: '45%'
-    },
-    buttonText: {
-        fontSize: FontSize.large,
-        textAlign: "center",
-        paddingVertical: 5,
-        color: GlobalColors.blue
-    },
-    inputContainer: {
-        borderRadius: 5,
-        borderWidth: 1,
-        borderColor: 'lightgray',
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 10,
-        width: '50%'
-    },
-    header: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        position: 'absolute',
-        zIndex: 1,
-        marginLeft: 15,
-        marginTop: -8,
-        paddingHorizontal: 5
-    },
-    headerText: {
-        color: GlobalColors.blue,
     },
 });
 

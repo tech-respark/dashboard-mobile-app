@@ -1,19 +1,19 @@
 import React, { FC, useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { GlobalStyles } from "../../../../../Styles/Styles";
+import { GlobalStyles } from "../../../../Styles/Styles";
 import moment from "moment";
-import { FontSize, GlobalColors } from "../../../../../Styles/GlobalStyleConfigs";
+import { FontSize, GlobalColors } from "../../../../Styles/GlobalStyleConfigs";
 import { TextInput, TouchableOpacity } from "react-native-gesture-handler";
 import AddMemberView from "./AddMemberView";
-import { SHOW_SHIFT_MEMBERSHIP_AFTER_DAYS, environment } from "../../../../../utils/Constants";
+import { SHOW_SHIFT_MEMBERSHIP_AFTER_DAYS, environment } from "../../../../utils/Constants";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { selectUserData } from "../../../../../redux/state/UserStates";
-import { useAppSelector } from "../../../../../redux/Hooks";
-import { getAddedMembersObjects, makeAPIRequest } from "../../../../../utils/Helper";
+import { selectUserData } from "../../../../redux/state/UserStates";
+import { useAppSelector } from "../../../../redux/Hooks";
+import { getAddedMembersObjects, makeAPIRequest } from "../../../../utils/Helper";
 import Toast from "react-native-root-toast";
 import FamilyMembers from "../FamilyMembers";
-import AlertModal from "../../../../../components/AlertModal";
+import AlertModal from "../../../../components/AlertModal";
 
 interface IShiftMembership {
     customer: { [key: string]: any },

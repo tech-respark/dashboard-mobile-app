@@ -1,11 +1,11 @@
 import React, { FC, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { FontSize, GlobalColors } from "../../../../Styles/GlobalStyleConfigs";
-import { GlobalStyles } from "../../../../Styles/Styles";
-import { useAppDispatch } from "../../../../redux/Hooks";
-import { setIsLoading } from "../../../../redux/state/UIStates";
-import { makeAPIRequest } from "../../../../utils/Helper";
-import { environment } from "../../../../utils/Constants";
+import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
+import { GlobalStyles } from "../../../Styles/Styles";
+import { useAppDispatch } from "../../../redux/Hooks";
+import { setIsLoading } from "../../../redux/state/UIStates";
+import { makeAPIRequest } from "../../../utils/Helper";
+import { environment } from "../../../utils/Constants";
 import Toast from "react-native-root-toast";
 
 interface IAboutUser {

@@ -89,7 +89,7 @@ const ServiceSearchModal: FC<ServiceSearchModalType> = ({ data, selectedValue, s
             <Pressable style={{ marginVertical: 10 }} onPress={() => { setModalVisible(true) }}>
                 <HeaderedComponent header={headerText}>
                     <View style={[GlobalStyles.justifiedRow, styles.searchView]}>
-                        <Text style={{ color: selectedValue ? '#000' : 'gray' }}>{selectedValue ?? "Search Service by Name"}</Text>
+                        <Text style={{ color: selectedValue ? '#000' : 'gray', width: '85%' }} numberOfLines={1} ellipsizeMode="tail">{selectedValue ?? "Search Service by Name"}</Text>
                         {
                             selectedValue ? <Ionicons name="close" size={25} color={GlobalColors.grayDark}
                                 onPress={() => {

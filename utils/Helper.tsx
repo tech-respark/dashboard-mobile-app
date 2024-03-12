@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "../redux/Hooks";
 import { AppDispatch } from "../redux/Store";
 import { setCategoriesData } from "../redux/state/BackOfficeStates";
 import { setIsLoading } from "../redux/state/UIStates";
-import { selectCurrentBranch, selectStoreData, setCurrentBranch, setStoreIdData } from "../redux/state/UserStates";
+import { selectCurrentBranch, selectCurrentStoreConfig, selectStoreData, setCurrentBranch, setStoreIdData } from "../redux/state/UserStates";
 import { environment } from "./Constants";
 import { GlobalColors } from "../Styles/GlobalStyleConfigs";
 
@@ -125,4 +125,11 @@ export const getAddedMembersObjects = (selectedFamily: string[], customer: {[key
       }
   });
   return objects;
+};
+
+export const getTofixValue = (config: any, value: any = 0, isDisplayValue: boolean = false, roundValue: number = 0)  => {
+  if (config && config?.decimalPlaces) roundValue = config.decimalPlaces;
+  if (!value) value = 0;
+  value = Number(value).toFixed(roundValue)
+  return isDisplayValue ? value : Number(value);
 };

@@ -1,13 +1,13 @@
 import React, { FC, useEffect, useState } from "react";
 import { ActivityIndicator, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { GlobalStyles } from "../../../../Styles/Styles";
-import { FontSize, GlobalColors } from "../../../../Styles/GlobalStyleConfigs";
+import { GlobalStyles } from "../../../Styles/Styles";
+import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import { TextInput, TouchableOpacity } from "react-native-gesture-handler";
-import { environment } from "../../../../utils/Constants";
-import { useAppSelector } from "../../../../redux/Hooks";
-import { selectBranchId, selectPaymentTypes, selectTenantId, selectUserData } from "../../../../redux/state/UserStates";
-import { makeAPIRequest } from "../../../../utils/Helper";
-import LoadingState from "../../../../components/LoadingState";
+import { environment } from "../../../utils/Constants";
+import { useAppSelector } from "../../../redux/Hooks";
+import { selectBranchId, selectPaymentTypes, selectTenantId, selectUserData } from "../../../redux/state/UserStates";
+import { makeAPIRequest } from "../../../utils/Helper";
+import LoadingState from "../../../components/LoadingState";
 import moment from "moment";
 import Toast from "react-native-root-toast";
 

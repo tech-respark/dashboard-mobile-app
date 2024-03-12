@@ -81,7 +81,7 @@ const CalendarEntries: FC<ICalenderEntries> = ({ selectedStaffIndex, staffObject
                             onPress={() => {
                                 if (timeSlots[index] != 0) {
                                     dispatch(setShowUserProfileTopBar({showUserProfileTopBar: false}));
-                                    navigation.navigate("Create Appointment", { from: timeIntervals[time], to: timeIntervals[Object.keys(timeIntervals)[index + 1]], selectedStaffIndex: selectedStaffIndex, staffObjects: staffObjects });
+                                    navigation.navigate("Create Appointment", { from: time, to: Object.keys(timeIntervals)[index + 1], selectedStaffIndex: selectedStaffIndex, staffObjects: staffObjects, selectedDate: selectedDate });
                                 }
                             }}
                         >
