@@ -52,3 +52,4 @@ export const MEMBERSHIPCOLORS = [
     ]
 
 export const SHOW_SHIFT_MEMBERSHIP_AFTER_DAYS: number = 10
+export const DEFAULT_SERVICE_DURATION = 30;

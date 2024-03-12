@@ -33,7 +33,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
     const [createUserModal, setCreateUserModal] = useState<boolean>(false);
     const customers = useCustomerData(createUserModal);
     const [serviceDetails, setServiceDetails] = useState<ServiceDetailsType[]>([{
-        service: {},
+        service: null,
         experts: [route.params.staffObjects[route.params.selectedStaffIndex]],
         fromTime: route.params.from,
         toTime: route.params.to
@@ -42,13 +42,93 @@ const CreateAppointment = ({ navigation, route }: any) => {
     const addEmptyService = () => {
         let lastObj = serviceDetails[serviceDetails.length - 1];
         console.log(lastObj)
-        let errorMsg = Object.keys(lastObj.service).length == 0 ? "Select Service" : (lastObj.experts.length == 0 ? "Select Expert" : (!lastObj.fromTime ? "Select From Time" : (!lastObj.toTime ? "Select To Time" : null)));
+        let errorMsg = lastObj.service && Object.keys(lastObj.service).length == 0 ? "Select Service" : (lastObj.experts.length == 0 ? "Select Expert" : (!lastObj.fromTime ? "Select From Time" : (!lastObj.toTime ? "Select To Time" : null)));
         if (errorMsg) {
             Toast.show(errorMsg, { backgroundColor: GlobalColors.error, duration: Toast.durations.LONG });
             return;
         }
         setServiceDetails([...serviceDetails, { service: {}, experts: [], fromTime: "", toTime: "" }]);
     };
+
+    const formValidation = () => {
+        if (!selectedCustomer?.name) {
+            Toast.show("Select Customer", { backgroundColor: GlobalColors.error, opacity: 1.0 })
+            return false
+        }
+        serviceDetails.map((service: any, index: number) => {
+            let msg = !service.service ? "Select Service" : service.experts.length == 0 ? "Select Expert" : !service.fromTime ? "Select From Time" : !service.toTime ? "Select To Time" : "";
+            if (msg) {
+                Toast.show(msg, { backgroundColor: GlobalColors.error, opacity: 1.0 })
+                return false
+            }
+        });
+        return true;
+    };
+
+    // const createIndividualExpertService = (serviceObj: any) => {
+        
+    //     const duration = serviceObj.service.durationType === 'hrs' ? serviceObj.service.duration * 60 : serviceObj.service.duration
+
+    //     const individualAppointmentObj = {
+    //         "appointmentTime": serviceObj.fromTime,
+    //         "duration": duration,
+    //         // "serviceCategory": category,
+    //         "service": serviceObj.service.name || serviceObj.service.service || serviceObj.serviceQuery,
+    //         "slot": `${serviceObj.fromTime}-${serviceObj.toTime}`,
+    //         "expertId": serviceObj.experts[0].id,
+    //         "expertName": serviceObj.experts[0].name,
+    //         "price": serviceObj.service.price,
+    //         "salePrice": serviceObj.service.salePrice,
+    //         "billingPrice": serviceObj.service.salePrice || serviceObj.service.price,
+    //         // "quantity": quantity || 1,
+    //         // "serviceCategoryId": categoryId,
+    //         "serviceId": serviceId || id,
+    //         "txchrgs": txchrgs,
+    //         "variations": variations,
+    //         "consumables": consumables,
+    //         contributions
+    //     }
+
+    // };
+
+    // const createAppointmentPayload = () => {
+    //     if (formValidation()) {
+    //         let appointmentsList: any = [];
+    //         serviceDetails.map((service: any) => {
+    //             appointmentsList.push(createIndividualExpertService(service));
+    //         })
+    //         const appointmentObj: any = {
+    //             "appointmentDay": currentDate.newDate,
+    //             "appointmentTime": appointmentsList[0].appointmentTime,
+    //             "duration": appointmentsList[0].duration,
+    //             "instruction": appointmentInstruction,
+    //             "instrImages": instructionImages,
+    //             "slot": appointmentsList[0].slot,
+    //             "orderId": selectedStaffSlotDetails.apptOrder ? selectedStaffSlotDetails.apptOrder.orderId : '',
+    //             "invoiceId": selectedStaffSlotDetails.apptOrder ? selectedStaffSlotDetails.apptOrder.invoiceId : '',
+    //             "expertId": appointmentsList[0].expertId,
+    //             "expertName": appointmentsList[0].expertName,
+    //             "storeId": storageService.getStore().storeId,
+    //             "tenantId": storageService.getStore().tenantId,
+    //             "store": storageService.getStore().store,
+    //             "tenant": storageService.getStore().tenant,
+    //             "guestId": guestDetails.id,
+    //             "guestName": guestDetails.lastName ? `${guestDetails.firstName} ${guestDetails.lastName}` : guestDetails.firstName,
+    //             "guestMobile": guestDetails.mobileNo,
+    //             "guestEmail": guestDetails.email,
+    //             "guestGSTN": guestDetails.gstN,
+    //             "bookedFor": guestDetails.bookedFor || null,
+    //             "storeLocation": selectedStaffSlotDetails?.appointmentId ? selectedStaffSlotDetails?.apptOrder?.storeLocation : '',
+    //             "createdOn": selectedStaffSlotDetails?.appointmentId ? selectedStaffSlotDetails?.apptOrder.createdOn : new Date(),
+    //             "expertAppointments": appointmentsList,
+    //             "noOfRemindersSent": selectedStaffSlotDetails?.appointmentId ? selectedStaffSlotDetails?.apptOrder.noOfRemindersSent : 0,
+    //             "rescheduled": selectedStaffSlotDetails?.appointmentId ? selectedStaffSlotDetails?.apptOrder.rescheduled : false,
+    //             "feedbackLinkShared": selectedStaffSlotDetails?.appointmentId ? selectedStaffSlotDetails?.apptOrder.feedbackLinkShared : false,
+    //             "type": APPOINTMENT_TYPE_POS,
+    //             "smsKeys": appointmentSMSConfigRef
+    //         }
+    //     }
+    // };
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -168,7 +248,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
                                             })
                                         }}
                                     />
-                                    <TimerWithBorderHeader header="To Time" isFrom={false}      
+                                    <TimerWithBorderHeader header="To Time" isFrom={false}
                                         serviceObj={serviceDetailsObj}
                                         setValue={(val) => {
                                             setServiceDetails(prev => {
@@ -244,6 +324,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
                             </TouchableOpacity>
                             <TouchableOpacity style={[styles.buttonContainer, { backgroundColor: GlobalColors.blue }]}
                                 onPress={() => {
+                                    console.log("##333", serviceDetails)
                                     //perform api 
                                 }}>
                                 <Text style={[styles.buttonText, { color: '#fff' }]}>Yes</Text>

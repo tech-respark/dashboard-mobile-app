@@ -19,25 +19,41 @@ const ServiceSearchModal: FC<ServiceSearchModalType> = ({ data, selectedValue, s
     const [modalVisible, setModalVisible] = useState(false);
     const [search, setSearch] = useState<string>(selectedValue ?? "");
     const [clickedItem, setClickedItem] = useState<{ [key: string]: any } | null>(null);
-    const [selectedGender, setSelectedGender] = useState<string>('Male');
+    const [selectedGender, setSelectedGender] = useState<string>("Male");
 
     const checkTypeGender = (item: any) => {
         return item.type == type && (item.group == selectedGender.toLowerCase() || item.group == "both");
     }
 
-    const renderServiceItem = (item: { [key: string]: any }) => {
+    // solve issue of variation inside variation
+    const renderServiceVariation = (isVariation: boolean, service: {[key: string]: any}, serviceCategory: string, serviceCategoryId: string, variation: any) => {
+        let name = isVariation ? `${service.name} - ${variation.name}` : service.name;
+        let currentObj = isVariation ? variation : service
         return (
-            item?.map((service: any, serviceIndex: number) => (
-                service.name.toLowerCase().includes(search.toLowerCase()) ?
-                    <TouchableOpacity key={serviceIndex} style={[styles.serviceItemView, clickedItem?.name==service.name && {backgroundColor: GlobalColors.blueLight, borderColor: GlobalColors.blue, borderWidth: 0.5}]}
-                        onPress={() => {
-                            setSearch(service.name);
-                            setClickedItem(service);
-                        }}
-                    >
-                        <Text style={{ fontWeight: '300', width: '80%' }}>{service.name}</Text>
-                        <Text>₹{service.salePrice !== 0 ? service.salePrice : service.price}</Text>
-                    </TouchableOpacity> : <View key={serviceIndex}></View>
+            name.toLowerCase().includes(search.toLowerCase()) ?
+                <TouchableOpacity key={currentObj.id} style={[styles.serviceItemView, clickedItem?.fullName == name && { backgroundColor: GlobalColors.blueLight, borderColor: GlobalColors.blue, borderWidth: 0.5 }]}
+                    onPress={() => {
+                        setSearch(name);
+                        let item = {...service, serviceCategory: serviceCategory, serviceCategoryId: serviceCategoryId, variations: isVariation ? [variation] : null, fullName: name}
+                        setClickedItem(item);
+                    }}
+                >
+                    <Text style={{ fontWeight: '300', width: '80%' }}>{name}</Text>
+                    <Text>₹{currentObj.salePrice !== 0 ? currentObj.salePrice : currentObj.price}</Text>
+                </TouchableOpacity> : <View key={currentObj.id}></View>
+        );
+    };
+
+    const renderService = (item: { [key: string]: any }, serviceCategoryId: string, serviceCategory: string) => {
+        return (
+            item?.map((service: any) => (
+                service.active &&
+                    service.variations.length > 0 ?
+                        service.variations.map((variation: any, index: number) => (
+                            renderServiceVariation(true, service, serviceCategory, serviceCategoryId, variation)
+                        ))
+                        :
+                        renderServiceVariation(false, service, serviceCategory, serviceCategoryId, null)
             ))
         );
     };
@@ -45,24 +61,24 @@ const ServiceSearchModal: FC<ServiceSearchModalType> = ({ data, selectedValue, s
     const renderServiceOptions = (item: any) => {
         return (
             <View key={item.id} style={{ marginVertical: 5, width: '100%' }}>
-                <Text style={{ fontWeight: 'bold' }}>{item.name}</Text>
+                <Text style={{ fontWeight: '500', color: GlobalColors.blue }}>{item.name}</Text>
                 {
                     item.categoryList && item.categoryList.length > 0 ? item.categoryList.map((cateogory: any, index: number) => (
-                        checkTypeGender(cateogory) ?
+                        checkTypeGender(cateogory) && cateogory.active ?
                             <View key={index} style={{ marginVertical: 5 }}>
                                 <Text>{cateogory.name}</Text>
                                 <View style={{ width: '100%', borderStyle: 'dotted', borderWidth: 0.5, borderColor: 'gray', marginVertical: 2 }} />
-                                {renderServiceItem(cateogory.itemList)}
+                                {renderService(cateogory.itemList, `${item.id} - ${cateogory.id}`, `${item.name} - ${cateogory.name}`)}
                             </View> : <View key={index}></View>
                     )) :
-                        renderServiceItem(item.itemList)
+                        renderService(item.itemList, item.id, item.name)
                 }
             </View>
         );
     };
 
     useEffect(() => {
-        if(modalVisible){
+        if (modalVisible) {
             setSearch(selectedValue ?? "");
             !selectedValue ? setClickedItem(null) : null;
         }
@@ -126,7 +142,7 @@ const ServiceSearchModal: FC<ServiceSearchModalType> = ({ data, selectedValue, s
                                         {
                                             data.map((item: { [key: string]: any }, index: number) => {
                                                 return (
-                                                    checkTypeGender(item) ?
+                                                    checkTypeGender(item) && item.active ?
                                                         <View key={index}>
                                                             {renderServiceOptions(item)}
                                                         </View> : <View key={index}></View>
@@ -143,6 +159,7 @@ const ServiceSearchModal: FC<ServiceSearchModalType> = ({ data, selectedValue, s
                                 </Pressable>
                                 <Pressable style={[styles.buttonContainer, { backgroundColor: clickedItem ? GlobalColors.blue : 'lightgray', width: '30%', borderColor: clickedItem ? GlobalColors.blue : 'lightgray' }]}
                                     onPress={() => {
+                                        console.log(clickedItem);
                                         setSelectedValue(clickedItem!);
                                         setModalVisible(false);
                                     }}
@@ -186,7 +203,13 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
         elevation: 5,
     },
-    searchView: { borderWidth: 0.5, borderColor: 'lightgray', borderRadius: 2, padding: 5 },
+    searchView: {
+        borderWidth: 0.5,
+        borderColor: 'lightgray',
+        borderRadius: 2,
+        padding: 5,
+        paddingLeft: 10
+    },
     textInput: {
         backgroundColor: GlobalColors.lightGray2,
         borderWidth: 0.5,

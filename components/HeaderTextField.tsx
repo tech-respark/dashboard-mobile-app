@@ -69,7 +69,7 @@ export const TimerWithBorderHeader: FC<TimerWithBorderHeaderProps> = ({ serviceO
           Toast.show("Select Expert First", {backgroundColor: GlobalColors.error, opacity: 1.0})
         }}
       >
-          <Text>{isFrom ? serviceObj.fromTime: serviceObj.toTime}</Text>
+          <Text>{isFrom ? timeInterval[serviceObj.fromTime]: timeInterval[serviceObj.toTime]}</Text>
           <Ionicons name="timer-outline" size={20} color={GlobalColors.blue}/>
       </Pressable>
       {timeSlotModal && <TimeSlotModal modalVisible={timeSlotModal} setModalVisible={setTimeSlotModal} isFrom={isFrom} timeInterval={timeInterval} setValue={setValue} 

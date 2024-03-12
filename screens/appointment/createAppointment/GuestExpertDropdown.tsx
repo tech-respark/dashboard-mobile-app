@@ -33,6 +33,7 @@ const GuestExpertDropdown: FC<IGuestExpertDropdown> = ({ data, placeholderText, 
                     placeholderStyle={{ color: 'gray', fontSize: FontSize.regular }}
                     data={type=="expert" ? newData : data}
                     search
+                    selectedTextStyle={{fontSize: FontSize.regular}}
                     maxHeight={300}
                     labelField={type=="guest" ? "firstName" : "name"}
                     valueField={type=="guest" ? "firstName" : "name"}
