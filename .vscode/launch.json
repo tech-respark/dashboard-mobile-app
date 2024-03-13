@@ -5,20 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Android",
-            "cwd": "${workspaceFolder}",
-            "type": "reactnative",
+            "name": "Debug iOS",
             "request": "launch",
-            "platform": "android",
-            // "isDynamic": true
+            "type": "reactnative",
+            "cwd": "${workspaceFolder}",
+            "platform": "ios"
         },
         {
-            "name": "Debug iOS",
-            "cwd": "${workspaceFolder}",
-            "type": "reactnative",
+            "type": "node",
             "request": "launch",
-            "platform": "ios",
-            // "isDynamic": true
+            "name": "Launch Program",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/node_modules/expo/AppEntry.js"
         }
     ]
 }
