@@ -48,7 +48,7 @@ const AppointmentCalendar = ({ navigation }: any) => {
 
     const getAppointmentsData = async (isFirstCall: boolean, appCount: number = appointmentCount) => {
         let endDate = moment(selectedDate, 'YYYY-MM-DD').clone().add(15, 'days').format('YYYY-MM-DD');
-        const url = environment.appointmentUri + `appointments/between?count=${appCount}&end=${endDate}&start=${selectedDate}&storeid=${storeId}&tenantid=${tenantId}`;
+        const url = environment.txnUrl + `appointments/between?count=${appCount}&end=${endDate}&start=${selectedDate}&storeid=${storeId}&tenantid=${tenantId}`;
         let response = await makeAPIRequest(url, null, "GET") ?? [];
         if (isFirstCall) {
             setAppointmentsData(response);

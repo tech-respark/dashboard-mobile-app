@@ -68,9 +68,9 @@ const useInitialDataFetch = () => {
 
     const getProductAndServiceCategories = async () => {
         const url = environment.documentBaseUri + `stores/getStoreByTenantAndStoreId?storeId=${storeId}&tenantId=${tenantId}`;
-        let response = await makeAPIRequest(url, null, "GET")
+        let response = await makeAPIRequest(url, null, "GET");
         if (response) {
-            setProductServiceCategories({productServiceCategories: response.categories});
+            dispatch(setProductServiceCategories({productServiceCategories: response.categories}));
         }
     };
 

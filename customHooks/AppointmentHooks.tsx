@@ -38,6 +38,39 @@ export const useTimeIntervalList = () => {
     return timeIntervals;
 };
 
+export const useExpertTimeInterval = (timeSlot: string) => {
+    const [timeIntervals, setTimeIntervals] = useState<{ [key: string]: string }>({});
+
+    const getTimeIntervalList = () => {
+        const slots = timeSlot.split("-");
+        const timeObject: { [key: string]: string } = {};
+        const start = new Date(`1970-01-01T${slots[0]}`);
+        const end = new Date(`1970-01-01T${slots[1]}`);
+        while (start <= end) {
+            const timeString = start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false });
+            const formattedTime = start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            timeObject[timeString] = formattedTime;
+            start.setMinutes(start.getMinutes() + 15);
+        }
+        setTimeIntervals(timeObject);
+        return timeObject;
+    };
+
+    const memoizedTimeIntervalList = useMemo(() => {
+        console.log("Hello", timeSlot)
+        if (timeSlot) {
+            return getTimeIntervalList();
+        }
+        return {};
+    }, [timeSlot]);
+
+    useEffect(() => {
+        setTimeIntervals(memoizedTimeIntervalList);
+    }, [memoizedTimeIntervalList]);
+
+    return timeIntervals;
+};
+
 export const useDebounce = ({value, delay=500}: any) => {
     const [debouncedVal, setDebouncedVal] = useState<string>(value);
 
@@ -67,9 +100,7 @@ export const useCustomerData = (modalVisible: boolean = false) => {
 
     useEffect(()=>{
         if(!modalVisible){
-            console.log("####5", modalVisible)
-
-        getCustomersData();
+            getCustomersData();
         }
     }, [modalVisible]);
 

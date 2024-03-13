@@ -1,7 +1,7 @@
 import React, { FC } from "react";
 import { FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
-import { FontSize, GlobalColors } from "../../../../Styles/GlobalStyleConfigs";
-import { GlobalStyles } from "../../../../Styles/Styles";
+import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
+import { GlobalStyles } from "../../../Styles/Styles";
 import moment from "moment";
 
 interface IOrders {
@@ -9,15 +9,13 @@ interface IOrders {
 }
 
 const Orders: FC<IOrders> = ({ ordersHistory }) => {
-    console.log("#######", ordersHistory.length)
-
     const showProductOrService = (type: string, item: any) => {
         let isTextShown = false;
         return (
             <View>
                 {item.products && item.products?.map((product: any, sindex: number) => (
                     product.type == type &&
-                    <>
+                    <View key={sindex}>
                         {!isTextShown && (
                             <React.Fragment>
                                 {isTextShown = true}
@@ -25,18 +23,18 @@ const Orders: FC<IOrders> = ({ ordersHistory }) => {
                             </React.Fragment>
                         )
                         }
-                        <View key={sindex} style={{ marginVertical: 5 }}>
+                        <View style={{ marginVertical: 5 }}>
                             <Text>{product.category}</Text>
                             <View style={GlobalStyles.justifiedRow}>
-                                <View style={{ flexDirection: 'row' }}>
-                                    <Text style={{ fontWeight: '300', marginRight: 15 }}>{product.name}</Text>
-                                    <Text style={{ fontWeight: '300' }}>{product.staff ? `(By ${product.staff})` : '-'}</Text>
+                                <View style={{ flexDirection: 'row', width: '80%', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <Text style={{ fontWeight: '300', width: '50%' }}>{product.name}</Text>
+                                    <Text style={{ fontWeight: '300', width: '50%' }}>{product.staff ? `(By ${product.staff})` : '-'}</Text>
                                 </View>
                                 <Text>₹{product.billingPrice}</Text>
                             </View>
                             {product.variations?.length > 0 && <Text style={{ fontWeight: '300' }}>({product.variations[0].name})</Text>}
                         </View>
-                    </>
+                    </View>
                 )
                 )}
             </View>
@@ -54,7 +52,7 @@ const Orders: FC<IOrders> = ({ ordersHistory }) => {
                     <View style={{ flexDirection: 'row', width: '70%' }}>
                         <Text style={{ fontWeight: '300' }}>Paymode: </Text>
                         <View style={{ width: '75%', flexDirection: 'row', flexWrap: 'wrap' }}>
-                            {item.payments.map((payment: any, tindex: number) => (
+                            {item.payments?.map((payment: any, tindex: number) => (
                                 <Text key={tindex} style={{ fontWeight: '300' }}>{`${payment.name} (${payment.payment}), `}</Text>
                             ))}
                         </View>

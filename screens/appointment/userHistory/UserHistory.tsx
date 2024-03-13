@@ -1,54 +1,47 @@
 import { useIsFocused } from "@react-navigation/native";
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useAppDispatch, useAppSelector } from "../../../../redux/Hooks";
-import { setShowUserProfileTopBar } from "../../../../redux/state/UIStates";
+import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
+import { setShowUserProfileTopBar } from "../../../redux/state/UIStates";
 import { Ionicons } from "@expo/vector-icons";
-import { GlobalColors } from "../../../../Styles/GlobalStyleConfigs";
+import { GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import ProfileInfo from "./ProfileInfo";
 import Orders from "./Orders";
-import { environment } from "../../../../utils/Constants";
-import { selectBranchId, selectTenantId } from "../../../../redux/state/UserStates";
-import { makeAPIRequest, sleep } from "../../../../utils/Helper";
+import { environment } from "../../../utils/Constants";
+import { selectBranchId, selectTenantId } from "../../../redux/state/UserStates";
+import { makeAPIRequest, sleep } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
-import LoadingState from "../../../../components/LoadingState";
+import LoadingState from "../../../components/LoadingState";
 import AboutUser from "./AboutUser";
-import Membership from "./Membership";
+import Membership from "./membership/Membership";
 import FamilyMembers from "./FamilyMembers";
+import AdvanceOrBalance from "./AdvanceOrBalance";
+import Packages from "./Packages";
 
 const UserHistory = ({ navigation, route }: any) => {
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
 
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
-    const [customerData, setCustomerData] = useState<{ [key: string]: any } | null>(null);
+    const [customerData, setCustomerData] = useState<{ [key: string]: any }>(route.params.guestDetails);
     const [orderHistory, setOrderHistory] = useState<{ [key: string]: any }[]>([]);
     const [loader, setLoader] = useState<boolean>(false);
 
-    const userHistorySections = ["Profile Info", "Orders", "About User", "Membership", "Advance", "Due Balance", "Family Members"];
-    const sectionIcons = ["person-outline", "receipt-outline", "information-circle-outline", "ribbon-outline", "cash-outline", "wallet-outline", "people-outline"];
+    const userHistorySections = ["Profile Info", "Orders", "About User", "Membership", "Advance", "Due Balance", "Family Members", "Packages"];
+    const sectionIcons = ["person-outline", "receipt-outline", "information-circle-outline", "ribbon-outline", "cash-outline", "wallet-outline", "people-outline", "basket-outline"];
     const sectionViewMap: { [key: string]: any } = {
-        "Profile Info": <ProfileInfo customer={customerData!}/>,
+        "Profile Info": <ProfileInfo customer={customerData!} setCustomer={setCustomerData}/>,
         "Orders": <Orders ordersHistory={orderHistory}/>,
-        "About User": <AboutUser />,
+        "About User": <AboutUser customer={customerData!} setCustomer={setCustomerData}/>,
         "Membership": <Membership customer={customerData!} setCustomer={setCustomerData}/>,
-        "Advance": <AboutUser />,
-        "Due Balance": <AboutUser />,
-        "Family Members": <FamilyMembers customer={customerData!} setCustomer={setCustomerData}/>
+        "Advance": <AdvanceOrBalance isAdvance={true} customer={customerData!} setCustomer={setCustomerData}/>,
+        "Due Balance": <AdvanceOrBalance isAdvance={false} customer={customerData!} setCustomer={setCustomerData}/>,
+        "Family Members": <FamilyMembers customer={customerData!} setCustomer={setCustomerData}/>,
+        "Packages": <Packages customer={customerData!} setCustomer={setCustomerData} />
     }
 
-    const getUserData = async () => {
-        const url = environment.guestUrl + `customers/userbyguestid?tenantId=${tenantId}&storeId=${storeId}&guestId=${route.params.customerId}`;
-        let response = await makeAPIRequest(url, null, "GET");
-        if (response) {
-            setCustomerData(response);
-        } else {
-            Toast.show("Encountered issue", { backgroundColor: GlobalColors.error });
-        }
-    };
-
     const getUserOrdersHistory = async () => {
-        const url = environment.appointmentUri + `sorder/tenantguest/${tenantId}/${route.params.customerId}`;
+        const url = environment.txnUrl + `sorder/tenantguest/${tenantId}/${route.params.customerId}`;
         let response = await makeAPIRequest(url, null, "GET");
         if (response) {
             setOrderHistory(response);
@@ -69,7 +62,6 @@ const UserHistory = ({ navigation, route }: any) => {
 
     useEffect(() => {
         setLoader(true);
-        getUserData();
         getUserOrdersHistory();
         setLoader(false);
     }, []);

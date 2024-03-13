@@ -1,8 +1,7 @@
 import React, { FC, useEffect, useState } from "react";
-import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import { TextInput, TouchableOpacity } from "react-native-gesture-handler";
-import { Ionicons } from "@expo/vector-icons";
 import { GlobalStyles } from "../../../Styles/Styles";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from "moment";
@@ -16,12 +15,15 @@ import { selectBranchId, selectStoreCount, selectTenantId } from "../../../redux
 import Checkbox from "expo-checkbox";
 import CustomDropdown2 from "../../../components/CustomDropdown2";
 
-interface ICreateUser {
+interface IAddUpdateUser {
     modalVisible: boolean,
     setModalVisible: (val: boolean) => void;
+    userDetails?: { [key: string]: any },
+    setUserDetails?: (val: { [key: string]: any }) => void,
+    isEdit?: boolean
 };
 
-const CreateUser: FC<ICreateUser> = ({ modalVisible, setModalVisible }) => {
+const AddUpdateUser: FC<IAddUpdateUser> = ({ modalVisible, setModalVisible, userDetails, isEdit, setUserDetails }) => {
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
     const segments = useAppSelector(selectSegments);
@@ -53,7 +55,7 @@ const CreateUser: FC<ICreateUser> = ({ modalVisible, setModalVisible }) => {
         });
     };
 
-    const createUser = async () => {
+    const createUpdateUser = async () => {
         let isMobileValid = REGULAR_EXP.mobile.test(form.mobileNo);
         if (!isMobileValid || !form.firstName) {
             Toast.show(isMobileValid ? "Fill required fields" : "Invalid mobile number", { backgroundColor: GlobalColors.error, opacity: 1 });
@@ -72,7 +74,8 @@ const CreateUser: FC<ICreateUser> = ({ modalVisible, setModalVisible }) => {
         let response = await makeAPIRequest(url, data, "POST");
         if (response) {
             setModalVisible(false);
-            Toast.show("User Added", { backgroundColor: GlobalColors.success, opacity: 1 });
+            isEdit ? setUserDetails!(response) : null;
+            Toast.show(isEdit ? "User Updated" : "User Added", { backgroundColor: GlobalColors.success, opacity: 1 });
         }
         else
             Toast.show("Encountered Error", { backgroundColor: GlobalColors.error, opacity: 1 });
@@ -84,16 +87,16 @@ const CreateUser: FC<ICreateUser> = ({ modalVisible, setModalVisible }) => {
         const keys = Object.keys(segments!);
         for (let i = 0; i < keys.length; i += 2) {
             rows.push(
-                <View style={[GlobalStyles.justifiedRow, styles.rowViews]}>
+                <View style={[GlobalStyles.justifiedRow, styles.rowViews]} key={i}>
                     <View style={{ width: '45%' }}>
                         <Text style={styles.marginBt5}>{keys[i]}</Text>
-                        <CustomDropdown2 setSelectedItem={(val: { [key: string]: any }) => { handleSegmentsChange(keys[i], val) }} options={segments![keys[i]]} labelKey={'segTypeName'} />
+                        <CustomDropdown2 setSelectedItem={(val: { [key: string]: any }) => { handleSegmentsChange(keys[i], val) }} options={segments![keys[i]]} labelKey={'segTypeName'} selectedValue={selectedSegments[keys[i]]?.segTypeName} />
                     </View>
                     {
                         i + 1 < keys.length &&
                         <View style={{ width: '45%' }}>
                             <Text style={styles.marginBt5}>{keys[i + 1]}</Text>
-                            <CustomDropdown2 setSelectedItem={(val: { [key: string]: any }) => { handleSegmentsChange(keys[i + 1], val) }} options={segments![keys[i + 1]]} labelKey={'segTypeName'} />
+                            <CustomDropdown2 setSelectedItem={(val: { [key: string]: any }) => { handleSegmentsChange(keys[i + 1], val) }} options={segments![keys[i + 1]]} labelKey={'segTypeName'} selectedValue={selectedSegments[keys[i+1]]?.segTypeName} />
                         </View>
                     }
                 </View>
@@ -102,13 +105,13 @@ const CreateUser: FC<ICreateUser> = ({ modalVisible, setModalVisible }) => {
         return rows;
     };
 
-    useEffect(() => {
+    const setToEmpty = () => {
         setForm({
             mobileNo: "",
             firstName: "",
             email: "",
             dob: null,
-            aniversaryDate: null,
+            anniversaryDate: null,
             gstNumber: "",
             source: "",
             gender: "female",
@@ -116,6 +119,40 @@ const CreateUser: FC<ICreateUser> = ({ modalVisible, setModalVisible }) => {
         })
         setSegmentObject({});
         setSelectedSegments({});
+    };
+
+    const setUpdateUserSegments = () => {
+        setSegmentObject(userDetails!.segments);
+        const result: any = {};
+        for (const segId in userDetails!.segments) {
+            const segmentName = Object.keys(segments!).find(key => segments![key].some(segment => segment.segId === parseInt(segId)));
+            if (segmentName) {
+                const segment = segments![segmentName].find(segment => segment.id === userDetails!.segments[segId][0]);
+                if (segment) {
+                    result[segmentName] = segment;
+                }
+            }
+        }
+        setSelectedSegments(result);
+    };
+
+    useEffect(() => {
+        if (isEdit && userDetails) {
+            setForm({
+                mobileNo: userDetails.mobileNo,
+                firstName: userDetails.firstName,
+                email: userDetails.email,
+                dob: userDetails.dob,
+                anniversaryDate: userDetails.anniversaryDate,
+                gstNumber: userDetails.gstN,
+                source: userDetails.source,
+                gender: userDetails.gender,
+                isGlobal: userDetails.isGlobal
+            });
+            setUpdateUserSegments();
+        } else {
+            setToEmpty();
+        }
     }, [modalVisible])
 
     return (
@@ -127,7 +164,8 @@ const CreateUser: FC<ICreateUser> = ({ modalVisible, setModalVisible }) => {
             }}>
             <View style={[GlobalStyles.modalbackground]}>
                 <View style={styles.modalView}>
-                    <Text style={styles.addUser}>Add User</Text>
+                    <Text style={styles.addUser}>{isEdit ? "Update User" : "Add User"}</Text>
+                    <ScrollView style={{width: '100%'}}>
                     <View style={[styles.rowViews, GlobalStyles.justifiedRow]}>
                         <View style={{ width: storeCount! > 1 ? '70%' : '100%' }}>
                             <View style={{ flexDirection: 'row' }}>
@@ -158,7 +196,6 @@ const CreateUser: FC<ICreateUser> = ({ modalVisible, setModalVisible }) => {
                             </View>
                         }
                     </View>
-
                     <View style={styles.rowViews}>
                         <View style={{ flexDirection: 'row' }}>
                             <Text>Name</Text>
@@ -201,10 +238,10 @@ const CreateUser: FC<ICreateUser> = ({ modalVisible, setModalVisible }) => {
                         <View style={{ width: '45%' }}>
                             <Text>Anniversary Date</Text>
                             <TouchableOpacity style={[styles.textInput]} onPress={() => {
-                                setSelectedDateLabel('aniversaryDate')
+                                setSelectedDateLabel('anniversaryDate')
                                 setIsDatePickerVisible(true)
                             }}>
-                                <Text style={{ color: form.aniversaryDate ? '#000' : 'gray' }}>{form.aniversaryDate ? moment(form.aniversaryDate).format('DD/MM/YYYY') : "DD/MM/YYYY"}</Text>
+                                <Text style={{ color: form.anniversaryDate ? '#000' : 'gray' }}>{form.anniversaryDate ? moment(form.anniversaryDate).format('DD/MM/YYYY') : "DD/MM/YYYY"}</Text>
                             </TouchableOpacity>
                         </View>
                         <View style={{ width: '45%' }}>
@@ -231,7 +268,7 @@ const CreateUser: FC<ICreateUser> = ({ modalVisible, setModalVisible }) => {
                     <View style={[GlobalStyles.justifiedRow, styles.rowViews]}>
                         <View style={{ width: '45%' }}>
                             <Text>Source</Text>
-                            <CustomDropdown2 setSelectedItem={(val: { [key: string]: any }) => { handleFormChange('source', val.name) }} options={sources!} labelKey={'name'} />
+                            <CustomDropdown2 setSelectedItem={(val: { [key: string]: any }) => { handleFormChange('source', val.name) }} options={sources!} labelKey={'name'} selectedValue={form.source}/>
                         </View>
                         <View style={{ width: '45%' }}>
                             <Text>Gender</Text>
@@ -245,6 +282,7 @@ const CreateUser: FC<ICreateUser> = ({ modalVisible, setModalVisible }) => {
                         </View>
                     </View>
                     {renderSegments()}
+                    </ScrollView>
                     <View style={[GlobalStyles.justifiedRow, { justifyContent: "flex-end", width: "100%" }]}>
                         <Pressable style={[styles.buttonContainer, { marginRight: 20 }]}
                             onPress={() => { setModalVisible(false) }}
@@ -252,9 +290,9 @@ const CreateUser: FC<ICreateUser> = ({ modalVisible, setModalVisible }) => {
                             <Text style={styles.buttonText}>Cancel</Text>
                         </Pressable>
                         <Pressable style={[styles.buttonContainer, { backgroundColor: GlobalColors.blue }]}
-                            onPress={async () => { await createUser() }}
+                            onPress={async () => { await createUpdateUser() }}
                         >
-                            <Text style={[styles.buttonText, { color: '#fff' }]}>Add</Text>
+                            <Text style={[styles.buttonText, { color: '#fff' }]}>{isEdit ? "Update" : "Add"}</Text>
                         </Pressable>
                     </View>
                 </View>
@@ -324,4 +362,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default CreateUser;
+export default AddUpdateUser;

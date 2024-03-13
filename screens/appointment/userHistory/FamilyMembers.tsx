@@ -1,12 +1,12 @@
 import React, { FC, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { FontSize, GlobalColors } from "../../../../Styles/GlobalStyleConfigs";
-import { GlobalStyles } from "../../../../Styles/Styles";
+import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
+import { GlobalStyles } from "../../../Styles/Styles";
 import { Ionicons } from "@expo/vector-icons";
-import { environment } from "../../../../utils/Constants";
-import { makeAPIRequest } from "../../../../utils/Helper";
+import { environment } from "../../../utils/Constants";
+import { makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
-import AddFamilyMemberModal from "../../../../components/AddFamilyMemberModal";
+import AddFamilyMemberModal from "../common/AddFamilyMemberModal";
 
 interface IFamilyMembers {
     customer: { [key: string]: any },

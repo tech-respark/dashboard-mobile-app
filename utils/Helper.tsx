@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "../redux/Hooks";
 import { AppDispatch } from "../redux/Store";
 import { setCategoriesData } from "../redux/state/BackOfficeStates";
 import { setIsLoading } from "../redux/state/UIStates";
-import { selectCurrentBranch, selectStoreData, setCurrentBranch, setStoreIdData } from "../redux/state/UserStates";
+import { selectCurrentBranch, selectCurrentStoreConfig, selectStoreData, setCurrentBranch, setStoreIdData } from "../redux/state/UserStates";
 import { environment } from "./Constants";
 import { GlobalColors } from "../Styles/GlobalStyleConfigs";
 
@@ -14,6 +14,7 @@ export const makeAPIRequest = async (url: string, body?: any, method: string = "
   try {
     response = await fetch(url, options);
     if (response.status != 200 || (!allowEmptyRes && response.headers.get('content-length') === '0')) {
+      console.log("500 code of: ", url)
       return null;
     }
   } catch (error) {
@@ -111,4 +112,24 @@ export function getActiveStaffsForAppointment(latestStaffList: { [key: string]: 
     return false;
   });
   return commonStaffList;
-}
+};
+
+export const getAddedMembersObjects = (selectedFamily: string[], customer: {[key: string]: any}) => {
+  const objects = selectedFamily.map(item => {
+      const foundObject = customer.familyMembers.find((obj:any) => obj.name === item);
+      if (foundObject) {
+          const { id, ...rest } = foundObject; 
+          return { ...rest, sharedId: id }; 
+      } else {
+          return null;
+      }
+  });
+  return objects;
+};
+
+export const getTofixValue = (config: any, value: any = 0, isDisplayValue: boolean = false, roundValue: number = 0)  => {
+  if (config && config?.decimalPlaces) roundValue = config.decimalPlaces;
+  if (!value) value = 0;
+  value = Number(value).toFixed(roundValue)
+  return isDisplayValue ? value : Number(value);
+};

@@ -2,11 +2,11 @@ export const environment = {
     sqlBaseUri: "https://dev-respark.respark.in:8081/pcs/v1/",
     documentBaseUri: "https://dev-respark.respark.in:8082/pcs-catalog/v1/",
     guestUrl: "https://dev-respark.respark.in:8083/pcs-guest/v1/",
-    appointmentUri: "https://dev-respark.respark.in:8084/pcs-txn/v1/"
+    txnUrl: "https://dev-respark.respark.in:8084/pcs-txn/v1/"
     // sqlBaseUri: "https://qa.respark.in:8081/pcs/v1/",
     // documentBaseUri: "https://qa.respark.in:8082/pcs-catalog/v1/",
     // guestUrl: "https://qa.respark.in:8083/pcs-guest/v1/",
-    // appointmentUri: "https://qa.respark.in:8084/pcs-txn/v1/"
+    // txnUrl: "https://qa.respark.in:8084/pcs-txn/v1/"
 }
 
 export const mainTabsIconsMap: {[key: string]: string} = {
@@ -50,3 +50,17 @@ export const MEMBERSHIPCOLORS = [
      {shade1: '#c8f4ed', shade2: '#6ff0dc', shade3: "#197063"},
      {shade1: '#cdf9d9', shade2: '#6ff093', shade3: "#1c8539"}
     ]
+
+export const SHOW_SHIFT_MEMBERSHIP_AFTER_DAYS: number = 10
+export const DEFAULT_SERVICE_DURATION = 30;
+export const SERVICES_INDEX = 0;
+export const PRODUCTS_INDEX = 1;
+export const MEMBERSHIPS_INDEX = 2;
+export const PACKAGES_INDEX = 3;
+export const APPOINTMENT_CREATED = "CREATED";
+export const APPOINTMENT_RUNNING = "RUNNING";
+export const APPOINTMENT_CONFIRMED = "CONFIRMED";
+export const APPOINTMENT_UPDATED = "UPDATED";
+export const APPOINTMENT_COMPLETED = "COMPLETED";
+export const APPOINTMENT_DELETED = "DELETED";
+export const APPOINTMENT_CANCELLED = "CANCELLED";

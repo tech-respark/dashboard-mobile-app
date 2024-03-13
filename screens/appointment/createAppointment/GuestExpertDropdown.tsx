@@ -11,19 +11,19 @@ interface IGuestExpertDropdown {
     headerText?: string,
     setSelected: (val: { [key: string]: any }) => void,
     selectedValue: string,
-    type: string
+    type: string,
+    currentExperts?: {[key: string]: any}[]
 }
 
-const GuestExpertDropdown: FC<IGuestExpertDropdown> = ({ data, placeholderText, headerText, selectedValue, type, setSelected }) => {
+const GuestExpertDropdown: FC<IGuestExpertDropdown> = ({ data, placeholderText, headerText, selectedValue, type, setSelected, currentExperts }) => {
 
-    // const [filteredList, setFilteredList] = useState<{ [key: string]: any }[]>([]);
+    const [newData, setNewData] = useState<{[key: string]: any}[]>(data);
 
-    // const filterData = (searchTerm: string) => {
-    //     const filteredData = data.filter(item => {
-    //         return item.mobileNo.includes(searchTerm) || item.firstName.includes(searchTerm);
-    //     });
-    //     setFilteredList(filteredData);
-    // };
+    useEffect(()=>{
+        if(type=="expert" && currentExperts && currentExperts?.length > 1){
+            setNewData(data.filter(expert => !currentExperts?.some((item2: any) => expert.id === item2.id)));
+        }
+    }, []);
 
     return (
         <View style={styles.container}>
@@ -31,8 +31,9 @@ const GuestExpertDropdown: FC<IGuestExpertDropdown> = ({ data, placeholderText, 
                 <Dropdown
                     style={[styles.dropdown, type == "guest" ? { backgroundColor: GlobalColors.lightGray2 } : { borderColor: 'lightgray', borderWidth: 0.5, }]}
                     placeholderStyle={{ color: 'gray', fontSize: FontSize.regular }}
-                    data={data}
+                    data={type=="expert" ? newData : data}
                     search
+                    selectedTextStyle={{fontSize: FontSize.regular}}
                     maxHeight={300}
                     labelField={type=="guest" ? "firstName" : "name"}
                     valueField={type=="guest" ? "firstName" : "name"}

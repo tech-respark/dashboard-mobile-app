@@ -1,12 +1,12 @@
 import React, { FC, useEffect, useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { GlobalStyles } from "../Styles/Styles";
-import { FontSize, GlobalColors } from "../Styles/GlobalStyleConfigs";
-import GuestExpertDropdown from "../screens/appointment/createAppointment/GuestExpertDropdown";
-import { useCustomerData } from "../customHooks/AppointmentHooks";
-import CreateUser from "../screens/appointment/createAppointment/CreateUser";
-import { environment } from "../utils/Constants";
-import { makeAPIRequest } from "../utils/Helper";
+import { GlobalStyles } from "../../../Styles/Styles";
+import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
+import GuestExpertDropdown from "../createAppointment/GuestExpertDropdown";
+import { useCustomerData } from "../../../customHooks/AppointmentHooks";
+import AddUpdateUser from "./AddUpdateUser";
+import { environment } from "../../../utils/Constants";
+import { makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
 import { useIsFocused } from "@react-navigation/native";
 
@@ -22,21 +22,26 @@ const AddFamilyMemberModal: FC<IAddFamilyMemberModal> = ({ modalVisible, setModa
     const [createUserModal, setCreateUserModal] = useState<boolean>(false);
     const [relation, setRelation] = useState<string>("");
     const [updatedGuests, setUpdatedGuests] =  useState<{[key: string]: any}[]>([]);
+    const [showError, setShowError] = useState<boolean>(false);
     const guests = useCustomerData(createUserModal);
 
     const addMember = async () => {
-        let members = [...customer.familyMembers];
-        members.push(
-            {
+        if(!relation){
+            setShowError(true);
+            return
+        };
+        let members = customer.familyMembers ?? [];
+        members.push({
                 id: selectedCustomer.id,
                 mobileNo: selectedCustomer.mobileNo,
                 name: selectedCustomer.firstName,
                 optInForWapp: false,
                 relation: relation
-            }
-        );
-        let url = environment.guestUrl + `familyMembers?guestId=${customer.id}`;
-        let response = await makeAPIRequest(url, members, "PUT");
+            });
+        let tempCus = {...customer, ...{familyMembers: members}};
+        let url = environment.guestUrl + `customers`;
+        console.log("HEllo", tempCus, url)
+        let response = await makeAPIRequest(url, tempCus, "POST");
         if (response) {
             setCustomer(response);
             setModalVisible(false);
@@ -46,7 +51,7 @@ const AddFamilyMemberModal: FC<IAddFamilyMemberModal> = ({ modalVisible, setModa
 
     useEffect(()=>{
         if(guests.length > 0){
-            setUpdatedGuests(guests.filter(guest => !customer.familyMembers.some((item2: any) => guest.id === item2.id) && guest.id !== customer.id));
+            setUpdatedGuests(guests.filter(guest => !customer.familyMembers?.some((item2: any) => guest.id === item2.id) && guest.id !== customer.id));
         }
     }, [guests]);
 
@@ -57,7 +62,7 @@ const AddFamilyMemberModal: FC<IAddFamilyMemberModal> = ({ modalVisible, setModa
             onRequestClose={() => {
                 setModalVisible(!modalVisible);
             }}>
-            {createUserModal && <CreateUser setModalVisible={setCreateUserModal} modalVisible={createUserModal} />}
+            {createUserModal && <AddUpdateUser setModalVisible={setCreateUserModal} modalVisible={createUserModal} />}
             <View style={[GlobalStyles.modalbackground]}>
                 <View style={styles.modalView}>
                     <Text style={{ width: '100%', textAlign: 'center', fontWeight: '600', fontSize: FontSize.large }}>Add Family Member</Text>
@@ -67,7 +72,7 @@ const AddFamilyMemberModal: FC<IAddFamilyMemberModal> = ({ modalVisible, setModa
                         <GuestExpertDropdown data={updatedGuests} placeholderText="Search By Name Or Number" type="guest" setSelected={(val) => { setSelectedCustomer(val) }} selectedValue={selectedCustomer.firstName} />
                     </View>
                     <View style={{ marginBottom: 10 }}>
-                        <Text>Relation</Text>
+                        <Text>Relation*</Text>
                         <TextInput
                             style={styles.textInput}
                             placeholder="Mother, Father, etc..."
@@ -75,6 +80,7 @@ const AddFamilyMemberModal: FC<IAddFamilyMemberModal> = ({ modalVisible, setModa
                             placeholderTextColor="lightgray"
                             onChangeText={setRelation}
                         />
+                        {showError && <Text style={{fontSize: FontSize.small, color: GlobalColors.error}}>Please enter relation</Text>}
                     </View>
                     <View style={[GlobalStyles.justifiedRow, { justifyContent: "flex-end", width: "100%", paddingTop: 15, borderTopColor: 'lightgray', borderTopWidth: 2 }]}>
                         <Pressable style={[styles.buttonContainer, { marginRight: 20, width: '30%' }]}
