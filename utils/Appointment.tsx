@@ -29,7 +29,7 @@ export const calculateTaxes = (taxebalePrice: number, config: any) => {
                 type: taxData.type,
                 isInclusive: taxData.isInclusive,
                 taxRate: taxData.value,
-                value: getTofixValue(taxApplied, config),
+                value: getTofixValue(config, taxApplied),
             }
             txchrgs.push(taxObj);
         });

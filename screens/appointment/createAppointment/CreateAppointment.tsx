@@ -10,7 +10,7 @@ import { APPOINTMENT_CREATED, DEFAULT_SERVICE_DURATION, environment } from "../.
 import { selectBranchId, selectCurrentStoreConfig, selectProductServiceCategories, selectTenantId, selectUserData } from "../../../redux/state/UserStates";
 import { makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
-import { HeaderedComponent, TimerWithBorderHeader } from "../../../components/HeaderTextField";
+import { TimerWithBorderHeader } from "../../../components/HeaderTextField";
 import ServiceSearchModal from "./ServiceSearchModal";
 import Checkbox from 'expo-checkbox';
 import AddUpdateUser from "../common/AddUpdateUser";
@@ -31,7 +31,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
     const services = useAppSelector(selectProductServiceCategories);
     const storeConfig = useAppSelector(selectCurrentStoreConfig);
     const loggedInUser = useAppSelector(selectUserData);
-    const guestDetails = useAppSelector(selectSelectedGuest) ?? {};
+    const guestDetails = useAppSelector(selectSelectedGuest) ?? null;
 
     const [selectedCustomer, setSelectedCustomer] = useState<{ [key: string]: any } | null>(null);
     const [instructions, setInstructions] = useState<string>('');
@@ -48,39 +48,38 @@ const CreateAppointment = ({ navigation, route }: any) => {
 
     const addEmptyService = () => {
         let lastObj = serviceDetails[serviceDetails.length - 1];
-        console.log(lastObj)
         let errorMsg = lastObj.service && Object.keys(lastObj.service).length == 0 ? "Select Service" : (lastObj.experts.length == 0 ? "Select Expert" : (!lastObj.fromTime ? "Select From Time" : (!lastObj.toTime ? "Select To Time" : null)));
         if (errorMsg) {
             Toast.show(errorMsg, { backgroundColor: GlobalColors.error, duration: Toast.durations.LONG });
             return;
         }
-        setServiceDetails([...serviceDetails, { service: {}, experts: [], fromTime: "", toTime: "" }]);
+        setServiceDetails([...serviceDetails, { service: {}, experts: [{}], fromTime: "", toTime: "" }]);
     };
 
-    const calculateContributions = (service: { [key: string]: any }, duration: number) => {
+    const calculateContributions = (serviceObj: { [key: string]: any }, duration: number) => {
         let contributions: any = [];
-        service.contributions && service.contributions.map((contributor: any, index: number) => {
+        serviceObj.experts.length>0 && serviceObj.experts.map((contributor: any, index: number) => {
             contributions.push({
-                slot: `${service.fromTime}-${service.toTime}`,
+                slot: `${serviceObj.fromTime}-${serviceObj.toTime}`,
                 duration: duration || DEFAULT_SERVICE_DURATION,
-                expertId: contributor.expertId,
-                expertName: contributor.expertName,
-                workPercentage: (100 / service.contributions.length).toFixed(2),
-                workAmount: service.salePrice || service.price,
+                expertId: contributor.id,
+                expertName: contributor.name,
+                workPercentage: (100 / serviceObj.experts.length).toFixed(2),
+                workAmount: serviceObj.service.salePrice || serviceObj.service.price,
                 specialist: index == 0 ? true : false
             })
-        })
+        });
         return contributions;
     };
 
     const formValidation = () => {
-        if (Object.keys(guestDetails).length == 0) {
-            Toast.show("Select Customer", { backgroundColor: GlobalColors.error, opacity: 1.0 })
-            return false
+        console.log(guestDetails, selectedCustomer)
+        if (!selectedCustomer || !guestDetails) {
+            Toast.show("Select Customer", { backgroundColor: GlobalColors.error, opacity: 1.0 });
+            return false;
         }
         let isValid = true;
         serviceDetails.map((service: any, index: number) => {
-            console.log(service)
             let msg = !service.service ? "Select Service" : service.experts.length == 0 ? "Select Expert" : !service.fromTime ? "Select From Time" : !service.toTime ? "Select To Time" : "";
             if (msg) {
                 Toast.show(msg, { backgroundColor: GlobalColors.error, opacity: 1.0 });
@@ -126,6 +125,15 @@ const CreateAppointment = ({ navigation, route }: any) => {
         return statusList;
     };
 
+    const getSMSKeys = () => {
+        return {
+            appointmentCancelled: true,
+            appointmentConfirmed:false,
+            combineFeedbackAndInvoice: true,
+            smsForAppointments: true
+        }
+    };
+
     const createAppointmentPayload = (actionType: string) => {
         let appointmentsList: any = [];
         serviceDetails.map((service: any) => {
@@ -147,12 +155,12 @@ const CreateAppointment = ({ navigation, route }: any) => {
             "tenantId": tenantId,
             "store": storeConfig!.store,
             "tenant": storeConfig!.tenant,
-            "guestId": guestDetails.id,
-            "guestName": guestDetails.lastName ? `${guestDetails.firstName} ${guestDetails.lastName}` : guestDetails.firstName,
-            "guestMobile": guestDetails.mobileNo,
-            "guestEmail": guestDetails.email,
-            "guestGSTN": guestDetails.gstN,
-            "bookedFor": guestDetails.bookedFor || null,
+            "guestId": guestDetails!.id,
+            "guestName": guestDetails!.lastName ? `${guestDetails!.firstName} ${guestDetails!.lastName}` : guestDetails!.firstName,
+            "guestMobile": guestDetails!.mobileNo,
+            "guestEmail": guestDetails!.email,
+            "guestGSTN": guestDetails!.gstN,
+            "bookedFor": guestDetails!.bookedFor || null,
             "storeLocation": '', //maybe for update
             "createdOn": new Date().toISOString(), //maybe for update,
             "expertAppointments": appointmentsList,
@@ -160,24 +168,25 @@ const CreateAppointment = ({ navigation, route }: any) => {
             "rescheduled": false, //maybe for update
             "feedbackLinkShared": false, //maybe for update
             "type": "POS",
-            // "smsKeys": appointmentSMSConfigRef,
+            "smsKeys": getSMSKeys(),
             "status": getAppointmentStatus(actionType)
-        }
+        };
         return appointmentObj;
     };
 
-    const appointmentAPICall =  (actionType: string) => {
-        // dispatch(setIsLoading({isLoading: true}));
+    const appointmentAPICall =  async(actionType: string) => {
+        dispatch(setIsLoading({isLoading: true}));
         const url = environment.txnUrl + `appointments`;
         const payload = createAppointmentPayload(actionType);
-        console.log(payload)
-        // let response = await makeAPIRequest(url, payload, "POST");
-        // dispatch(setIsLoading({isLoading: false}));
-        // if(response){
-        //     Toast.show(`Appointment created successfuly`, {backgroundColor: GlobalColors.success, opacity: 1.0});
-        // }else{
-        //     Toast.show("Encountered Error", {backgroundColor: GlobalColors.error, opacity: 1.0});
-        // }
+        let response = await makeAPIRequest(url, payload, "POST");
+        dispatch(setIsLoading({isLoading: false}));
+        setModalVisible(false);
+        if(response){
+            Toast.show(`Appointment created successfuly`, {backgroundColor: GlobalColors.success, opacity: 1.0});
+            navigation.goBack();
+        }else{
+            Toast.show("Encountered Error", {backgroundColor: GlobalColors.error, opacity: 1.0});
+        }
     };
 
     const getGuestDetails = async () => {
@@ -217,7 +226,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
                     <View style={[GlobalStyles.justifiedRow, { marginBottom: 10 }]}>
                         <Text style={styles.headingText}>1. Guest Details</Text>
                         {
-                            Object.keys(guestDetails!).length > 0 ?
+                            selectedCustomer && guestDetails ?
                                 <Text style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}
                                     onPress={() => {
                                         dispatch(setShowUserProfileTopBar({ showUserProfileTopBar: false }));
@@ -235,7 +244,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
                                 </View>
                         }
                     </View>
-                    <GuestExpertDropdown data={customers} placeholderText="Search By Name Or Number" type="guest" setSelected={(val) => { setSelectedCustomer(val) }} selectedValue={selectedCustomer ? selectedCustomer.firstName : null} />
+                    <GuestExpertDropdown data={customers} placeholderText="Search By Name Or Number" type="guest" setSelected={(val) => { setSelectedCustomer(val); setSelectedCustomer(val); }} selectedValue={selectedCustomer ? selectedCustomer.firstName : null} />
                 </View>
 
                 <View style={[GlobalStyles.sectionView]}>
@@ -244,14 +253,32 @@ const CreateAppointment = ({ navigation, route }: any) => {
                         <View style={GlobalStyles.justifiedRow}>
                             <Text style={{ color: GlobalColors.blue, marginRight: 10 }}>Add Service</Text>
                             <TouchableOpacity style={styles.circleIcon}
-                                onPress={addEmptyService}>
+                                onPress={()=>{
+                                    if(formValidation())
+                                        addEmptyService();
+                                    }}>
                                 <Ionicons name="add" size={25} color="#fff" />
                             </TouchableOpacity>
                         </View>
                     </View>
                     {
                         serviceDetails.map((serviceDetailsObj: ServiceDetailsType, sIndex: number) => (
-                            <View style={{ borderWidth: 1, borderRadius: 5, borderColor: 'lightgray', padding: 5, marginVertical: 5 }} key={sIndex}>
+                            <View style={[{ borderWidth: 1, borderRadius: 5, borderColor: 'lightgray', padding: 10, marginVertical: 8 }, GlobalStyles.shadow]} key={sIndex}>
+                                {serviceDetails.length > 1 && 
+                                    <View style={{flexDirection: 'row', justifyContent: 'flex-end', width: '100%'}}>
+                                        <TouchableOpacity style={{backgroundColor: GlobalColors.lightGray2, padding: 3, borderRadius: 20}} 
+                                        onPress={() => {
+                                            setServiceDetails(prev => {
+                                                const updated = [...prev];
+                                                updated.splice(sIndex, 1);
+                                                return updated
+                                            })
+                                        }}>
+                                            <Ionicons name="trash-outline" color={GlobalColors.error} size={20}/>
+                                        </TouchableOpacity>
+                                    </View>
+                                }
+                                
                                 <ServiceSearchModal data={services!} headerText={`Service ${sIndex + 1}`} selectedValue={serviceDetailsObj.service?.name}
                                     setSelectedValue={(val) => {
                                         setServiceDetails(prev => {
@@ -269,15 +296,15 @@ const CreateAppointment = ({ navigation, route }: any) => {
                                                 setSelected={(val) => {
                                                     setServiceDetails(prev => {
                                                         const updated = [...prev];
-                                                        updated[sIndex].experts[eIndex] = val;
+                                                        updated[sIndex].experts[eIndex] = val ?? {};
                                                         return updated
                                                     })
                                                 }}
                                             />
                                         </View>
                                         {eIndex != 0 &&
-                                            <TouchableOpacity style={{ backgroundColor: GlobalColors.error, borderRadius: 20, padding: 2 }}>
-                                                <Ionicons name="close" size={20} color="#fff"
+                                            <TouchableOpacity style={{ backgroundColor: GlobalColors.lightGray2, borderRadius: 20, padding: 2 }}>
+                                                <Ionicons name="close" size={20} color={GlobalColors.error}
                                                     onPress={() => {
                                                         setServiceDetails(prev => {
                                                             const updated = [...prev];
@@ -369,7 +396,9 @@ const CreateAppointment = ({ navigation, route }: any) => {
                     <Text style={{ color: "#fff", textAlign: "center", fontSize: FontSize.large, fontWeight: '500' }}>Create</Text>
                 </TouchableOpacity>
             </View>
-            {modalVisible && <ConfirmationModal modalVisible={modalVisible} setModalVisible={setModalVisible} performAction={() => {appointmentAPICall(APPOINTMENT_CREATED)}}/>}
+            {modalVisible && <ConfirmationModal modalVisible={modalVisible} setModalVisible={setModalVisible} performAction={() => {
+                appointmentAPICall(APPOINTMENT_CREATED);
+                }}/>}
         </View>
     );
 };

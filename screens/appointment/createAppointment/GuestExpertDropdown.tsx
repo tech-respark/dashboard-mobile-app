@@ -9,7 +9,7 @@ interface IGuestExpertDropdown {
     data: { [key: string]: any }[],
     placeholderText: string,
     headerText?: string,
-    setSelected: (val: { [key: string]: any }) => void,
+    setSelected: (val: { [key: string]: any } | null) => void,
     selectedValue: string,
     type: string,
     currentExperts?: {[key: string]: any}[]
@@ -50,7 +50,7 @@ const GuestExpertDropdown: FC<IGuestExpertDropdown> = ({ data, placeholderText, 
                             size={type == "expert" ? 15 : (selectedValue ? 20: 25)}
                             onPress={() => {
                                 if (type == "guest" && selectedValue) {
-                                    setSelected({});
+                                    setSelected(null);
                                 }
                             }}
                         />
