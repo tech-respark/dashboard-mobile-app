@@ -5,7 +5,7 @@ export interface UserStates {
     userData?: { [key: string]: string },
     configs?: { [key: string]: any },
     tenantId?: number,
-    StoreIdData?: { [key: string]: any }[],
+    storeIdData?: { [key: string]: any }[],
     availableTabs?: { [key: string]: boolean },
     currentBranch?: string,
     storeID?: number,
@@ -20,7 +20,7 @@ const initialState: UserStates = {
     userData: {},
     configs: {},
     tenantId: 0,
-    StoreIdData: [],
+    storeIdData: [],
     availableTabs: {},
     currentBranch: "",
     storeID: 0,
@@ -44,13 +44,12 @@ const UserSlice = createSlice({
             state.availableTabs = action.payload.configs?.storeConfig?.basicConfig ?? {};
         },
         setStoreIdData: (state, action: PayloadAction<UserStates>) => {
-            state.StoreIdData = action.payload.StoreIdData;
+            state.storeIdData = action.payload.storeIdData;
         },
         setCurrentBranch: (state, action: PayloadAction<UserStates>) => {
             state.currentBranch = action.payload.currentBranch;
-            //set branchID
-            let storeData = state.StoreIdData?.find(item => item.name === action.payload.currentBranch);
-            state.storeID = storeData ? storeData.storeId : 0;
+            let storeData = state.storeIdData?.find(item => item.name === action.payload.currentBranch);
+            state.storeID = storeData ? storeData.id : 0;
         },
         setStaffData : (state, action: PayloadAction<UserStates>) => {
             let staffData = action.payload.staffData;
@@ -80,7 +79,7 @@ export const { setUserData, setConfig, setStoreIdData, setCurrentBranch, setStaf
 export const selectUserData = (state: RootState) => state.UserStates.userData;
 export const selectAvailableConfig = (state: RootState) => state.UserStates.availableTabs;
 export const selectTenantId = (state: RootState) => state.UserStates.tenantId;
-export const selectStoreData = (state: RootState) => state.UserStates.StoreIdData;
+export const selectStoreData = (state: RootState) => state.UserStates.storeIdData;
 export const selectCurrentBranch = (state: RootState) => state.UserStates.currentBranch;
 export const selectBranchId = (state: RootState) => state.UserStates.storeID;
 export const selectStaffData = (state: RootState) => state.UserStates.staffData;

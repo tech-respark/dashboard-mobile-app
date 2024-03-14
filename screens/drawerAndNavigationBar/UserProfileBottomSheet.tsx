@@ -51,7 +51,7 @@ const UserProfileBottomSheet: FC<UserProfileBottomSheetProps> = ({ handleSheetCl
           end={{ y: 0.0, x: 1.0 }}
         >
           <TouchableOpacity onPress={() => {
-            AsyncStorage.removeItem("userData");
+            AsyncStorage.multiRemove(["userData", "selectedBranchName"])
             dispatch(setUserData({}));
             navigation.replace("Login");
           }

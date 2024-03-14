@@ -6,13 +6,14 @@ import moment from "moment";
 import { MEMBERSHIPCOLORS, environment } from "../../../../utils/Constants";
 import { useAppDispatch, useAppSelector } from "../../../../redux/Hooks";
 import { selectBranchId, selectPaymentTypes, selectStaffData, selectTenantId, selectUserData } from "../../../../redux/state/UserStates";
-import { getAddedMembersObjects, makeAPIRequest } from "../../../../utils/Helper";
+import { makeAPIRequest } from "../../../../utils/Helper";
 import { Svg, Path } from "react-native-svg";
 import GuestExpertDropdown from "../../createAppointment/GuestExpertDropdown";
 import LoadingState from "../../../../components/LoadingState";
 import { setIsLoading } from "../../../../redux/state/UIStates";
 import Toast from "react-native-root-toast";
 import AddMemberView from "./AddMemberView";
+import { getAddedMembersObjects } from "../../../../utils/Appointment";
 
 interface IMembershipModal {
     modalVisible: boolean,

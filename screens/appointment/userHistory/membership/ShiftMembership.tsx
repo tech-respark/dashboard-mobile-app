@@ -10,10 +10,11 @@ import { Ionicons } from "@expo/vector-icons";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { selectUserData } from "../../../../redux/state/UserStates";
 import { useAppSelector } from "../../../../redux/Hooks";
-import { getAddedMembersObjects, makeAPIRequest } from "../../../../utils/Helper";
+import { makeAPIRequest } from "../../../../utils/Helper";
 import Toast from "react-native-root-toast";
 import FamilyMembers from "../FamilyMembers";
 import AlertModal from "../../../../components/AlertModal";
+import { getAddedMembersObjects } from "../../../../utils/Appointment";
 
 interface IShiftMembership {
     customer: { [key: string]: any },

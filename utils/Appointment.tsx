@@ -13,7 +13,7 @@ export const calculateTaxes = (taxebalePrice: number, config: any) => {
             applicableTaxes.push({ ...taxData });
         }
     });
-    if (true) {
+    if (config.storeConfig.settingsConfig.taxes) {
         applicableTaxes.map((taxData: any) => {
             let taxApplied = 0;
             if (taxData.isInclusive) {
@@ -35,4 +35,32 @@ export const calculateTaxes = (taxebalePrice: number, config: any) => {
         });
     }
     return txchrgs;
-}
+};
+
+export function getActiveStaffsForAppointment(latestStaffList: { [key: string]: any }[], mainStaffList: { [key: string]: any }[]): { [key: string]: any }[] {
+    mainStaffList = mainStaffList.filter(item => item.enableAppointments && item.active);
+    latestStaffList = latestStaffList.filter(item => !item.onLeave);
+  
+    const commonStaffList = latestStaffList.filter(latestStaff => {
+      const mainStaff = mainStaffList.find(mainStaff => mainStaff.id === latestStaff.staffId);
+      if (mainStaff) {
+        latestStaff.name = `${mainStaff.firstName} ${mainStaff.lastName}`;
+        return true;
+      }
+      return false;
+    });
+    return commonStaffList;
+  };
+
+  export const getAddedMembersObjects = (selectedFamily: string[], customer: {[key: string]: any}) => {
+    const objects = selectedFamily.map(item => {
+        const foundObject = customer.familyMembers.find((obj:any) => obj.name === item);
+        if (foundObject) {
+            const { id, ...rest } = foundObject; 
+            return { ...rest, sharedId: id }; 
+        } else {
+            return null;
+        }
+    });
+    return objects;
+  };

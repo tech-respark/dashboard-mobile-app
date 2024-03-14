@@ -22,7 +22,7 @@ import { environment } from '../../utils/Constants';
 import { setIsLoading } from '../../redux/state/UIStates';
 import Toast from 'react-native-root-toast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { setCurrentBranch, setStoreIdData, setUserData } from '../../redux/state/UserStates';
+import { setUserData } from '../../redux/state/UserStates';
 
 const LoginScreen = ({ navigation }: any) => {
   const dispatch = useAppDispatch();
@@ -36,6 +36,7 @@ const LoginScreen = ({ navigation }: any) => {
     !username ? setError("Username is required") : !password ? setError("Password is required") : setError("");
     setTimeout(() => { setError("") }, 3000);
   }
+
   const loginAction = async () => {
     if (!username || !password) {
       checkUsernamePassword();
@@ -50,7 +51,8 @@ const LoginScreen = ({ navigation }: any) => {
         Toast.show("Sorry, Account is disabled.", { duration: Toast.durations.LONG, backgroundColor: GlobalColors.error });
       } else {
         AsyncStorage.setItem("userData", JSON.stringify(response)); //now while on splash screen will fetch and save to store
-        await getBranchesAndStoreId(response.id, dispatch);
+        let branchName = await getBranchesAndStoreId(response.tenantId, dispatch);
+        branchName ? AsyncStorage.setItem("selectedBranchName", branchName): null;
         dispatch(setUserData({ userData: response, tenantId: response.tenantId }));
         navigation.navigate("DrawerNavigationRoutes");
       }
@@ -70,7 +72,7 @@ const LoginScreen = ({ navigation }: any) => {
         <Text style={{ fontSize: FontSize.headingX, fontWeight: '200', marginBottom: 30 }}>Login</Text>
         <Text>User Name</Text>
         <View style={[styles.inputContainer, { marginBottom: 20 }]}>
-          <Ionicons name="person" size={15} color="lightgray" style={styles.icon} />
+          <Ionicons name="person-outline" size={15} color="lightgray" style={styles.icon} />
           <TextInput
             style={styles.textInput}
             placeholder="User Name"
@@ -80,13 +82,14 @@ const LoginScreen = ({ navigation }: any) => {
             onSubmitEditing={() => {
               passwordRef.current.focus();
             }}
+            autoCapitalize='none'
             blurOnSubmit={false}
             onChangeText={(val) => { setUsername(val) }}
           />
         </View>
         <Text>Password</Text>
         <View style={styles.inputContainer}>
-          <Ionicons name="md-lock-closed" size={15} color="lightgray" style={styles.icon} />
+          <Ionicons name="lock-closed-outline" size={15} color="lightgray" style={styles.icon} />
           <TextInput
             style={styles.textInput}
             placeholder="Password"

@@ -18,7 +18,7 @@ const SplashScreen = ({ navigation }: any) => {
       if (userData != null) {
         let data: {[key: string]: any} = JSON.parse(userData) ?? {};
         dispatch(setUserData({ userData: data, tenantId: data.tenantId}));
-        data ? await getBranchesAndStoreId(data.id, dispatch) : null;
+        data ? await getBranchesAndStoreId(data.tenantId, dispatch) : null;
         navigation.replace("DrawerNavigationRoutes");
       } else {
         navigation.replace("Login");
