@@ -20,6 +20,7 @@ import { ServiceDetailsType } from "../../../utils/Types";
 import { calculateTaxes } from "../../../utils/Appointment";
 import moment from "moment";
 import ConfirmationModal from "./ConfirmationModal";
+import { selectSelectedGuest, setSelectedGuest } from "../../../redux/state/AppointmentStates";
 
 
 const CreateAppointment = ({ navigation, route }: any) => {
@@ -30,9 +31,9 @@ const CreateAppointment = ({ navigation, route }: any) => {
     const services = useAppSelector(selectProductServiceCategories);
     const storeConfig = useAppSelector(selectCurrentStoreConfig);
     const loggedInUser = useAppSelector(selectUserData);
+    const guestDetails = useAppSelector(selectSelectedGuest) ?? {};
 
     const [selectedCustomer, setSelectedCustomer] = useState<{ [key: string]: any } | null>(null);
-    const [guestDetails, setGuestDetails] = useState<{ [key: string]: any }>({});
     const [instructions, setInstructions] = useState<string>('');
     const [enableSMS, setEnableSMS] = useState<boolean>(true);
     const [modalVisible, setModalVisible] = useState<boolean>(false);
@@ -86,7 +87,6 @@ const CreateAppointment = ({ navigation, route }: any) => {
                 isValid = false;
             }
         });
-        console.log("it is")
         return isValid;
     };
 
@@ -184,9 +184,9 @@ const CreateAppointment = ({ navigation, route }: any) => {
         const url = environment.guestUrl + `customers/userbyguestid?tenantId=${tenantId}&storeId=${storeId}&guestId=${selectedCustomer!.id}`;
         let response = await makeAPIRequest(url, null, "GET");
         if (response) {
-            setGuestDetails(response);
+            dispatch(setSelectedGuest ({selectedGuest: response}));
         } else {
-            setGuestDetails({});
+            dispatch(setSelectedGuest ({selectedGuest: {}}));
             Toast.show("Encountered issue", { backgroundColor: GlobalColors.error });
         }
     };
@@ -205,7 +205,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
 
     useEffect(()=>{
         if(selectedCustomer){
-            Object.keys(selectedCustomer).length > 0 ? getGuestDetails() : setGuestDetails({});
+            Object.keys(selectedCustomer).length > 0 ? getGuestDetails() : dispatch(setSelectedGuest ({selectedGuest: {}}));
         }
     }, [selectedCustomer]);
 
@@ -217,7 +217,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
                     <View style={[GlobalStyles.justifiedRow, { marginBottom: 10 }]}>
                         <Text style={styles.headingText}>1. Guest Details</Text>
                         {
-                            Object.keys(guestDetails).length > 0 ?
+                            Object.keys(guestDetails!).length > 0 ?
                                 <Text style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}
                                     onPress={() => {
                                         dispatch(setShowUserProfileTopBar({ showUserProfileTopBar: false }));
@@ -235,7 +235,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
                                 </View>
                         }
                     </View>
-                    <GuestExpertDropdown data={customers} placeholderText="Search By Name Or Number" type="guest" setSelected={(val) => { setSelectedCustomer(val) }} selectedValue={selectedCustomer ? selectedCustomer.firstName : ""} />
+                    <GuestExpertDropdown data={customers} placeholderText="Search By Name Or Number" type="guest" setSelected={(val) => { setSelectedCustomer(val) }} selectedValue={selectedCustomer ? selectedCustomer.firstName : null} />
                 </View>
 
                 <View style={[GlobalStyles.sectionView]}>
