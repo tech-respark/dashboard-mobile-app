@@ -21,6 +21,7 @@ import { calculateTaxes } from "../../../utils/Appointment";
 import moment from "moment";
 import ConfirmationModal from "./ConfirmationModal";
 import { selectSelectedGuest, setSelectedGuest } from "../../../redux/state/AppointmentStates";
+import MembershipValidationModal from "./MembershipValidationModal";
 
 
 const CreateAppointment = ({ navigation, route }: any) => {
@@ -37,6 +38,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
     const [instructions, setInstructions] = useState<string>('');
     const [enableSMS, setEnableSMS] = useState<boolean>(true);
     const [modalVisible, setModalVisible] = useState<boolean>(false);
+    const [membershipValidationModal, setMembershipValidationModal] = useState<boolean>(false);
     const [createUserModal, setCreateUserModal] = useState<boolean>(false);
     const customers = useCustomerData(createUserModal);
     const [serviceDetails, setServiceDetails] = useState<ServiceDetailsType[]>([{
@@ -385,7 +387,8 @@ const CreateAppointment = ({ navigation, route }: any) => {
                         />
                         <Text>{"SMS\nConfirmation"}</Text>
                     </View>
-                    <Text onPress={() => { }} style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}>Membership Validation</Text>
+                    {!selectedCustomer && <Text onPress={() => { setMembershipValidationModal(true)}} style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}>Membership Validation</Text>}
+                    {membershipValidationModal && <MembershipValidationModal modalVisible={membershipValidationModal} setModalVisible={setMembershipValidationModal} setCustomer={(val)=>{setSelectedCustomer(val)}}/>}
                 </View>
                 <TouchableOpacity style={{ width: '100%', backgroundColor: GlobalColors.blue, paddingVertical: 10, borderRadius: 5, marginBottom: 5 }}
                     onPress={() => {
