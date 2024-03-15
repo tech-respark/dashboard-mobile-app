@@ -1,13 +1,12 @@
 import React, { FC, useEffect, useState } from "react";
-import { FlatList, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { FlatList, Image, ImageBackground, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { FontSize, GlobalColors } from "../../../../Styles/GlobalStyleConfigs";
 import { GlobalStyles } from "../../../../Styles/Styles";
 import moment from "moment";
-import { MEMBERSHIPCOLORS, environment } from "../../../../utils/Constants";
+import { MEMBERSHIPBACKGROUNDS, MEMBERSHIPCOLORS, environment } from "../../../../utils/Constants";
 import { useAppDispatch, useAppSelector } from "../../../../redux/Hooks";
 import { selectBranchId, selectPaymentTypes, selectStaffData, selectTenantId, selectUserData } from "../../../../redux/state/UserStates";
 import { makeAPIRequest } from "../../../../utils/Helper";
-import { Svg, Path } from "react-native-svg";
 import GuestExpertDropdown from "../../createAppointment/GuestExpertDropdown";
 import LoadingState from "../../../../components/LoadingState";
 import { setIsLoading } from "../../../../redux/state/UIStates";
@@ -150,7 +149,7 @@ const MembershipModal: FC<IMembershipModal> = ({ modalVisible, setModalVisible, 
 
     const renderItem = ({ item, index }: any) => {
         return (
-            <Pressable key={index} style={{ width: 280, height: '95%', backgroundColor: MEMBERSHIPCOLORS[index % MEMBERSHIPCOLORS.length].shade1, borderRadius: 5, margin: 10, borderColor: GlobalColors.blue, borderWidth: item == selectedMembership ? 1 : 0 }}
+            <Pressable key={index} style={{ height: '95%', width: 280, borderRadius: 5, margin: 10 }}
                 onPress={() => {
                     setSelectedMembership(item);
                     console.log(item)
@@ -159,30 +158,31 @@ const MembershipModal: FC<IMembershipModal> = ({ modalVisible, setModalVisible, 
                     setAddMember(item.isSharable);
                 }}
             >
-                <Svg height={280} width={280} viewBox="0 0 1440 320">
-                    <Path
-                        fill={MEMBERSHIPCOLORS[index % MEMBERSHIPCOLORS.length].shade2}
-                        d="M0,160L48,181.3C96,203,192,245,288,250.7C384,256,480,224,576,192C672,160,768,128,864,106.7C960,85,1056,75,1152,96C1248,117,1344,171,1392,197.3L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-                    />
-                </Svg>
-                <View style={{ position: 'absolute', paddingVertical: 10, paddingHorizontal: 10 }}>
-                    <Text style={{ fontSize: FontSize.headingX, marginBottom: 10 }}>{item.name}</Text>
-                    <Text style={{ fontWeight: '300', marginBottom: 10 }}>Pay ₹{item.membershipFee} & Get ₹{item.membershipFee + item.benefit}</Text>
-                    <View style={[GlobalStyles.justifiedRow, { marginBottom: 10 }]}>
-                        <Text style={{ fontWeight: '300', marginRight: 10 }}>Validity: {item.validity} Days</Text>
-                        <Text style={{ fontWeight: '300' }}>Benefit: ₹{item.benefit} Extra</Text>
+                <ImageBackground
+                    source={MEMBERSHIPBACKGROUNDS[(index)%6]}
+                    style={{ flex: 1, justifyContent: 'center' }}
+                    imageStyle={{ borderRadius: 5, borderColor: GlobalColors.blue, borderWidth: item == selectedMembership ? 1 : 0 }}
+                >
+                    <View style={{ paddingVertical: 10, paddingHorizontal: 10 }}>
+                        <Text style={{ fontSize: FontSize.headingX, marginBottom: 10 }}>{item.name}</Text>
+                        <Text style={{ fontWeight: '300', marginBottom: 10 }}>Pay ₹{item.membershipFee} & Get ₹{item.membershipFee + item.benefit}</Text>
+                        <View style={[GlobalStyles.justifiedRow, { marginBottom: 10 }]}>
+                            <Text style={{ fontWeight: '300', marginRight: 10 }}>Validity: {item.validity} Days</Text>
+                            <Text style={{ fontWeight: '300' }}>Benefit: ₹{item.benefit} Extra</Text>
+                        </View>
+                        {item.txchrgs.length > 0 &&
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <Text style={{ fontWeight: '300' }}>Taxes: </Text>
+                                {item.txchrgs.map((tax: any, index: number) => (
+                                    <Text key={index} style={{ fontWeight: '300' }}>₹{tax.value} {tax.isInclusive && `(Inclusive)`}</Text>
+                                ))}
+                            </View>}
+                        <View style={{ marginTop: 10, borderColor: MEMBERSHIPCOLORS[(index) % 6], borderWidth: 1, width: '55%', borderRadius: 5 }}>
+                            <Text style={{ fontSize: FontSize.heading, padding: 5, textAlign: 'center' }}>Fee ₹{item.membershipFee}</Text>
+                        </View>
                     </View>
-                    {item.txchrgs.length > 0 &&
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Text style={{ fontWeight: '300' }}>Taxes: </Text>
-                            {item.txchrgs.map((tax: any, index: number) => (
-                                <Text key={index} style={{ fontWeight: '300' }}>₹{tax.value} {tax.isInclusive && `(Inclusive)`}</Text>
-                            ))}
-                        </View>}
-                    <View style={{ marginTop: 10, borderColor: MEMBERSHIPCOLORS[index % MEMBERSHIPCOLORS.length].shade3, borderWidth: 1, width: '55%', borderRadius: 5 }}>
-                        <Text style={{ fontSize: FontSize.heading, padding: 5, textAlign: 'center' }}>Fee ₹{item.membershipFee}</Text>
-                    </View>
-                </View>
+                </ImageBackground>
+
             </Pressable>
         );
     };
@@ -257,11 +257,11 @@ const MembershipModal: FC<IMembershipModal> = ({ modalVisible, setModalVisible, 
                                         <GuestExpertDropdown data={staffList!} placeholderText="Select Staff" type="expert" selectedValue={expert.name} setSelected={setExpert} />
                                     </View>
                                     {addMember &&
-                                        <AddMemberView customer={customer} setCustomer={setCustomer} selectedFamily={selectedFamily} setSelectedFamily={setSelectedFamily}/>
+                                        <AddMemberView customer={customer} setCustomer={setCustomer} selectedFamily={selectedFamily} setSelectedFamily={setSelectedFamily} />
                                     }
                                     <View>
                                         <Text style={{ fontSize: FontSize.large, marginBottom: 10 }}>Payment Details:</Text>
-                                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 15 }}>
+                                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 15, justifyContent: 'space-evenly' }}>
                                             {paymentTypes?.map((type: { [key: string]: any }, index: number) => (
                                                 <Pressable style={{ margin: 10, width: '25%' }} key={index}
                                                     onPress={() => {

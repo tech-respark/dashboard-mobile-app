@@ -14,6 +14,7 @@ export interface UserStates {
     storeCount?: number,
     productServiceCategories?: { [key: string]: any }[],
     paymentTypes?: { [key: string]: any }[],
+    smsConfig?: { [key: string]: any },
 }
 
 const initialState: UserStates = {
@@ -28,7 +29,8 @@ const initialState: UserStates = {
     currentStoreConfig: {},
     storeCount: 0,
     productServiceCategories: [],
-    paymentTypes: []
+    paymentTypes: [],
+    smsConfig: {}
 }
 
 const UserSlice = createSlice({
@@ -70,10 +72,13 @@ const UserSlice = createSlice({
         setPaymentTypes: (state, action: PayloadAction<UserStates>) => {
             state.paymentTypes = action.payload.paymentTypes;
         },
+        setSMSConfig: (state, action: PayloadAction<UserStates>) => {
+            state.smsConfig = action.payload.smsConfig;
+        },
     },
 });
 
-export const { setUserData, setConfig, setStoreIdData, setCurrentBranch, setStaffData, setCurrrentStoreConfig, setStoreCount, setProductServiceCategories, setPaymentTypes } = UserSlice.actions;
+export const { setUserData, setConfig, setStoreIdData, setCurrentBranch, setStaffData, setCurrrentStoreConfig, setStoreCount, setProductServiceCategories, setPaymentTypes, setSMSConfig } = UserSlice.actions;
 
 
 export const selectUserData = (state: RootState) => state.UserStates.userData;
@@ -88,6 +93,8 @@ export const selectConfig = (state: RootState) => state.UserStates.configs;
 export const selectStoreCount = (state: RootState) => state.UserStates.storeCount;
 export const selectProductServiceCategories = (state: RootState) => state.UserStates.productServiceCategories;
 export const selectPaymentTypes = (state: RootState) => state.UserStates.paymentTypes;
+export const selectSMSConfig = (state: RootState) => state.UserStates.smsConfig;
+
 
 
 export default UserSlice.reducer;

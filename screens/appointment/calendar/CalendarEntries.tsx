@@ -7,6 +7,7 @@ import moment from "moment";
 import { setIsLoading, setShowUserProfileTopBar } from "../../../redux/state/UIStates";
 import { appointmentColorCodes } from "../../../utils/Constants";
 import { useTimeIntervalList } from "../../../customHooks/AppointmentHooks";
+import Toast from "react-native-root-toast";
 
 interface ICalenderEntries {
     selectedStaffIndex: number,
@@ -81,7 +82,7 @@ const CalendarEntries: FC<ICalenderEntries> = ({ selectedStaffIndex, staffObject
                             onPress={() => {
                                 if (timeSlots[index] != 0) {
                                     dispatch(setShowUserProfileTopBar({showUserProfileTopBar: false}));
-                                    navigation.navigate("Create Appointment", { from: time, to: Object.keys(timeIntervals)[index + 1], selectedStaffIndex: selectedStaffIndex, staffObjects: staffObjects, selectedDate: selectedDate });
+                                    navigation.navigate("Create Edit Appointment", { isCreate: true, from: time, to: Object.keys(timeIntervals)[index + 1], selectedStaffIndex: selectedStaffIndex, staffObjects: staffObjects, selectedDate: selectedDate });
                                 }
                             }}
                         >
@@ -103,15 +104,24 @@ const CalendarEntries: FC<ICalenderEntries> = ({ selectedStaffIndex, staffObject
                     {emptyCalenderView()}
                     {Object.keys(timeYPositions).length > 0 && Object.keys(expertAppointments).map((appointmentTime: any, index: number) => {
                         let times = appointmentTime.split("-");
-                        let bc = appointmentColorCodes[expertAppointments[appointmentTime]["status"].slice(-1)[0]["status"]];
+                        let status = expertAppointments[appointmentTime]["status"].slice(-1)[0]["status"];
                         return (
-                            <View key={index} style={[styles.appointmentView, { backgroundColor: bc, top: timeYPositions[times[0]], height: timeYPositions[times[1]] - timeYPositions[times[0]] }]}>
+                            <TouchableOpacity key={index} style={[styles.appointmentView, { backgroundColor: appointmentColorCodes[status], top: timeYPositions[times[0]], height: timeYPositions[times[1]] - timeYPositions[times[0]] }]}
+                                onPress={()=>{
+                                    dispatch(setShowUserProfileTopBar({showUserProfileTopBar: false}));
+                                    if(status=="CONFIRMED" || status =="CHECKIN"){
+                                        navigation.navigate("Create Edit Appointment", { isCreate: false, staffObjects: staffObjects, appointment: expertAppointments[appointmentTime] });
+                                    }else{
+                                        Toast.show(`Cannot edit ${status} appointments right now`);
+                                    }
+                                }}
+                            >
                                 <View style={styles.appointmentFirstRow}>
                                     <Text style={{ fontWeight: "bold", maxWidth: '50%' }} ellipsizeMode="tail">{expertAppointments[appointmentTime]["guestName"]}</Text>
                                     <Text style={{ fontSize: FontSize.small }}>{timeIntervals[times[0]]}-{timeIntervals[times[1]]}</Text>
                                 </View>
                                 <Text ellipsizeMode="tail" numberOfLines={1} style={{ maxWidth: '60%' }}>{expertAppointments[appointmentTime]["expertAppointments"][0]["service"]}</Text>
-                            </View>
+                            </TouchableOpacity>
                         );
                     })
                     }

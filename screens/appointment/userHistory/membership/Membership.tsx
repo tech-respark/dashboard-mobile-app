@@ -40,7 +40,7 @@ const Membership: FC<IMembership> = ({ customer, setCustomer }) => {
                         <ScrollView>
                             {
                                 customer.membershipHistory.map((membership: any, index: number) => (
-                                    <View key={index} style={[GlobalStyles.justifiedRow, { paddingHorizontal: 10, paddingVertical: 10, borderBottomWidth: 0.5, borderColor: 'gray' }]}>
+                                    <View key={index} style={[GlobalStyles.justifiedRow, { paddingHorizontal: 10, paddingVertical: 10, borderBottomWidth: 0.5, borderColor: 'lightgray' }]}>
                                         <Text style={{ width: '40%' }}>{membership.membershipPlan}</Text>
                                         <Text>{moment(membership.purchaseDate).format('YYYY-MM-DD')}</Text>
                                         <Text>{moment(membership.expiryDate).format('YYYY-MM-DD')}</Text>

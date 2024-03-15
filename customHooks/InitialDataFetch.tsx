@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from '../redux/Hooks';
 import { setIsLoading } from '../redux/state/UIStates';
 import { environment } from '../utils/Constants';
 import { makeAPIRequest } from '../utils/Helper';
-import { selectBranchId, selectTenantId, setConfig, setCurrrentStoreConfig, setPaymentTypes, setProductServiceCategories, setStaffData, setStoreCount } from '../redux/state/UserStates';
+import { selectBranchId, selectTenantId, setConfig, setCurrrentStoreConfig, setPaymentTypes, setProductServiceCategories, setSMSConfig, setStaffData, setStoreCount } from '../redux/state/UserStates';
 import { setCustomerSources, setSegments } from '../redux/state/AppointmentStates';
 
 const useInitialDataFetch = () => {
@@ -82,6 +82,14 @@ const useInitialDataFetch = () => {
         }
     };
 
+    const getSMSConfig = async() => {
+        const url = environment.sqlBaseUri+`getSMSConfigs/${tenantId}/${storeId}`;
+        let response = await makeAPIRequest(url, null, "GET");
+        if(response && response.code == 200){
+            dispatch(setSMSConfig({smsConfig: response.data}));
+        }
+    };
+
     useEffect(() => {
         dispatch(setIsLoading({ isLoading: true }));
         getUserConfig();
@@ -92,6 +100,7 @@ const useInitialDataFetch = () => {
         getStoreCount();
         getProductAndServiceCategories();
         getPaymentTypes();
+        getSMSConfig();
         dispatch(setIsLoading({ isLoading: false }));
     }, []);
 };

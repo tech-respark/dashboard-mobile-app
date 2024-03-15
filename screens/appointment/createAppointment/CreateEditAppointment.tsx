@@ -6,8 +6,8 @@ import { useIsFocused } from "@react-navigation/native";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { setIsLoading, setShowUserProfileTopBar } from "../../../redux/state/UIStates";
 import { GlobalStyles } from "../../../Styles/Styles";
-import { APPOINTMENT_CREATED, DEFAULT_SERVICE_DURATION, environment } from "../../../utils/Constants";
-import { selectBranchId, selectCurrentStoreConfig, selectProductServiceCategories, selectTenantId, selectUserData } from "../../../redux/state/UserStates";
+import { APPOINTMENT_CONFIRMED, APPOINTMENT_CREATED, DEFAULT_SERVICE_DURATION, environment } from "../../../utils/Constants";
+import { selectBranchId, selectCurrentStoreConfig, selectProductServiceCategories, selectSMSConfig, selectTenantId, selectUserData } from "../../../redux/state/UserStates";
 import { makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
 import { TimerWithBorderHeader } from "../../../components/HeaderTextField";
@@ -24,8 +24,9 @@ import { selectSelectedGuest, setSelectedGuest } from "../../../redux/state/Appo
 import MembershipValidationModal from "./MembershipValidationModal";
 
 
-const CreateAppointment = ({ navigation, route }: any) => {
+const CreateEditAppointment = ({ navigation, route }: any) => {
 
+    const isCreate = route.params.isCreate;
     const dispatch = useAppDispatch();
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
@@ -33,10 +34,11 @@ const CreateAppointment = ({ navigation, route }: any) => {
     const storeConfig = useAppSelector(selectCurrentStoreConfig);
     const loggedInUser = useAppSelector(selectUserData);
     const guestDetails = useAppSelector(selectSelectedGuest) ?? null;
+    const smsConfig = useAppSelector(selectSMSConfig);
 
     const [selectedCustomer, setSelectedCustomer] = useState<{ [key: string]: any } | null>(null);
     const [instructions, setInstructions] = useState<string>('');
-    const [enableSMS, setEnableSMS] = useState<boolean>(true);
+    const [enableSMS, setEnableSMS] = useState<boolean>(smsConfig!.appointmentConfirmed ?? false);
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [membershipValidationModal, setMembershipValidationModal] = useState<boolean>(false);
     const [createUserModal, setCreateUserModal] = useState<boolean>(false);
@@ -129,10 +131,10 @@ const CreateAppointment = ({ navigation, route }: any) => {
 
     const getSMSKeys = () => {
         return {
-            appointmentCancelled: true,
-            appointmentConfirmed:false,
-            combineFeedbackAndInvoice: true,
-            smsForAppointments: true
+            appointmentCancelled: smsConfig!.appointmentCancelled,
+            appointmentConfirmed: enableSMS, //for creating confirmation sms
+            combineFeedbackAndInvoice: smsConfig!.combineFeedbackAndInvoice,
+            smsForAppointments: smsConfig!.smsForAppointments,
         }
     };
 
@@ -204,7 +206,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerTitle: "Create Appointment",
+            headerTitle: `${isCreate ? "Create" : "Update"} Appointment`,
             headerTitleAlign: 'left',
             headerLeft: () => (
                 <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -400,7 +402,7 @@ const CreateAppointment = ({ navigation, route }: any) => {
                 </TouchableOpacity>
             </View>
             {modalVisible && <ConfirmationModal modalVisible={modalVisible} setModalVisible={setModalVisible} performAction={() => {
-                appointmentAPICall(APPOINTMENT_CREATED);
+                appointmentAPICall(APPOINTMENT_CONFIRMED);
                 }}/>}
         </View>
     );
@@ -429,4 +431,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default CreateAppointment;
+export default CreateEditAppointment;
