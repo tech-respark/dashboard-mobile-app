@@ -33,7 +33,6 @@ const CustomDrawerContent = ({ navigation, state }: any) => {
                             ]}
                             key={index}
                             onPress={() => {
-                                console.log("item", item)
                                 navigation.navigate(item);
                                 navigation.closeDrawer();
                             }}
