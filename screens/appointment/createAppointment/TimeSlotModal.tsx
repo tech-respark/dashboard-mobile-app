@@ -16,7 +16,6 @@ interface ITimeSlotModal {
 const TimeSlotModal: FC<ITimeSlotModal> = ({ modalVisible, setModalVisible, isFrom, timeInterval, setValue, serviceObj }) => {
     let validationOccurred = false;
 
-    console.log(serviceObj)
     const checkTimeValidation = (time: string) => {
         if (isFrom) {
             return true;

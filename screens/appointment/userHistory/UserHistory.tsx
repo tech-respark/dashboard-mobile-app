@@ -17,18 +17,23 @@ import Membership from "./membership/Membership";
 import FamilyMembers from "./FamilyMembers";
 import AdvanceOrBalance from "./AdvanceOrBalance";
 import Packages from "./Packages";
+import { selectSelectedGuest, setSelectedGuest } from "../../../redux/state/AppointmentStates";
 
 const UserHistory = ({ navigation, route }: any) => {
+    const dispatch = useAppDispatch();
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
-
+    const customerData = useAppSelector(selectSelectedGuest);
+    
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
-    const [customerData, setCustomerData] = useState<{ [key: string]: any }>(route.params.guestDetails);
     const [orderHistory, setOrderHistory] = useState<{ [key: string]: any }[]>([]);
     const [loader, setLoader] = useState<boolean>(false);
 
     const userHistorySections = ["Profile Info", "Orders", "About User", "Membership", "Advance", "Due Balance", "Family Members", "Packages"];
     const sectionIcons = ["person-outline", "receipt-outline", "information-circle-outline", "ribbon-outline", "cash-outline", "wallet-outline", "people-outline", "basket-outline"];
+    const setCustomerData = (val: {[key: string]: any}) => {
+        dispatch(setSelectedGuest({selectedGuest: val}));
+    }
     const sectionViewMap: { [key: string]: any } = {
         "Profile Info": <ProfileInfo customer={customerData!} setCustomer={setCustomerData}/>,
         "Orders": <Orders ordersHistory={orderHistory}/>,
@@ -38,10 +43,10 @@ const UserHistory = ({ navigation, route }: any) => {
         "Due Balance": <AdvanceOrBalance isAdvance={false} customer={customerData!} setCustomer={setCustomerData}/>,
         "Family Members": <FamilyMembers customer={customerData!} setCustomer={setCustomerData}/>,
         "Packages": <Packages customer={customerData!} setCustomer={setCustomerData} />
-    }
+    };
 
     const getUserOrdersHistory = async () => {
-        const url = environment.txnUrl + `sorder/tenantguest/${tenantId}/${route.params.customerId}`;
+        const url = environment.txnUrl + `sorder/tenantguest/${tenantId}/${customerData!.id}`;
         let response = await makeAPIRequest(url, null, "GET");
         if (response) {
             setOrderHistory(response);

@@ -42,7 +42,7 @@ const CalendarEntries: FC<ICalenderEntries> = ({ selectedStaffIndex, staffObject
                 appointment.expertAppointments.forEach((expertAppoint: any) => {
                     expertAppoint.contributions.forEach((contributor: any) => {
                         if(contributor.expertId === currentExpertId){
-                            newAppointments[contributor.slot] = appointment
+                            newAppointments[expertAppoint.slot] = appointment
                         }
                     })
                 })   

@@ -30,11 +30,11 @@ const ProfileInfo: FC<IProfileInfo> = ({ customer, setCustomer }) => {
                     </View>
                     <View style={styles.row}>
                         <Text>Birth Date: </Text>
-                        <Text style={styles.text}>{moment(customer.dob).format("DD MMM")}</Text>
+                        <Text style={styles.text}>{customer.dob ? moment(customer.dob).format("DD MMM") : ""}</Text>
                     </View>
                     <View style={styles.row}>
                         <Text>Last Visted Date: </Text>
-                        <Text style={styles.text}>{moment(customer.lastVisitedOn).format("YYYY/MM/DD")}</Text>
+                        <Text style={styles.text}>{customer.lastVisitedOn ? moment(customer.lastVisitedOn).format("YYYY/MM/DD") : ""}</Text>
                     </View>
                     <View style={styles.row}>
                         <Text>Loyalty Points: </Text>
@@ -52,7 +52,7 @@ const ProfileInfo: FC<IProfileInfo> = ({ customer, setCustomer }) => {
                     </View>
                     <View style={styles.row}>
                         <Text>Anniversary: </Text>
-                        <Text style={styles.text}>{moment(customer.anniversaryDate).format("DD MMM")}</Text>
+                        <Text style={styles.text}>{customer.anniversaryDate ? moment(customer.anniversaryDate).format("DD MMM") : ""}</Text>
                     </View>
                     <View style={styles.row}>
                         <Text>Lifetime visit count: </Text>

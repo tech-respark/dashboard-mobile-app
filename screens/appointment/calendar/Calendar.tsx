@@ -6,12 +6,13 @@ import { selectBranchId, selectCurrentStoreConfig, selectStaffData, selectTenant
 import moment from "moment";
 import { setIsLoading, setShowUserProfileTopBar } from "../../../redux/state/UIStates";
 import { APPOINTMENT_FETCH_INTERVAL, environment } from "../../../utils/Constants";
-import { getActiveStaffsForAppointment, makeAPIRequest } from "../../../utils/Helper";
+import { makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
 import { useIsFocused } from "@react-navigation/native";
 import DateAndDropdown from "./DateAndDropdown";
 import CalendarEntries from "./CalendarEntries";
 import AppointmentsCardView from "../AppointmentsCardView";
+import { getActiveStaffsForAppointment } from "../../../utils/Appointment";
 
 const AppointmentCalendar = ({ navigation }: any) => {
     const staffList = useAppSelector(selectStaffData);
@@ -23,7 +24,7 @@ const AppointmentCalendar = ({ navigation }: any) => {
 
     const [staffObjects, setStaffObjects] = useState<{ [key: string]: any }[]>([]);
     const [selectedStaffIndex, setSelectedStaffIndex] = useState<number>(0);
-    const [selectedDate, setSelectedDate] = useState<string>(moment().format('YYYY-MM-DD'));
+    const [selectedDate, setSelectedDate] = useState<string>('2024-03-13');
     const [appointmentCount, setAppointmentCount] = useState<number>(0);
     const [appointmentsData, setAppointmentsData] = useState<{ [key: string]: string }[]>([]);
     const [selectedDropdown, setSelectedDropdown] = useState<string>('confirmed');

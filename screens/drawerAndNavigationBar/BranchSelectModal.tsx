@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from "../../redux/Hooks";
 import { selectCurrentBranch, selectStoreData, setCurrentBranch } from "../../redux/state/UserStates";
 import Toast from "react-native-root-toast";
 import { GlobalStyles } from "../../Styles/Styles";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type BranchSelectModalProp = {
     showBranchModal: boolean;
@@ -27,7 +28,8 @@ const BranchSelectModal: FC<BranchSelectModalProp> = ({ showBranchModal, setShow
                 <View style={styles.modalView}>
                     {branchesData?.map((branch: { [key: string]: any }, index: number) => (
                         <TouchableOpacity key={index} style={[{ paddingVertical: 15, width: '100%', alignItems: 'center' }, index != branchesData!.length - 1 ? { borderBottomWidth: 0.5, borderColor: 'lightgray' } : {}]}
-                            onPress={() => {
+                            onPress={async() => {
+                                await AsyncStorage.setItem("selectedBranchName", branch.name);
                                 dispatch(setCurrentBranch({ currentBranch: branch.name }));
                                 setShowBranchModal(false);
                                 Toast.show(`Switched to ${branch.name}`, { backgroundColor: GlobalColors.success });

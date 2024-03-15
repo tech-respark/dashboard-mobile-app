@@ -1,11 +1,11 @@
 import Toast from "react-native-root-toast";
-import { useAppDispatch, useAppSelector } from "../redux/Hooks";
 import { AppDispatch } from "../redux/Store";
 import { setCategoriesData } from "../redux/state/BackOfficeStates";
 import { setIsLoading } from "../redux/state/UIStates";
-import { selectCurrentBranch, selectCurrentStoreConfig, selectStoreData, setCurrentBranch, setStoreIdData } from "../redux/state/UserStates";
+import { setCurrentBranch, setStoreIdData } from "../redux/state/UserStates";
 import { environment } from "./Constants";
 import { GlobalColors } from "../Styles/GlobalStyleConfigs";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const makeAPIRequest = async (url: string, body?: any, method: string = "POST", allowEmptyRes: boolean = false, options: RequestInit = { headers: { 'Content-Type': "application/json" } }): Promise<any> => {
   options.method = method;
@@ -52,12 +52,16 @@ export const sleep = (milliseconds: number) => {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 };
 
-export const getBranchesAndStoreId = async (staffId: number, dispatch: AppDispatch) => {
-  let res: { [key: string]: any }[] = await makeAPIRequest(environment.sqlBaseUri + "ssroles/staff/custom/staffid/" + staffId, null, "GET");
+export const getBranchesAndStoreId = async (tenantId: number, dispatch: AppDispatch) => {
+  let res: { [key: string]: any }[] = await makeAPIRequest(environment.sqlBaseUri + "tenants/stores/tenant/" + tenantId, null, "GET");
   if (res.length > 0) {
-    dispatch(setStoreIdData({ StoreIdData: res }));
-    dispatch(setCurrentBranch({ currentBranch: res[0].name }));
+    let selectedBranchName = await AsyncStorage.getItem('selectedBranchName') ?? res[0].name;
+    //additonal check if branch is deleted
+    dispatch(setStoreIdData({ storeIdData: res }));
+    dispatch(setCurrentBranch({ currentBranch: selectedBranchName }));
+    return selectedBranchName;
   }
+  return null;
 };
 
 export const getCategoryData = async (type: string, tenantId: number, storeId: number, dispatch: AppDispatch) => {
@@ -87,7 +91,6 @@ export const uploadImageToS3 = async (imageUrl: string, tenantId?: number) => {
   return response;
 };
 
-
 export const checkImageToUpload = async (displayImageList: { [key: string]: any }[], tenantId: number) => {
   let displayUploads = [...displayImageList];
   for (let index = 0; index < displayImageList.length; index++) {
@@ -97,34 +100,6 @@ export const checkImageToUpload = async (displayImageList: { [key: string]: any 
     }
   }
   return displayUploads;
-}
-
-export function getActiveStaffsForAppointment(latestStaffList: { [key: string]: any }[], mainStaffList: { [key: string]: any }[]): { [key: string]: any }[] {
-  mainStaffList = mainStaffList.filter(item => item.enableAppointments && item.active);
-  latestStaffList = latestStaffList.filter(item => !item.onLeave);
-
-  const commonStaffList = latestStaffList.filter(latestStaff => {
-    const mainStaff = mainStaffList.find(mainStaff => mainStaff.id === latestStaff.staffId);
-    if (mainStaff) {
-      latestStaff.name = `${mainStaff.firstName} ${mainStaff.lastName}`;
-      return true;
-    }
-    return false;
-  });
-  return commonStaffList;
-};
-
-export const getAddedMembersObjects = (selectedFamily: string[], customer: {[key: string]: any}) => {
-  const objects = selectedFamily.map(item => {
-      const foundObject = customer.familyMembers.find((obj:any) => obj.name === item);
-      if (foundObject) {
-          const { id, ...rest } = foundObject; 
-          return { ...rest, sharedId: id }; 
-      } else {
-          return null;
-      }
-  });
-  return objects;
 };
 
 export const getTofixValue = (config: any, value: any = 0, isDisplayValue: boolean = false, roundValue: number = 0)  => {
