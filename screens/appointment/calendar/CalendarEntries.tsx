@@ -108,8 +108,8 @@ const CalendarEntries: FC<ICalenderEntries> = ({ selectedStaffIndex, staffObject
                         return (
                             <TouchableOpacity activeOpacity={0.8} key={index} style={[styles.appointmentView, { backgroundColor: appointmentColorCodes[status], top: timeYPositions[times[0]], height: timeYPositions[times[1]] - timeYPositions[times[0]] }]}
                                 onPress={()=>{
-                                    dispatch(setShowUserProfileTopBar({showUserProfileTopBar: false}));
                                     if([APPOINTMENT_CONFIRMED, APPOINTMENT_CHECKIN, APPOINTMENT_CANCELLED].includes(status) ){
+                                        dispatch(setShowUserProfileTopBar({showUserProfileTopBar: false}));
                                         navigation.navigate("Create Edit Appointment", { isCreate: false, stage: status, staffObjects: staffObjects, appointment: expertAppointments[appointmentTime] });
                                     }else{
                                         Toast.show(`Cannot edit ${status} appointments right now`);

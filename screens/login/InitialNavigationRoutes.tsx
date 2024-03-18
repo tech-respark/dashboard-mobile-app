@@ -7,7 +7,7 @@ import LoginScreen from './Login';
 import ForgotPassword from './ForgotPassword';
 import { useAppSelector } from '../../redux/Hooks';
 import { selectIsLoading } from '../../redux/state/UIStates';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, SafeAreaView, View } from 'react-native';
 import { GlobalStyles } from '../../Styles/Styles';
 import DrawerNavigationRoutes from '../drawerAndNavigationBar/DrawerNavigationRoutes';
 import { GlobalColors } from '../../Styles/GlobalStyleConfigs';
@@ -17,7 +17,7 @@ const Stack = createStackNavigator();
 const InitialNavigationRoutes = () => {
   const isLoading = useAppSelector(selectIsLoading);
   return (
-    <>
+    <SafeAreaView style={{flex: 1}}>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Splash">
           <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
@@ -31,7 +31,7 @@ const InitialNavigationRoutes = () => {
           <ActivityIndicator color={GlobalColors.blue} size={"large"}/>
         </View>
       }
-    </>
+    </SafeAreaView>
   );
 };
 
