@@ -1,11 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useLayoutEffect, useState } from "react";
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { setIsLoading, setShowUserProfileTopBar } from "../../../redux/state/UIStates";
 import { GlobalStyles } from "../../../Styles/Styles";
-import { APPOINTMENT_CANCELLED, APPOINTMENT_CHECKIN, APPOINTMENT_CONFIRMED, APPOINTMENT_CREATED, DEFAULT_SERVICE_DURATION, environment } from "../../../utils/Constants";
+import { APPOINTMENT_CANCELLED, APPOINTMENT_CHECKIN, APPOINTMENT_CONFIRMED, APPOINTMENT_CREATED, APPOINTMENT_UPDATED, DEFAULT_SERVICE_DURATION, environment } from "../../../utils/Constants";
 import { selectBranchId, selectCurrentStoreConfig, selectProductServiceCategories, selectSMSConfig, selectTenantId, selectUserData } from "../../../redux/state/UserStates";
 import { makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
@@ -16,12 +16,13 @@ import { useCustomerData } from "../../../customHooks/AppointmentHooks";
 import { ServiceDetailsType } from "../../../utils/Types";
 import { calculateTaxes } from "../../../utils/Appointment";
 import moment from "moment";
-import ConfirmationModal from "./ConfirmationModal";
 import { selectSelectedGuest, setSelectedGuest } from "../../../redux/state/AppointmentStates";
 import MembershipValidationModal from "./MembershipValidationModal";
 import CancelAppointmentButton from "./CancelAppointmentButton";
 import AlertModal from "../../../components/AlertModal";
 import Header from "./Header";
+import { TimerWithBorderHeader } from "../../../components/HeaderTextField";
+import ServiceSearchModal from "./ServiceSearchModal";
 
 
 const CreateEditAppointment = ({ navigation, route }: any) => {
@@ -37,6 +38,7 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
     const loggedInUser = useAppSelector(selectUserData);
     const guestDetails = useAppSelector(selectSelectedGuest) ?? null;
     const smsConfig = useAppSelector(selectSMSConfig);
+    const services = useAppSelector(selectProductServiceCategories);
 
     const [selectedCustomer, setSelectedCustomer] = useState<{ [key: string]: any } | null>(null);
     const [instructions, setInstructions] = useState<string>('');
@@ -45,12 +47,7 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
     const [membershipValidationModal, setMembershipValidationModal] = useState<boolean>(false);
     const [createUserModal, setCreateUserModal] = useState<boolean>(false);
     const customers = useCustomerData(createUserModal);
-    const [serviceDetails, setServiceDetails] = useState<ServiceDetailsType[]>([{
-        service: null,
-        experts: [route.params.staffObjects[route.params.selectedStaffIndex]],
-        fromTime: route.params.from,
-        toTime: route.params.to
-    }]);
+    const [serviceDetails, setServiceDetails] = useState<ServiceDetailsType[]>([]);
 
     const addEmptyService = () => {
         let lastObj = serviceDetails[serviceDetails.length - 1];
@@ -79,7 +76,6 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
     };
 
     const formValidation = () => {
-        console.log(guestDetails, selectedCustomer)
         if (!selectedCustomer || !guestDetails) {
             Toast.show("Select Customer", { backgroundColor: GlobalColors.error, opacity: 1.0 });
             return false;
@@ -102,7 +98,7 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
             "appointmentTime": serviceObj.fromTime,
             "duration": duration,
             "serviceCategory": serviceObj.service.serviceCategory,
-            "service": serviceObj.service.name || serviceObj.service.service || serviceObj.serviceQuery,
+            "service": serviceObj.service.name || serviceObj.service.service || serviceObj.serviceQuery, //update this
             "slot": `${serviceObj.fromTime}-${serviceObj.toTime}`,
             "expertId": serviceObj.experts[0].id,
             "expertName": serviceObj.experts[0].name,
@@ -110,7 +106,7 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
             "salePrice": serviceObj.service.salePrice,
             "billingPrice": serviceObj.service.salePrice || serviceObj.service.price,
             "quantity": 1,
-            "serviceCategoryId": serviceObj.service.serviceCategory,
+            "serviceCategoryId": serviceObj.service.serviceCategoryId,
             "serviceId": serviceObj.service.id,
             "txchrgs": taxes,
             "variations": serviceObj.service.variations,
@@ -120,8 +116,7 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
         return individualAppointmentObj;
     };
 
-    const getAppointmentStatus = (actionType: string) => {
-        const statusList = []; //update for updation
+    const getAppointmentStatus = (actionType: string, statusList: { [key: string]: any }[]) => {
         let newStatus = {
             staff: loggedInUser!.id,
             createdOn: new Date().toISOString(),
@@ -145,18 +140,17 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
         serviceDetails.map((service: any) => {
             appointmentsList.push(createIndividualExpertService(service));
         })
-        const selectedDate = moment(route.params.selectedDate, 'YYYY-MM-DD').toISOString();
         const appointmentObj: any = {
-            "appointmentDay": selectedDate,
+            "appointmentDay": isCreate ? moment(route.params.selectedDate, 'YYYY-MM-DD').toISOString() : appointmentDetails.appointmentDay,
             "appointmentTime": appointmentsList[0].appointmentTime,
             "duration": appointmentsList[0].duration,
             "instruction": instructions,
-            "instrImages": [], //what is use of this
+            "instrImages": [], //what is use of this 
             "slot": appointmentsList[0].slot,
-            "orderId": '', //maybe for update
-            "invoiceId": '', //maybe for update
+            "orderId": '',
+            "invoiceId": '',
             "expertId": appointmentsList[0].expertId,
-            "expertName": appointmentsList[0].expertName,
+            "expertName": appointmentsList[0].expertName, //not in update
             "storeId": storeId,
             "tenantId": tenantId,
             "store": storeConfig!.store,
@@ -167,28 +161,38 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
             "guestEmail": guestDetails!.email,
             "guestGSTN": guestDetails!.gstN,
             "bookedFor": guestDetails!.bookedFor || null,
-            "storeLocation": '', //maybe for update
-            "createdOn": new Date().toISOString(), //maybe for update,
+            "storeLocation": isCreate ? '' : appointmentDetails.storeLocation,
+            "createdOn": isCreate ? new Date().toISOString() : appointmentDetails.createdOn,
             "expertAppointments": appointmentsList,
-            "noOfRemindersSent": 0, //maybe for update
-            "rescheduled": false, //maybe for update
-            "feedbackLinkShared": false, //maybe for update
+            "noOfRemindersSent": isCreate ? 0 : appointmentDetails.noOfRemindersSent,
+            "rescheduled": false,
+            "feedbackLinkShared": false,
             "type": "POS",
-            "smsKeys": getSMSKeys(),
-            "status": getAppointmentStatus(actionType)
+            "smsKeys": isCreate ? getSMSKeys() : appointmentDetails.smsKeys,
+            "status": isCreate ? getAppointmentStatus(actionType, []) : appointmentDetails.status
         };
+        if (!isCreate) {
+            appointmentObj['id'] = appointmentDetails.id
+        }
         return appointmentObj;
     };
 
     const appointmentAPICall = async (actionType: string) => {
         dispatch(setIsLoading({ isLoading: true }));
         const url = environment.txnUrl + `appointments`;
-        const payload = createAppointmentPayload(actionType);
+        let payload = null;
+        if (actionType == APPOINTMENT_CONFIRMED || actionType == APPOINTMENT_UPDATED) {
+            payload = createAppointmentPayload(actionType);
+        } else {
+            //marking as checked IN
+            payload = { ...appointmentDetails };
+            payload["status"] = getAppointmentStatus(actionType, payload["status"]);
+        }
         let response = await makeAPIRequest(url, payload, "POST");
         dispatch(setIsLoading({ isLoading: false }));
         setModalVisible(false);
         if (response) {
-            Toast.show(`Appointment created successfuly`, { backgroundColor: GlobalColors.success, opacity: 1.0 });
+            Toast.show(isCreate ? `Appointment created successfuly` : `Appointment marked Checked In`, { backgroundColor: GlobalColors.success, opacity: 1.0 });
             navigation.goBack();
         } else {
             Toast.show("Encountered Error", { backgroundColor: GlobalColors.error, opacity: 1.0 });
@@ -208,15 +212,53 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
 
     const setUpdateData = () => {
         setInstructions(appointmentDetails.instruction);
+        const mapContributions = (contribution: { [key: string]: any }) => {
+            const foundExpert = route.params.staffObjects.find((staff: any) => staff.staffId === contribution.expertId);
+            return foundExpert ? foundExpert : null;
+        };
+        const mapExpertAppointment = (expertAppointment: { [key: string]: any }) => {
+            const slots = expertAppointment.slot.split('-');
+            const experts = expertAppointment.contributions.map(mapContributions);
+            const service = {
+                salePrice: expertAppointment.salePrice,
+                price: expertAppointment.price,
+                serviceCategory: expertAppointment.serviceCategory,
+                name: expertAppointment.service,
+                serviceCategoryId: expertAppointment.serviceCategoryId,
+                id: expertAppointment.serviceId,
+                variations: expertAppointment.variations,
+                consumables: expertAppointment.consumables,
+                duration: expertAppointment.duration
+            };
+            return {
+                service,
+                fromTime: slots[0],
+                toTime: slots[1],
+                experts
+            };
+        };
+        const servicesList: ServiceDetailsType[] = appointmentDetails.expertAppointments.map(mapExpertAppointment);
+        setServiceDetails(servicesList);
     };
 
     useEffect(() => {
-        if (isCreate && selectedCustomer) {
-            Object.keys(selectedCustomer).length > 0 ? getGuestDetails(selectedCustomer!.id) : dispatch(setSelectedGuest({ selectedGuest: {} }));
+        if (isCreate) {
+            setServiceDetails([{
+                service: null,
+                experts: [route.params.staffObjects[route.params.selectedStaffIndex]],
+                fromTime: route.params.from,
+                toTime: route.params.to
+            }])
         } else if (appointmentDetails && appointmentDetails.guestId) {
-            //set guestdetailds for  update
             getGuestDetails(appointmentDetails.guestId);
             setUpdateData();
+        }
+    }, []);
+
+    //only used for create
+    useEffect(() => {
+        if (isCreate && selectedCustomer) {
+            Object.keys(selectedCustomer).length > 0 ? getGuestDetails(selectedCustomer!.id) : dispatch(setSelectedGuest({ selectedGuest: {} }));
         }
     }, [selectedCustomer]);
 
@@ -272,24 +314,24 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
                             </TouchableOpacity>
                         </View>
                     </View>
-                    {/* {
-                        serviceDetails.map((serviceDetailsObj: ServiceDetailsType, sIndex: number) => (
+                    {
+                        serviceDetails.length > 0 ? serviceDetails.map((serviceDetailsObj: ServiceDetailsType, sIndex: number) => (
                             <View style={[{ borderWidth: 1, borderRadius: 5, borderColor: 'lightgray', padding: 10, marginVertical: 8 }, GlobalStyles.shadow]} key={sIndex}>
-                                {serviceDetails.length > 1 && 
-                                    <View style={{flexDirection: 'row', justifyContent: 'flex-end', width: '100%'}}>
-                                        <TouchableOpacity style={{backgroundColor: GlobalColors.lightGray2, padding: 3, borderRadius: 20}} 
-                                        onPress={() => {
-                                            setServiceDetails(prev => {
-                                                const updated = [...prev];
-                                                updated.splice(sIndex, 1);
-                                                return updated
-                                            })
-                                        }}>
-                                            <Ionicons name="trash-outline" color={GlobalColors.error} size={20}/>
+                                {serviceDetails.length > 1 &&
+                                    <View style={{ flexDirection: 'row', justifyContent: 'flex-end', width: '100%' }}>
+                                        <TouchableOpacity style={{ backgroundColor: GlobalColors.lightGray2, padding: 3, borderRadius: 20 }}
+                                            onPress={() => {
+                                                setServiceDetails(prev => {
+                                                    const updated = [...prev];
+                                                    updated.splice(sIndex, 1);
+                                                    return updated
+                                                })
+                                            }}>
+                                            <Ionicons name="trash-outline" color={GlobalColors.error} size={20} />
                                         </TouchableOpacity>
                                     </View>
                                 }
-                                
+
                                 <ServiceSearchModal data={services!} headerText={`Service ${sIndex + 1}`} selectedValue={serviceDetailsObj.service?.name}
                                     setSelectedValue={(val) => {
                                         setServiceDetails(prev => {
@@ -319,7 +361,6 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
                                                     onPress={() => {
                                                         setServiceDetails(prev => {
                                                             const updated = [...prev];
-                                                            console.log(eIndex)
                                                             updated[sIndex].experts.splice(eIndex, 1); //bug here
                                                             return updated
                                                         })
@@ -365,8 +406,12 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
                                     />
                                 </View>
                             </View>
-                        ))
-                    } */}
+                        )) :
+                            <View style={{ alignItems: 'center', height: '100%', justifyContent: 'center' }}>
+                                <Text>Loading</Text>
+                                <ActivityIndicator color={GlobalColors.blue} />
+                            </View>
+                    }
                 </View>
 
                 <View style={GlobalStyles.sectionView}>
@@ -403,29 +448,35 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
                         </View> :
                         stage != APPOINTMENT_CANCELLED &&
                         <View style={[GlobalStyles.justifiedRow, { width: '100%', marginBottom: 5 }]}>
-                            <TouchableOpacity style={[styles.buttonView, { width: '45%' }]} onPress={() => { }}>
+                            <TouchableOpacity style={[styles.buttonView, { width: '45%' }]} onPress={() => { setModalVisible(true) }}>
                                 <Text style={styles.buttonText}>Update</Text>
                             </TouchableOpacity>
                             <CancelAppointmentButton cancelSMSDefault={smsConfig!.appointmentCancelled} appointmentDetails={appointmentDetails} navigation={navigation} />
                         </View>
                 }
-                <TouchableOpacity style={[styles.buttonView, { width: '100%', backgroundColor: stage==APPOINTMENT_CANCELLED ? 'lightgray' : GlobalColors.blue }]}
+                <TouchableOpacity style={[styles.buttonView, { width: '100%', backgroundColor: stage == APPOINTMENT_CANCELLED ? 'lightgray' : GlobalColors.blue }]}
                     onPress={() => {
-                        if(APPOINTMENT_CONFIRMED==stage){
+                        if (APPOINTMENT_CREATED == stage) {
                             formValidation() ? setModalVisible(true) : null;
+                        } else if (APPOINTMENT_CONFIRMED == stage) {
+                            setModalVisible(true);
                         }
-                        else{
+                        else {
                             Toast.show("For Bill Generation, use Web instead");
                         }
                     }}
-                    disabled={stage==APPOINTMENT_CANCELLED}
+                    disabled={stage == APPOINTMENT_CANCELLED}
                 >
                     <Text style={styles.buttonText}>{isCreate ? "Create" : stage == APPOINTMENT_CONFIRMED ? "Check In" : stage == APPOINTMENT_CHECKIN ? "Generate Bill" : "Cancelled"}</Text>
                 </TouchableOpacity>
             </View>
-            {modalVisible && <ConfirmationModal modalVisible={modalVisible} setModalVisible={setModalVisible} performAction={() => {
-                appointmentAPICall(APPOINTMENT_CONFIRMED);
-            }} />}
+            {modalVisible &&
+                <AlertModal modalVisible={modalVisible} setModalVisible={setModalVisible}
+                    description={`Are you sure, you want to \n ${isCreate ? "create & confirm an appointment" : stage == APPOINTMENT_CONFIRMED ? "mark appointment as Checked In" : "update appointment"}`}
+                    heading={isCreate ? "Create & Confirm \n Appointment" : stage == APPOINTMENT_CONFIRMED ? "Checked In \n Appointment" : "Update Appointment"}
+                    onConfirm={() => {
+                        appointmentAPICall(isCreate ? APPOINTMENT_CONFIRMED : stage == APPOINTMENT_CONFIRMED ? APPOINTMENT_CHECKIN : APPOINTMENT_UPDATED);
+                    }} />}
         </View>
     );
 };
@@ -457,7 +508,12 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         marginBottom: 5
     },
-    buttonText: { color: "#fff", textAlign: "center", fontSize: FontSize.large, fontWeight: '500' }
+    buttonText: {
+        color: "#fff",
+        textAlign: "center",
+        fontSize: FontSize.large,
+        fontWeight: '500'
+    }
 });
 
 export default CreateEditAppointment;

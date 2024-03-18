@@ -25,9 +25,9 @@ const AlertModal: FC<IAlertModal> = ({ modalVisible, setModalVisible, heading, d
             }}>
             <View style={[GlobalStyles.modalbackground]}>
                 <View style={styles.modalView}>
-                    <Text style={{ width: '100%', textAlign: 'center', fontWeight: '600', fontSize: FontSize.large, color: GlobalColors.blue, marginBottom: 10 }}>{heading}</Text>
+                    <Text style={{ width: '100%', textAlign: 'center', fontWeight: '600', fontSize: FontSize.heading, color: GlobalColors.blue, marginBottom: 10 }}>{heading}</Text>
                     <View style={{ paddingVertical: 20, borderTopWidth: 1, borderColor: 'lightgray', width: '100%', alignItems: 'center' }}>
-                        <Text>{description}</Text>
+                        <Text style={{textAlign: 'center', fontWeight: '300'}}>{description}</Text>
                         {
                             checkBoxDescription && 
                             <View style={[{marginTop: 10, width: '100%', flexDirection: 'row', alignItems: 'center'}]}>
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: GlobalColors.blue,
         borderRadius: 5,
-        width: '30%'
+        width: '35%'
     },
     buttonText: {
         fontSize: FontSize.large,
