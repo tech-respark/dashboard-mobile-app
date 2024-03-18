@@ -2,7 +2,7 @@ export const environment = {
     sqlBaseUri: "https://dev-respark.respark.in:8081/pcs/v1/",
     documentBaseUri: "https://dev-respark.respark.in:8082/pcs-catalog/v1/",
     guestUrl: "https://dev-respark.respark.in:8083/pcs-guest/v1/",
-    txnUrl: "https://dev-respark.respark.in:8084/pcs-txn/v1/"
+    txnUrl: "https://dev-respark.respark.in:8084/pcs-txn/v1/",
     // sqlBaseUri: "https://qa.respark.in:8081/pcs/v1/",
     // documentBaseUri: "https://qa.respark.in:8082/pcs-catalog/v1/",
     // guestUrl: "https://qa.respark.in:8083/pcs-guest/v1/",
@@ -69,6 +69,7 @@ export const PACKAGES_INDEX = 3;
 export const APPOINTMENT_CREATED = "CREATED";
 export const APPOINTMENT_RUNNING = "RUNNING";
 export const APPOINTMENT_CONFIRMED = "CONFIRMED";
+export const APPOINTMENT_CHECKIN = "CHECKIN";
 export const APPOINTMENT_UPDATED = "UPDATED";
 export const APPOINTMENT_COMPLETED = "COMPLETED";
 export const APPOINTMENT_DELETED = "DELETED";

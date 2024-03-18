@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { selectCurrentStoreConfig } from "../../../redux/state/UserStates";
 import moment from "moment";
 import { setIsLoading, setShowUserProfileTopBar } from "../../../redux/state/UIStates";
-import { appointmentColorCodes } from "../../../utils/Constants";
+import { APPOINTMENT_CANCELLED, APPOINTMENT_CHECKIN, APPOINTMENT_CONFIRMED, appointmentColorCodes } from "../../../utils/Constants";
 import { useTimeIntervalList } from "../../../customHooks/AppointmentHooks";
 import Toast from "react-native-root-toast";
 
@@ -82,7 +82,7 @@ const CalendarEntries: FC<ICalenderEntries> = ({ selectedStaffIndex, staffObject
                             onPress={() => {
                                 if (timeSlots[index] != 0) {
                                     dispatch(setShowUserProfileTopBar({showUserProfileTopBar: false}));
-                                    navigation.navigate("Create Edit Appointment", { isCreate: true, from: time, to: Object.keys(timeIntervals)[index + 1], selectedStaffIndex: selectedStaffIndex, staffObjects: staffObjects, selectedDate: selectedDate });
+                                    navigation.navigate("Create Edit Appointment", { isCreate: true, stage: "CREATED", from: time, to: Object.keys(timeIntervals)[index + 1], selectedStaffIndex: selectedStaffIndex, staffObjects: staffObjects, selectedDate: selectedDate });
                                 }
                             }}
                         >
@@ -109,8 +109,8 @@ const CalendarEntries: FC<ICalenderEntries> = ({ selectedStaffIndex, staffObject
                             <TouchableOpacity key={index} style={[styles.appointmentView, { backgroundColor: appointmentColorCodes[status], top: timeYPositions[times[0]], height: timeYPositions[times[1]] - timeYPositions[times[0]] }]}
                                 onPress={()=>{
                                     dispatch(setShowUserProfileTopBar({showUserProfileTopBar: false}));
-                                    if(status=="CONFIRMED" || status =="CHECKIN"){
-                                        navigation.navigate("Create Edit Appointment", { isCreate: false, staffObjects: staffObjects, appointment: expertAppointments[appointmentTime] });
+                                    if([APPOINTMENT_CONFIRMED, APPOINTMENT_CHECKIN, APPOINTMENT_CANCELLED].includes(status) ){
+                                        navigation.navigate("Create Edit Appointment", { isCreate: false, stage: status, staffObjects: staffObjects, appointment: expertAppointments[appointmentTime] });
                                     }else{
                                         Toast.show(`Cannot edit ${status} appointments right now`);
                                     }

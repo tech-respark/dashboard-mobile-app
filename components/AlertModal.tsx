@@ -2,6 +2,7 @@ import React, { FC } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { GlobalStyles } from "../Styles/Styles";
 import { FontSize, GlobalColors } from "../Styles/GlobalStyleConfigs";
+import Checkbox from "expo-checkbox";
 
 interface IAlertModal {
     modalVisible: boolean,
@@ -9,9 +10,12 @@ interface IAlertModal {
     heading: string,
     description: string,
     onConfirm: () => void,
+    checkBoxDescription?: string,
+    setCheckBox?: (val: boolean) => void,
+    checkBox?: boolean
 }
 
-const AlertModal: FC<IAlertModal> = ({ modalVisible, setModalVisible, heading, description, onConfirm }) => {
+const AlertModal: FC<IAlertModal> = ({ modalVisible, setModalVisible, heading, description, onConfirm, checkBox, checkBoxDescription, setCheckBox }) => {
     return (
         <Modal
             transparent={true}
@@ -22,17 +26,29 @@ const AlertModal: FC<IAlertModal> = ({ modalVisible, setModalVisible, heading, d
             <View style={[GlobalStyles.modalbackground]}>
                 <View style={styles.modalView}>
                     <Text style={{ width: '100%', textAlign: 'center', fontWeight: '600', fontSize: FontSize.large, color: GlobalColors.blue, marginBottom: 10 }}>{heading}</Text>
-                    <View style={{paddingVertical: 20, borderTopWidth: 1, borderColor: 'lightgray', width: '100%', alignItems: 'center'}}>
+                    <View style={{ paddingVertical: 20, borderTopWidth: 1, borderColor: 'lightgray', width: '100%', alignItems: 'center' }}>
                         <Text>{description}</Text>
+                        {
+                            checkBoxDescription && 
+                            <View style={[{marginTop: 10, width: '100%', flexDirection: 'row', alignItems: 'center'}]}>
+                                <Checkbox
+                                color={"#4FACFE"}
+                                style={{ borderColor: 'gray', borderRadius: 2, borderWidth: 0.5, marginRight: 10 }}
+                                value={checkBox}
+                                onValueChange={setCheckBox}
+                            />
+                                <Text>{checkBoxDescription}</Text>
+                            </View>
+                        }
                     </View>
-                    <View style={[GlobalStyles.justifiedRow, { justifyContent: "center", width: "100%"}]}>
+                    <View style={[GlobalStyles.justifiedRow, { justifyContent: "center", width: "100%" }]}>
                         <Pressable style={[styles.buttonContainer, { marginRight: 20 }]}
                             onPress={() => { setModalVisible(false) }}
                         >
                             <Text style={styles.buttonText}>No</Text>
                         </Pressable>
                         <Pressable style={[styles.buttonContainer, { backgroundColor: GlobalColors.blue, paddingHorizontal: 10 }]}
-                            onPress={()=>{
+                            onPress={() => {
                                 setModalVisible(false);
                                 onConfirm();
                             }}

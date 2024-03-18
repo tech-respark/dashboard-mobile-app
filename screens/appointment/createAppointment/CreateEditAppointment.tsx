@@ -1,17 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
-import { useIsFocused } from "@react-navigation/native";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { setIsLoading, setShowUserProfileTopBar } from "../../../redux/state/UIStates";
 import { GlobalStyles } from "../../../Styles/Styles";
-import { APPOINTMENT_CONFIRMED, APPOINTMENT_CREATED, DEFAULT_SERVICE_DURATION, environment } from "../../../utils/Constants";
+import { APPOINTMENT_CANCELLED, APPOINTMENT_CHECKIN, APPOINTMENT_CONFIRMED, APPOINTMENT_CREATED, DEFAULT_SERVICE_DURATION, environment } from "../../../utils/Constants";
 import { selectBranchId, selectCurrentStoreConfig, selectProductServiceCategories, selectSMSConfig, selectTenantId, selectUserData } from "../../../redux/state/UserStates";
 import { makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
-import { TimerWithBorderHeader } from "../../../components/HeaderTextField";
-import ServiceSearchModal from "./ServiceSearchModal";
 import Checkbox from 'expo-checkbox';
 import AddUpdateUser from "../common/AddUpdateUser";
 import GuestExpertDropdown from "./GuestExpertDropdown";
@@ -22,15 +19,20 @@ import moment from "moment";
 import ConfirmationModal from "./ConfirmationModal";
 import { selectSelectedGuest, setSelectedGuest } from "../../../redux/state/AppointmentStates";
 import MembershipValidationModal from "./MembershipValidationModal";
+import CancelAppointmentButton from "./CancelAppointmentButton";
+import AlertModal from "../../../components/AlertModal";
+import Header from "./Header";
 
 
 const CreateEditAppointment = ({ navigation, route }: any) => {
 
     const isCreate = route.params.isCreate;
+    const appointmentDetails = route.params.appointment;
+    const stage = route.params.stage;
+
     const dispatch = useAppDispatch();
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
-    const services = useAppSelector(selectProductServiceCategories);
     const storeConfig = useAppSelector(selectCurrentStoreConfig);
     const loggedInUser = useAppSelector(selectUserData);
     const guestDetails = useAppSelector(selectSelectedGuest) ?? null;
@@ -62,7 +64,7 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
 
     const calculateContributions = (serviceObj: { [key: string]: any }, duration: number) => {
         let contributions: any = [];
-        serviceObj.experts.length>0 && serviceObj.experts.map((contributor: any, index: number) => {
+        serviceObj.experts.length > 0 && serviceObj.experts.map((contributor: any, index: number) => {
             contributions.push({
                 slot: `${serviceObj.fromTime}-${serviceObj.toTime}`,
                 duration: duration || DEFAULT_SERVICE_DURATION,
@@ -178,59 +180,56 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
         return appointmentObj;
     };
 
-    const appointmentAPICall =  async(actionType: string) => {
-        dispatch(setIsLoading({isLoading: true}));
+    const appointmentAPICall = async (actionType: string) => {
+        dispatch(setIsLoading({ isLoading: true }));
         const url = environment.txnUrl + `appointments`;
         const payload = createAppointmentPayload(actionType);
         let response = await makeAPIRequest(url, payload, "POST");
-        dispatch(setIsLoading({isLoading: false}));
+        dispatch(setIsLoading({ isLoading: false }));
         setModalVisible(false);
-        if(response){
-            Toast.show(`Appointment created successfuly`, {backgroundColor: GlobalColors.success, opacity: 1.0});
+        if (response) {
+            Toast.show(`Appointment created successfuly`, { backgroundColor: GlobalColors.success, opacity: 1.0 });
             navigation.goBack();
-        }else{
-            Toast.show("Encountered Error", {backgroundColor: GlobalColors.error, opacity: 1.0});
+        } else {
+            Toast.show("Encountered Error", { backgroundColor: GlobalColors.error, opacity: 1.0 });
         }
     };
 
-    const getGuestDetails = async () => {
-        const url = environment.guestUrl + `customers/userbyguestid?tenantId=${tenantId}&storeId=${storeId}&guestId=${selectedCustomer!.id}`;
+    const getGuestDetails = async (customerId: string) => {
+        const url = environment.guestUrl + `customers/userbyguestid?tenantId=${tenantId}&storeId=${storeId}&guestId=${customerId}`;
         let response = await makeAPIRequest(url, null, "GET");
         if (response) {
-            dispatch(setSelectedGuest ({selectedGuest: response}));
+            dispatch(setSelectedGuest({ selectedGuest: response }));
         } else {
-            dispatch(setSelectedGuest ({selectedGuest: {}}));
+            dispatch(setSelectedGuest({ selectedGuest: {} }));
             Toast.show("Encountered issue", { backgroundColor: GlobalColors.error });
         }
     };
 
-    useLayoutEffect(() => {
-        navigation.setOptions({
-            headerTitle: `${isCreate ? "Create" : "Update"} Appointment`,
-            headerTitleAlign: 'left',
-            headerLeft: () => (
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Ionicons name={"chevron-back-outline"} size={20} style={{ marginHorizontal: 5, color: GlobalColors.blue }} />
-                </TouchableOpacity>
-            ),
-        });
-    }, [navigation]);
+    const setUpdateData = () => {
+        setInstructions(appointmentDetails.instruction);
+    };
 
-    useEffect(()=>{
-        if(selectedCustomer){
-            Object.keys(selectedCustomer).length > 0 ? getGuestDetails() : dispatch(setSelectedGuest ({selectedGuest: {}}));
+    useEffect(() => {
+        if (isCreate && selectedCustomer) {
+            Object.keys(selectedCustomer).length > 0 ? getGuestDetails(selectedCustomer!.id) : dispatch(setSelectedGuest({ selectedGuest: {} }));
+        } else if (appointmentDetails && appointmentDetails.guestId) {
+            //set guestdetailds for  update
+            getGuestDetails(appointmentDetails.guestId);
+            setUpdateData();
         }
     }, [selectedCustomer]);
 
     return (
         <View style={{ flex: 1 }}>
+            <Header navigation={navigation} isCreate={isCreate} guestName={guestDetails!.firstName} appointmentId={isCreate ? null : appointmentDetails.id} />
             {createUserModal && <AddUpdateUser setModalVisible={setCreateUserModal} modalVisible={createUserModal} />}
             <ScrollView style={styles.container}>
                 <View style={[GlobalStyles.sectionView]}>
                     <View style={[GlobalStyles.justifiedRow, { marginBottom: 10 }]}>
                         <Text style={styles.headingText}>1. Guest Details</Text>
                         {
-                            selectedCustomer && guestDetails ?
+                            (!isCreate || selectedCustomer) && guestDetails ?
                                 <Text style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}
                                     onPress={() => {
                                         dispatch(setShowUserProfileTopBar({ showUserProfileTopBar: false }));
@@ -248,7 +247,15 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
                                 </View>
                         }
                     </View>
-                    <GuestExpertDropdown data={customers} placeholderText="Search By Name Or Number" type="guest" setSelected={(val) => { setSelectedCustomer(val); setSelectedCustomer(val); }} selectedValue={selectedCustomer ? selectedCustomer.firstName : null} />
+                    {
+                        isCreate ?
+                            <GuestExpertDropdown data={customers} placeholderText="Search By Name Or Number" type="guest" setSelected={(val) => { setSelectedCustomer(val); setSelectedCustomer(val); }} selectedValue={selectedCustomer ? selectedCustomer.firstName : null} />
+                            :
+                            <View style={{ marginHorizontal: 5 }}>
+                                <Text style={{ fontWeight: '500' }}>{appointmentDetails.guestName}</Text>
+                                <Text>{appointmentDetails.guestMobile}</Text>
+                            </View>
+                    }
                 </View>
 
                 <View style={[GlobalStyles.sectionView]}>
@@ -257,15 +264,15 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
                         <View style={GlobalStyles.justifiedRow}>
                             <Text style={{ color: GlobalColors.blue, marginRight: 10 }}>Add Service</Text>
                             <TouchableOpacity style={styles.circleIcon}
-                                onPress={()=>{
-                                    if(formValidation())
+                                onPress={() => {
+                                    if (formValidation())
                                         addEmptyService();
-                                    }}>
+                                }}>
                                 <Ionicons name="add" size={25} color="#fff" />
                             </TouchableOpacity>
                         </View>
                     </View>
-                    {
+                    {/* {
                         serviceDetails.map((serviceDetailsObj: ServiceDetailsType, sIndex: number) => (
                             <View style={[{ borderWidth: 1, borderRadius: 5, borderColor: 'lightgray', padding: 10, marginVertical: 8 }, GlobalStyles.shadow]} key={sIndex}>
                                 {serviceDetails.length > 1 && 
@@ -359,7 +366,7 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
                                 </View>
                             </View>
                         ))
-                    }
+                    } */}
                 </View>
 
                 <View style={GlobalStyles.sectionView}>
@@ -379,31 +386,46 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
                 </View>
             </ScrollView>
             <View style={{ backgroundColor: '#fff', padding: 20, alignItems: 'center' }}>
-                <View style={[GlobalStyles.justifiedRow, { justifyContent: 'space-between', width: '100%', marginBottom: 20 }]}>
-                    <View style={[GlobalStyles.justifiedRow, { width: '35%' }]}>
-                        <Checkbox
-                            color={"#4FACFE"}
-                            style={{ borderColor: 'gray', borderRadius: 2, borderWidth: 0.5 }}
-                            value={enableSMS}
-                            onValueChange={() => setEnableSMS(!enableSMS)}
-                        />
-                        <Text>{"SMS\nConfirmation"}</Text>
-                    </View>
-                    {!selectedCustomer && <Text onPress={() => { setMembershipValidationModal(true)}} style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}>Membership Validation</Text>}
-                    {membershipValidationModal && <MembershipValidationModal modalVisible={membershipValidationModal} setModalVisible={setMembershipValidationModal} setCustomer={(val)=>{setSelectedCustomer(val)}}/>}
-                </View>
-                <TouchableOpacity style={{ width: '100%', backgroundColor: GlobalColors.blue, paddingVertical: 10, borderRadius: 5, marginBottom: 5 }}
+                {
+                    isCreate ?
+                        <View style={[GlobalStyles.justifiedRow, { justifyContent: 'space-between', width: '100%', marginBottom: 20 }]}>
+                            <View style={[GlobalStyles.justifiedRow, { width: '35%' }]}>
+                                <Checkbox
+                                    color={"#4FACFE"}
+                                    style={{ borderColor: 'gray', borderRadius: 2, borderWidth: 0.5 }}
+                                    value={enableSMS}
+                                    onValueChange={() => setEnableSMS(!enableSMS)}
+                                />
+                                <Text>{"SMS\nConfirmation"}</Text>
+                            </View>
+                            {!selectedCustomer && <Text onPress={() => { setMembershipValidationModal(true) }} style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}>Membership Validation</Text>}
+                            {membershipValidationModal && <MembershipValidationModal modalVisible={membershipValidationModal} setModalVisible={setMembershipValidationModal} setCustomer={(val) => { setSelectedCustomer(val) }} />}
+                        </View> :
+                        stage != APPOINTMENT_CANCELLED &&
+                        <View style={[GlobalStyles.justifiedRow, { width: '100%', marginBottom: 5 }]}>
+                            <TouchableOpacity style={[styles.buttonView, { width: '45%' }]} onPress={() => { }}>
+                                <Text style={styles.buttonText}>Update</Text>
+                            </TouchableOpacity>
+                            <CancelAppointmentButton cancelSMSDefault={smsConfig!.appointmentCancelled} appointmentDetails={appointmentDetails} navigation={navigation} />
+                        </View>
+                }
+                <TouchableOpacity style={[styles.buttonView, { width: '100%', backgroundColor: stage==APPOINTMENT_CANCELLED ? 'lightgray' : GlobalColors.blue }]}
                     onPress={() => {
-                        if(formValidation())
-                            setModalVisible(true);
+                        if(APPOINTMENT_CONFIRMED==stage){
+                            formValidation() ? setModalVisible(true) : null;
+                        }
+                        else{
+                            Toast.show("For Bill Generation, use Web instead");
+                        }
                     }}
+                    disabled={stage==APPOINTMENT_CANCELLED}
                 >
-                    <Text style={{ color: "#fff", textAlign: "center", fontSize: FontSize.large, fontWeight: '500' }}>Create</Text>
+                    <Text style={styles.buttonText}>{isCreate ? "Create" : stage == APPOINTMENT_CONFIRMED ? "Check In" : stage == APPOINTMENT_CHECKIN ? "Generate Bill" : "Cancelled"}</Text>
                 </TouchableOpacity>
             </View>
             {modalVisible && <ConfirmationModal modalVisible={modalVisible} setModalVisible={setModalVisible} performAction={() => {
                 appointmentAPICall(APPOINTMENT_CONFIRMED);
-                }}/>}
+            }} />}
         </View>
     );
 };
@@ -429,6 +451,13 @@ const styles = StyleSheet.create({
         backgroundColor: GlobalColors.blue,
         borderRadius: 20, padding: 3
     },
+    buttonView: {
+        backgroundColor: GlobalColors.blue,
+        paddingVertical: 10,
+        borderRadius: 5,
+        marginBottom: 5
+    },
+    buttonText: { color: "#fff", textAlign: "center", fontSize: FontSize.large, fontWeight: '500' }
 });
 
 export default CreateEditAppointment;
