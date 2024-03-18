@@ -107,7 +107,7 @@ const AdvanceOrBalance: FC<IAdvanceOrBalance> = ({ isAdvance, customer, setCusto
                         <ScrollView>
                             {
                                 history.map((data: any, index: number) => (
-                                    <View key={index} style={[GlobalStyles.justifiedRow, { paddingHorizontal: 10, paddingVertical: 10, borderBottomWidth: 0.5, borderColor: 'gray' }]}>
+                                    <View key={index} style={[GlobalStyles.justifiedRow, { paddingHorizontal: 10, paddingVertical: 10, borderBottomWidth: 0.5, borderColor: 'lightgray' }]}>
                                         <Text style={[styles.tableHeaderCell, { fontSize: FontSize.small }]}>{data.date}</Text>
                                         <Text style={[styles.tableHeaderCell, { fontSize: FontSize.small }]}>{data.creditAmount}</Text>
                                         <Text style={[styles.tableHeaderCell, { fontSize: FontSize.small }]}>{data.debitAmount}</Text>
@@ -154,7 +154,7 @@ const AdvanceOrBalance: FC<IAdvanceOrBalance> = ({ isAdvance, customer, setCusto
                             </View>
                             <View style={{ width: '100%', marginVertical: 15 }}>
                                 <Text style={{ fontSize: FontSize.medium, marginBottom: 10 }}>Paymode</Text>
-                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', borderWidth: 0.5, borderColor: 'lightgray', borderRadius: 2 }}>
+                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', borderWidth: 0.5, borderColor: 'lightgray', borderRadius: 2, justifyContent: 'space-evenly' }}>
                                     {paymentTypes?.map((type: { [key: string]: any }, index: number) => (
                                         <Pressable style={[GlobalStyles.justifiedRow, styles.shadow, styles.paymentView, { backgroundColor: paymode == type.name ? GlobalColors.blueLight : '#fff', borderColor: paymode == type.name ? GlobalColors.blue : 'lightgray' }]} key={index}
                                             onPress={() => { setPaymode(type.name) }}

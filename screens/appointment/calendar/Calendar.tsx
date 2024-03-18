@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
-import { selectBranchId, selectCurrentStoreConfig, selectStaffData, selectTenantId } from "../../../redux/state/UserStates";
+import { selectBranchId, selectCurrentStoreConfig, selectSMSConfig, selectStaffData, selectTenantId } from "../../../redux/state/UserStates";
 import moment from "moment";
 import { setIsLoading, setShowUserProfileTopBar } from "../../../redux/state/UIStates";
 import { APPOINTMENT_FETCH_INTERVAL, environment } from "../../../utils/Constants";
@@ -24,7 +24,7 @@ const AppointmentCalendar = ({ navigation }: any) => {
 
     const [staffObjects, setStaffObjects] = useState<{ [key: string]: any }[]>([]);
     const [selectedStaffIndex, setSelectedStaffIndex] = useState<number>(0);
-    const [selectedDate, setSelectedDate] = useState<string>('2024-03-13');
+    const [selectedDate, setSelectedDate] = useState<string>(moment().format('YYYY-MM-DD'));
     const [appointmentCount, setAppointmentCount] = useState<number>(0);
     const [appointmentsData, setAppointmentsData] = useState<{ [key: string]: string }[]>([]);
     const [selectedDropdown, setSelectedDropdown] = useState<string>('confirmed');
@@ -50,6 +50,7 @@ const AppointmentCalendar = ({ navigation }: any) => {
     const getAppointmentsData = async (isFirstCall: boolean, appCount: number = appointmentCount) => {
         let endDate = moment(selectedDate, 'YYYY-MM-DD').clone().add(15, 'days').format('YYYY-MM-DD');
         const url = environment.txnUrl + `appointments/between?count=${appCount}&end=${endDate}&start=${selectedDate}&storeid=${storeId}&tenantid=${tenantId}`;
+        // console.log(url)
         let response = await makeAPIRequest(url, null, "GET") ?? [];
         if (isFirstCall) {
             setAppointmentsData(response);
@@ -102,10 +103,15 @@ const AppointmentCalendar = ({ navigation }: any) => {
     }, [isFocused, selectedDate]);
 
     useEffect(() => {
+        // console.log("herew it is______", appointmentCount)
         const intervalId = setInterval(() => {
+            // console.log("DATA===========")
             getAppointmentsData(false);
         }, APPOINTMENT_FETCH_INTERVAL);
-        return () => clearInterval(intervalId);
+        return () => {
+            // console.log("Rmove")
+            clearInterval(intervalId)
+        };
     }, [appointmentCount]);
 
     useEffect(() => {
@@ -132,7 +138,7 @@ const AppointmentCalendar = ({ navigation }: any) => {
                     </View>
                     <CalendarEntries selectedDate={selectedDate} selectedStaffIndex={selectedStaffIndex} staffObjects={staffObjects} appointmentsData={appointmentsData} navigation={navigation} />
                 </> : 
-                <AppointmentsCardView selectedView={selectedDropdown} appointments={selectedDropdown == "total" ? appointmentsData: tabWiseAppointments[selectedDropdown]}/>
+                <AppointmentsCardView selectedView={selectedDropdown} appointments={selectedDropdown == "total" ? appointmentsData: tabWiseAppointments[selectedDropdown]} reFetchData={async()=>{await initialStatesHandler()}}/>
             }
         </View>
     )

@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'absolute',
     zIndex: 1,
-    marginLeft: 15,
+    marginLeft: 5,
     marginTop: -8,
     paddingHorizontal: 5
   },

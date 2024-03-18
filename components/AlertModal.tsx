@@ -25,7 +25,7 @@ const AlertModal: FC<IAlertModal> = ({ modalVisible, setModalVisible, heading, d
                     <View style={{paddingVertical: 20, borderTopWidth: 1, borderColor: 'lightgray', width: '100%', alignItems: 'center'}}>
                         <Text>{description}</Text>
                     </View>
-                    <View style={[GlobalStyles.justifiedRow, { justifyContent: "flex-end", width: "100%"}]}>
+                    <View style={[GlobalStyles.justifiedRow, { justifyContent: "center", width: "100%"}]}>
                         <Pressable style={[styles.buttonContainer, { marginRight: 20 }]}
                             onPress={() => { setModalVisible(false) }}
                         >
