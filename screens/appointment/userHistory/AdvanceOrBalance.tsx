@@ -10,6 +10,7 @@ import { makeAPIRequest } from "../../../utils/Helper";
 import LoadingState from "../../../components/LoadingState";
 import moment from "moment";
 import Toast from "react-native-root-toast";
+import TransactionHistoryTable from "../../../components/TransactionHistoryTable";
 
 interface IAdvanceOrBalance {
     isAdvance: boolean,
@@ -95,29 +96,9 @@ const AdvanceOrBalance: FC<IAdvanceOrBalance> = ({ isAdvance, customer, setCusto
             </View>
             <Text style={{ fontSize: FontSize.medium, fontWeight: '500', marginBottom: 10 }}>{isAdvance ? "Advance" : "Due Balance"} History</Text>
             {
-                history.length > 0 ?
-                    <ScrollView style={[GlobalStyles.cardView, GlobalStyles.shadow]}>
-                        <View style={[{ paddingVertical: 10, backgroundColor: 'lightgray', borderRadius: 5, marginBottom: 5, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-evenly' }]}>
-                            <Text style={styles.tableHeaderCell}>Date</Text>
-                            <Text style={styles.tableHeaderCell}>Credit Amount</Text>
-                            <Text style={styles.tableHeaderCell}>Debited Amount</Text>
-                            <Text style={styles.tableHeaderCell}>Type</Text>
-                            <Text style={styles.tableHeaderCell}>Remark</Text>
-                        </View>
-                        <ScrollView>
-                            {
-                                history.map((data: any, index: number) => (
-                                    <View key={index} style={[GlobalStyles.justifiedRow, { paddingHorizontal: 10, paddingVertical: 10, borderBottomWidth: 0.5, borderColor: 'lightgray' }]}>
-                                        <Text style={[styles.tableHeaderCell, { fontSize: FontSize.small }]}>{data.date}</Text>
-                                        <Text style={[styles.tableHeaderCell, { fontSize: FontSize.small }]}>{data.creditAmount}</Text>
-                                        <Text style={[styles.tableHeaderCell, { fontSize: FontSize.small }]}>{data.debitAmount}</Text>
-                                        <Text style={[styles.tableHeaderCell, { fontSize: FontSize.small }]}>{data.transactionType}</Text>
-                                        <Text style={[styles.tableHeaderCell, { fontSize: FontSize.small }]}>{data.remark}</Text>
-                                    </View>
-                                ))
-                            }
-                        </ScrollView>
-                    </ScrollView>
+                history.length > 0 && !loader ?
+                    <TransactionHistoryTable data={history} headerList={["Date", "Credit\nAmount", "Debit\nAmount", "Type", "Remark"]}
+                        keyList={["date", "creditAmount", "debitAmount", "transactionType", "remark"]} />
                     :
                     <LoadingState loader={loader} />
             }

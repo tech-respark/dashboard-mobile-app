@@ -48,6 +48,7 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
     const [createUserModal, setCreateUserModal] = useState<boolean>(false);
     const customers = useCustomerData(createUserModal);
     const [serviceDetails, setServiceDetails] = useState<ServiceDetailsType[]>([]);
+    const [isUpdate, setIsUpdate] = useState<boolean>(false);
 
     const addEmptyService = () => {
         let lastObj = serviceDetails[serviceDetails.length - 1];
@@ -65,7 +66,7 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
             contributions.push({
                 slot: `${serviceObj.fromTime}-${serviceObj.toTime}`,
                 duration: duration || DEFAULT_SERVICE_DURATION,
-                expertId: contributor.id,
+                expertId: contributor.staffId,
                 expertName: contributor.name,
                 workPercentage: (100 / serviceObj.experts.length).toFixed(2),
                 workAmount: serviceObj.service.salePrice || serviceObj.service.price,
@@ -76,7 +77,7 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
     };
 
     const formValidation = () => {
-        if (!selectedCustomer || !guestDetails) {
+        if ((isCreate && !selectedCustomer) || !guestDetails) {
             Toast.show("Select Customer", { backgroundColor: GlobalColors.error, opacity: 1.0 });
             return false;
         }
@@ -100,7 +101,7 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
             "serviceCategory": serviceObj.service.serviceCategory,
             "service": serviceObj.service.name || serviceObj.service.service || serviceObj.serviceQuery, //update this
             "slot": `${serviceObj.fromTime}-${serviceObj.toTime}`,
-            "expertId": serviceObj.experts[0].id,
+            "expertId": serviceObj.experts[0].staffId,
             "expertName": serviceObj.experts[0].name,
             "price": serviceObj.service.price,
             "salePrice": serviceObj.service.salePrice,
@@ -238,6 +239,7 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
             };
         };
         const servicesList: ServiceDetailsType[] = appointmentDetails.expertAppointments.map(mapExpertAppointment);
+        console.log(servicesList[0].experts)
         setServiceDetails(servicesList);
     };
 
@@ -341,34 +343,36 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
                                         })
                                     }}
                                 />
-                                {serviceDetailsObj.experts.map((expert: { [key: string]: any }, eIndex: number) => (
-                                    <View style={GlobalStyles.justifiedRow} key={eIndex}>
-                                        <View style={{ width: eIndex == 0 ? '100%' : '90%' }}>
-                                            <GuestExpertDropdown data={route.params.staffObjects} placeholderText="Search Expert" type="expert" selectedValue={expert.name} headerText={`Expert ${eIndex + 1}`}
-                                                currentExperts={serviceDetailsObj.experts}
-                                                setSelected={(val) => {
-                                                    setServiceDetails(prev => {
-                                                        const updated = [...prev];
-                                                        updated[sIndex].experts[eIndex] = val ?? {};
-                                                        return updated
-                                                    })
-                                                }}
-                                            />
-                                        </View>
-                                        {eIndex != 0 &&
-                                            <TouchableOpacity style={{ backgroundColor: GlobalColors.lightGray2, borderRadius: 20, padding: 2 }}>
-                                                <Ionicons name="close" size={20} color={GlobalColors.error}
-                                                    onPress={() => {
+                                {serviceDetailsObj.experts.map((expert: { [key: string]: any }, eIndex: number) => {
+                                    return (
+                                        <View style={GlobalStyles.justifiedRow} key={eIndex}>
+                                            <View style={{ width: eIndex == 0 ? '100%' : '90%' }}>
+                                                <GuestExpertDropdown data={route.params.staffObjects} placeholderText="Search Expert" type="expert" selectedValue={expert.name} headerText={`Expert ${eIndex + 1}`}
+                                                    currentExperts={serviceDetailsObj.experts}
+                                                    setSelected={(val) => {
                                                         setServiceDetails(prev => {
                                                             const updated = [...prev];
-                                                            updated[sIndex].experts.splice(eIndex, 1); //bug here
+                                                            updated[sIndex].experts[eIndex] = val ?? {};
                                                             return updated
                                                         })
-                                                    }} />
-                                            </TouchableOpacity>
-                                        }
-                                    </View>
-                                ))
+                                                    }}
+                                                />
+                                            </View>
+                                            {eIndex != 0 &&
+                                                <TouchableOpacity style={{ backgroundColor: GlobalColors.lightGray2, borderRadius: 20, padding: 2 }}>
+                                                    <Ionicons name="close" size={20} color={GlobalColors.error}
+                                                        onPress={() => {
+                                                            setServiceDetails(prev => {
+                                                                const updated = [...prev];
+                                                                updated[sIndex].experts.splice(eIndex, 1); //bug here
+                                                                return updated
+                                                            })
+                                                        }} />
+                                                </TouchableOpacity>
+                                            }
+                                        </View>
+                                    )
+                                })
                                 }
                                 <Text style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}
                                     onPress={() => {
@@ -448,7 +452,12 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
                         </View> :
                         stage != APPOINTMENT_CANCELLED &&
                         <View style={[GlobalStyles.justifiedRow, { width: '100%', marginBottom: 5 }]}>
-                            <TouchableOpacity style={[styles.buttonView, { width: '45%' }]} onPress={() => { setModalVisible(true) }}>
+                            <TouchableOpacity style={[styles.buttonView, { width: '45%' }]} onPress={() => {
+                                if (formValidation()) {
+                                    setIsUpdate(true);
+                                    setModalVisible(true);
+                                }
+                            }}>
                                 <Text style={styles.buttonText}>Update</Text>
                             </TouchableOpacity>
                             <CancelAppointmentButton cancelSMSDefault={smsConfig!.appointmentCancelled} appointmentDetails={appointmentDetails} navigation={navigation} />
@@ -472,10 +481,10 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
             </View>
             {modalVisible &&
                 <AlertModal modalVisible={modalVisible} setModalVisible={setModalVisible}
-                    description={`Are you sure, you want to \n ${isCreate ? "create & confirm an appointment" : stage == APPOINTMENT_CONFIRMED ? "mark appointment as Checked In" : "update appointment"}`}
-                    heading={isCreate ? "Create & Confirm \n Appointment" : stage == APPOINTMENT_CONFIRMED ? "Checked In \n Appointment" : "Update Appointment"}
+                    description={`Are you sure, you want to \n ${isCreate ? "create & confirm an appointment" : !isUpdate ? "mark appointment as Checked In" : "update appointment"}`}
+                    heading={isCreate ? "Create & Confirm \n Appointment" : !isUpdate ? "Checked In \n Appointment" : "Update Appointment"}
                     onConfirm={() => {
-                        appointmentAPICall(isCreate ? APPOINTMENT_CONFIRMED : stage == APPOINTMENT_CONFIRMED ? APPOINTMENT_CHECKIN : APPOINTMENT_UPDATED);
+                        appointmentAPICall(isCreate ? APPOINTMENT_CONFIRMED : !isUpdate ? APPOINTMENT_CHECKIN : APPOINTMENT_UPDATED); //wrong here
                     }} />}
         </View>
     );

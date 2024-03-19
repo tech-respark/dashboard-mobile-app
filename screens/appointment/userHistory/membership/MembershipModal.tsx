@@ -159,7 +159,7 @@ const MembershipModal: FC<IMembershipModal> = ({ modalVisible, setModalVisible, 
                 }}
             >
                 <ImageBackground
-                    source={MEMBERSHIPBACKGROUNDS[(index)%6]}
+                    source={MEMBERSHIPBACKGROUNDS[(index%6)+1]}
                     style={{ flex: 1, justifyContent: 'center' }}
                     imageStyle={{ borderRadius: 5, borderColor: GlobalColors.blue, borderWidth: item == selectedMembership ? 1 : 0 }}
                 >
@@ -177,12 +177,11 @@ const MembershipModal: FC<IMembershipModal> = ({ modalVisible, setModalVisible, 
                                     <Text key={index} style={{ fontWeight: '300' }}>₹{tax.value} {tax.isInclusive && `(Inclusive)`}</Text>
                                 ))}
                             </View>}
-                        <View style={{ marginTop: 10, borderColor: MEMBERSHIPCOLORS[(index) % 6], borderWidth: 1, width: '55%', borderRadius: 5 }}>
+                        <View style={{ marginTop: 10, borderColor: MEMBERSHIPCOLORS[(index%6)+1], borderWidth: 1, width: '55%', borderRadius: 5 }}>
                             <Text style={{ fontSize: FontSize.heading, padding: 5, textAlign: 'center' }}>Fee ₹{item.membershipFee}</Text>
                         </View>
                     </View>
                 </ImageBackground>
-
             </Pressable>
         );
     };

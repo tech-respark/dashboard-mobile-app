@@ -59,12 +59,13 @@ const ServiceSearchModal: FC<ServiceSearchModalType> = ({ data, selectedValue, s
     };
 
     const renderServiceOptions = (item: any) => {
-        return (
+        return (item.categoryList?.length > 0) || (item.itemList?.length > 0) ?  
+        (
             <View key={item.id} style={{ marginVertical: 5, width: '100%' }}>
                 <Text style={{ fontWeight: '500', color: GlobalColors.blue }}>{item.name}</Text>
                 {
-                    item.categoryList && item.categoryList.length > 0 ? item.categoryList.map((cateogory: any, index: number) => (
-                        checkTypeGender(cateogory) && cateogory.active ?
+                    item.categoryList?.length > 0 ? item.categoryList.map((cateogory: any, index: number) => (
+                        checkTypeGender(cateogory) && cateogory.active && cateogory.itemList?.length > 0?
                             <View key={index} style={{ marginVertical: 5 }}>
                                 <Text>{cateogory.name}</Text>
                                 <View style={{ width: '100%', borderStyle: 'dotted', borderWidth: 0.5, borderColor: 'gray', marginVertical: 2 }} />
@@ -74,7 +75,7 @@ const ServiceSearchModal: FC<ServiceSearchModalType> = ({ data, selectedValue, s
                         renderService(item.itemList, item.id, item.name)
                 }
             </View>
-        );
+        ) : <></>;
     };
 
     useEffect(() => {

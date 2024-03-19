@@ -14,7 +14,6 @@ export const makeAPIRequest = async (url: string, body?: any, method: string = "
   try {
     response = await fetch(url, options);
     if (response.status != 200 || (!allowEmptyRes && response.headers.get('content-length') === '0')) {
-      console.log("500 code of: ", url)
       return null;
     }
   } catch (error) {
@@ -108,3 +107,9 @@ export const getTofixValue = (config: any, value: any = 0, isDisplayValue: boole
   value = Number(value).toFixed(roundValue)
   return isDisplayValue ? value : Number(value);
 };
+
+export const mergeLists = (list_A: {[key: string]: any}[], list_B: {[key: string]: any}[]) => {
+  const map = new Map(list_A.map(obj => [obj.id, obj]));
+  list_B.forEach(objB => map.set(objB.id, objB));
+  return [...map.values()];
+}

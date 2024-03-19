@@ -6,7 +6,7 @@ import { selectBranchId, selectCurrentStoreConfig, selectSMSConfig, selectStaffD
 import moment from "moment";
 import { setIsLoading, setShowUserProfileTopBar } from "../../../redux/state/UIStates";
 import { APPOINTMENT_FETCH_INTERVAL, environment } from "../../../utils/Constants";
-import { makeAPIRequest } from "../../../utils/Helper";
+import { makeAPIRequest, mergeLists } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
 import { useIsFocused } from "@react-navigation/native";
 import DateAndDropdown from "./DateAndDropdown";
@@ -25,10 +25,10 @@ const AppointmentCalendar = ({ navigation }: any) => {
     const [staffObjects, setStaffObjects] = useState<{ [key: string]: any }[]>([]);
     const [selectedStaffIndex, setSelectedStaffIndex] = useState<number>(0);
     const [selectedDate, setSelectedDate] = useState<string>(moment().format('YYYY-MM-DD'));
-    const [appointmentCount, setAppointmentCount] = useState<number>(0);
+    const [appointmentCount, setAppointmentCount] = useState<number | null>(null);
     const [appointmentsData, setAppointmentsData] = useState<{ [key: string]: string }[]>([]);
     const [selectedDropdown, setSelectedDropdown] = useState<string>('confirmed');
-    const [categoryCount, setCategoryCount] = useState<{[key: string]: number}>({confirmed: 0, online: 0, future: 0, completed: 0, cancelled: 0, total: 0 });
+    const [categoryCount, setCategoryCount] = useState<{ [key: string]: number }>({ confirmed: 0, online: 0, future: 0, completed: 0, cancelled: 0, total: 0 });
     const [tabWiseAppointments, setTabWiseAppointments] = useState<{ [key: string]: { [key: string]: any }[] }>({});
 
     const getStaffShifts = async () => {
@@ -36,7 +36,7 @@ const AppointmentCalendar = ({ navigation }: any) => {
         let response = await makeAPIRequest(url, null, "GET");
         if (response) {
             let filteredList = getActiveStaffsForAppointment(response, staffList!);
-            if(filteredList.length <= selectedStaffIndex){
+            if (filteredList.length <= selectedStaffIndex) {
                 setSelectedStaffIndex(0);
             }
             setStaffObjects(filteredList);
@@ -47,16 +47,19 @@ const AppointmentCalendar = ({ navigation }: any) => {
         return [];
     };
 
-    const getAppointmentsData = async (isFirstCall: boolean, appCount: number = appointmentCount) => {
+    const getAppointmentsData = async (appCount: number = appointmentCount ?? 0) => {
         let endDate = moment(selectedDate, 'YYYY-MM-DD').clone().add(15, 'days').format('YYYY-MM-DD');
         const url = environment.txnUrl + `appointments/between?count=${appCount}&end=${endDate}&start=${selectedDate}&storeid=${storeId}&tenantid=${tenantId}`;
         let response = await makeAPIRequest(url, null, "GET") ?? [];
-        if (isFirstCall) {
+        //For new date, if empty list is returned -> then need to set AppointmentData to []
+        if(!appCount){
             setAppointmentsData(response);
-        } else if (response) {
-            setAppointmentsData(prevState => [...prevState, ...response]);
+            setAppointmentCount(response.length);   
+        }else{
+            const mergedList = mergeLists(appointmentsData, response);
+            setAppointmentsData(mergedList);
+            setAppointmentCount(mergedList.length);  
         }
-        setAppointmentCount(prevState => prevState + response.length);
     };
 
     const setAppointmentTypes = (appointments: { [key: string]: any }[]) => {
@@ -69,12 +72,12 @@ const AppointmentCalendar = ({ navigation }: any) => {
         };
         const tempCategory: { [key: string]: number } = {};
         appointments.forEach(appointment => {
-            if(moment(appointment.appointmentDay).format('YYYY-MM-DD')==selectedDate){
+            if (moment(appointment.appointmentDay).format('YYYY-MM-DD') == selectedDate) {
                 let status = appointment.status.slice(-1)[0]['status'].toLowerCase();
-                status = status=="checkin" ? "confirmed" : status;
+                status = status == "checkin" ? "confirmed" : status;
                 tempData[status]?.push(appointment);
                 tempCategory[status] = (tempCategory[status] || 0) + 1;
-            }else{
+            } else {
                 tempData['future']?.push(appointment);
                 tempCategory['future'] = (tempCategory['future'] || 0) + 1;
             }
@@ -89,26 +92,23 @@ const AppointmentCalendar = ({ navigation }: any) => {
             dispatch(setIsLoading({ isLoading: true }));
             setAppointmentCount(0);
             await getStaffShifts();
-            getAppointmentsData(true, 0);
+            getAppointmentsData(0);
             dispatch(setIsLoading({ isLoading: false }));
         }
     };
 
     useEffect(() => {
         if (isFocused) {
-            dispatch(setShowUserProfileTopBar({showUserProfileTopBar: true}));
+            dispatch(setShowUserProfileTopBar({ showUserProfileTopBar: true }));
             initialStatesHandler();
         }
     }, [isFocused, selectedDate]);
 
     useEffect(() => {
-        // console.log("herew it is______", appointmentCount)
         const intervalId = setInterval(() => {
-            // console.log("DATA===========")
-            getAppointmentsData(false);
+            getAppointmentsData();
         }, APPOINTMENT_FETCH_INTERVAL);
         return () => {
-            // console.log("Rmove")
             clearInterval(intervalId)
         };
     }, [appointmentCount]);
@@ -119,8 +119,8 @@ const AppointmentCalendar = ({ navigation }: any) => {
 
     return (
         <View style={styles.container}>
-            <DateAndDropdown selectedDate={selectedDate} setSelectedDate={(value) => { setSelectedDate(value) }} selectedDropdown={selectedDropdown} setSelectedDropdown={(val) => { setSelectedDropdown(val) }} data={categoryCount}/>
-            { selectedDropdown == "confirmed" ?
+            <DateAndDropdown selectedDate={selectedDate} setSelectedDate={(value) => { setSelectedDate(value) }} selectedDropdown={selectedDropdown} setSelectedDropdown={(val) => { setSelectedDropdown(val) }} data={categoryCount} />
+            {selectedDropdown == "confirmed" ?
                 <>
                     <View style={styles.staffView}>
                         <ScrollView horizontal showsHorizontalScrollIndicator >
@@ -136,8 +136,8 @@ const AppointmentCalendar = ({ navigation }: any) => {
                         </ScrollView>
                     </View>
                     <CalendarEntries selectedDate={selectedDate} selectedStaffIndex={selectedStaffIndex} staffObjects={staffObjects} appointmentsData={appointmentsData} navigation={navigation} />
-                </> : 
-                <AppointmentsCardView selectedView={selectedDropdown} appointments={selectedDropdown == "total" ? appointmentsData: tabWiseAppointments[selectedDropdown]} reFetchData={async()=>{await initialStatesHandler()}}/>
+                </> :
+                <AppointmentsCardView selectedView={selectedDropdown} appointments={selectedDropdown == "total" ? appointmentsData : tabWiseAppointments[selectedDropdown]} reFetchData={async () => { await initialStatesHandler() }} />
             }
         </View>
     )
