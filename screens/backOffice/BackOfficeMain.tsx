@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { View } from "react-native";
 import SwipeablePills from "../../components/SwipablePills";
 import HomePage from "./homepage/HomePage";
@@ -6,15 +6,21 @@ import StaffManagement from "./staffMgmt/StaffManagementNavigation";
 import CategoryNavigation from "./servicesAndProduct/CategoryNavigation";
 import { useAppDispatch, useAppSelector } from "../../redux/Hooks";
 import { selectShowBackOfficeCategories, setIsLoading } from "../../redux/state/UIStates";
+import { selectCurrentBranch } from "../../redux/state/UserStates";
 
 const BackOfficeMainScreen = ({ navigation }: any) => {
     const pillsData = ['Home Page', 'Services', 'Product', 'Staff Mgmt'];
     const showPills = useAppSelector(selectShowBackOfficeCategories);
+    const currentBranch = useAppSelector(selectCurrentBranch);
     const [selectedPill, setSelectedPill] = useState<string>("Home Page");
 
     const onSelectedPillChange = (pill: string) => {
         setSelectedPill(pill);
     };
+
+    useEffect(() => {
+        setSelectedPill('Home Page')
+    }, [currentBranch])
 
     const renderSelectedPillView = (pill: any) => {
         switch (pill) {

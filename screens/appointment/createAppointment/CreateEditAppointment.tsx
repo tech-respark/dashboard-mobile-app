@@ -5,7 +5,7 @@ import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { setIsLoading, setShowUserProfileTopBar } from "../../../redux/state/UIStates";
 import { GlobalStyles } from "../../../Styles/Styles";
-import { APPOINTMENT_CANCELLED, APPOINTMENT_CHECKIN, APPOINTMENT_CONFIRMED, APPOINTMENT_CREATED, APPOINTMENT_UPDATED, DEFAULT_SERVICE_DURATION, environment } from "../../../utils/Constants";
+import { APPOINTMENT_CANCELLED, APPOINTMENT_CHECKIN, APPOINTMENT_CONFIRMED, APPOINTMENT_CREATED, APPOINTMENT_ONLINE, APPOINTMENT_UPDATED, DEFAULT_SERVICE_DURATION, environment } from "../../../utils/Constants";
 import { selectBranchId, selectCurrentStoreConfig, selectProductServiceCategories, selectSMSConfig, selectTenantId, selectUserData } from "../../../redux/state/UserStates";
 import { makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
@@ -23,6 +23,7 @@ import AlertModal from "../../../components/AlertModal";
 import Header from "./Header";
 import { TimerWithBorderHeader } from "../../../components/HeaderTextField";
 import ServiceSearchModal from "./ServiceSearchModal";
+import CheckboxWithTitle from "../../../components/CheckboxWithTitle";
 
 
 const CreateEditAppointment = ({ navigation, route }: any) => {
@@ -142,7 +143,8 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
             appointmentsList.push(createIndividualExpertService(service));
         })
         const appointmentObj: any = {
-            "appointmentDay": isCreate ? moment(route.params.selectedDate, 'YYYY-MM-DD').toISOString() : appointmentDetails.appointmentDay,
+            //some new keys are there to be added later
+            "appointmentDay": appointmentDetails?.appointmentDay ?? moment(route.params.selectedDate, 'YYYY-MM-DD').toISOString(),
             "appointmentTime": appointmentsList[0].appointmentTime,
             "duration": appointmentsList[0].duration,
             "instruction": instructions,
@@ -156,24 +158,24 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
             "tenantId": tenantId,
             "store": storeConfig!.store,
             "tenant": storeConfig!.tenant,
-            "guestId": guestDetails!.id,
-            "guestName": guestDetails!.lastName ? `${guestDetails!.firstName} ${guestDetails!.lastName}` : guestDetails!.firstName,
-            "guestMobile": guestDetails!.mobileNo,
-            "guestEmail": guestDetails!.email,
-            "guestGSTN": guestDetails!.gstN,
-            "bookedFor": guestDetails!.bookedFor || null,
-            "storeLocation": isCreate ? '' : appointmentDetails.storeLocation,
-            "createdOn": isCreate ? new Date().toISOString() : appointmentDetails.createdOn,
+            "guestId": appointmentDetails?.guestId ?? guestDetails!.id,
+            "guestName": appointmentDetails?.guestName ?? guestDetails!.lastName ? `${guestDetails!.firstName} ${guestDetails!.lastName}` : guestDetails!.firstName,
+            "guestMobile": appointmentDetails?.guestMobile ?? guestDetails!.mobileNo,
+            "guestEmail": appointmentDetails?.guestEmail ?? guestDetails!.email,
+            "guestGSTN": appointmentDetails?.guestGSTN ?? guestDetails!.gstN,
+            "bookedFor": appointmentDetails?.bookedFor ?? (guestDetails!.bookedFor || null),
+            "storeLocation": appointmentDetails?.storeLocation ?? '',
+            "createdOn": appointmentDetails?.createdOn ?? new Date().toISOString(),
             "expertAppointments": appointmentsList,
-            "noOfRemindersSent": isCreate ? 0 : appointmentDetails.noOfRemindersSent,
+            "noOfRemindersSent": appointmentDetails?.noOfRemindersSent ?? 0,
             "rescheduled": false,
             "feedbackLinkShared": false,
             "type": "POS",
-            "smsKeys": isCreate ? getSMSKeys() : appointmentDetails.smsKeys,
-            "status": isCreate ? getAppointmentStatus(actionType, []) : appointmentDetails.status
+            "smsKeys": isCreate || stage == APPOINTMENT_ONLINE ? getSMSKeys() : appointmentDetails?.smsKeys,
+            "status": isCreate || stage == APPOINTMENT_ONLINE ? getAppointmentStatus(actionType, isCreate ? [] : appointmentDetails?.status) : appointmentDetails?.status
         };
         if (!isCreate) {
-            appointmentObj['id'] = appointmentDetails.id
+            appointmentObj['id'] = appointmentDetails?.id
         }
         return appointmentObj;
     };
@@ -193,7 +195,7 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
         dispatch(setIsLoading({ isLoading: false }));
         setModalVisible(false);
         if (response) {
-            Toast.show(isCreate ? `Appointment created successfuly` : `Appointment marked Checked In`, { backgroundColor: GlobalColors.success, opacity: 1.0 });
+            Toast.show(isCreate ? `Appointment created successfuly` : stage == APPOINTMENT_ONLINE ? "Appointment Confirmed" : `Appointment marked Checked In`, { backgroundColor: GlobalColors.success, opacity: 1.0 });
             navigation.goBack();
         } else {
             Toast.show("Encountered Error", { backgroundColor: GlobalColors.error, opacity: 1.0 });
@@ -207,7 +209,7 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
             dispatch(setSelectedGuest({ selectedGuest: response }));
         } else {
             dispatch(setSelectedGuest({ selectedGuest: {} }));
-            Toast.show("Encountered issue", { backgroundColor: GlobalColors.error });
+            // Toast.show("Encountered issue", { backgroundColor: GlobalColors.error });
         }
     };
 
@@ -219,7 +221,7 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
         };
         const mapExpertAppointment = (expertAppointment: { [key: string]: any }) => {
             const slots = expertAppointment.slot.split('-');
-            const experts = expertAppointment.contributions.map(mapContributions);
+            const experts = expertAppointment.contributions?.map(mapContributions) ?? [{}];
             const service = {
                 salePrice: expertAppointment.salePrice,
                 price: expertAppointment.price,
@@ -234,12 +236,11 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
             return {
                 service,
                 fromTime: slots[0],
-                toTime: slots[1],
+                toTime: slots[1] ?? "",
                 experts
             };
         };
         const servicesList: ServiceDetailsType[] = appointmentDetails.expertAppointments.map(mapExpertAppointment);
-        console.log(servicesList[0].experts)
         setServiceDetails(servicesList);
     };
 
@@ -266,7 +267,7 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
 
     return (
         <View style={{ flex: 1 }}>
-            <Header navigation={navigation} isCreate={isCreate} guestName={guestDetails!.firstName} appointmentId={isCreate ? null : appointmentDetails.id} />
+            <Header navigation={navigation} isCreate={isCreate} stage={stage} guestName={guestDetails!.firstName} appointmentId={isCreate ? null : appointmentDetails.id} />
             {createUserModal && <AddUpdateUser setModalVisible={setCreateUserModal} modalVisible={createUserModal} />}
             <ScrollView style={styles.container}>
                 <View style={[GlobalStyles.sectionView]}>
@@ -334,7 +335,7 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
                                     </View>
                                 }
 
-                                <ServiceSearchModal data={services!} headerText={`Service ${sIndex + 1}`} selectedValue={serviceDetailsObj.service?.name}
+                                <ServiceSearchModal data={services!} headerText={`Service ${sIndex + 1}`} selectedValue={serviceDetailsObj.service?.name} gender={guestDetails?.gender}
                                     setSelectedValue={(val) => {
                                         setServiceDetails(prev => {
                                             const updated = [...prev];
@@ -417,7 +418,6 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
                             </View>
                     }
                 </View>
-
                 <View style={GlobalStyles.sectionView}>
                     <Text style={styles.headingText}>3. Instruction Details</Text>
                     <TextInput
@@ -434,25 +434,23 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
                     />
                 </View>
             </ScrollView>
-            <View style={{ backgroundColor: '#fff', padding: 20, alignItems: 'center' }}>
+            <View style={{ backgroundColor: '#fff', paddingHorizontal: 20, paddingVertical: 10, alignItems: 'center' }}>
                 {
-                    isCreate ?
-                        <View style={[GlobalStyles.justifiedRow, { justifyContent: 'space-between', width: '100%', marginBottom: 20 }]}>
-                            <View style={[GlobalStyles.justifiedRow, { width: '35%' }]}>
-                                <Checkbox
-                                    color={"#4FACFE"}
-                                    style={{ borderColor: 'gray', borderRadius: 2, borderWidth: 0.5 }}
-                                    value={enableSMS}
-                                    onValueChange={() => setEnableSMS(!enableSMS)}
-                                />
-                                <Text>{"SMS\nConfirmation"}</Text>
-                            </View>
-                            {!selectedCustomer && <Text onPress={() => { setMembershipValidationModal(true) }} style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}>Membership Validation</Text>}
-                            {membershipValidationModal && <MembershipValidationModal modalVisible={membershipValidationModal} setModalVisible={setMembershipValidationModal} setCustomer={(val) => { setSelectedCustomer(val) }} />}
-                        </View> :
+                    (isCreate || stage == APPOINTMENT_ONLINE) ?
+                        <View style={[GlobalStyles.justifiedRow, styles.spaceBtView]}>
+                            <CheckboxWithTitle value={enableSMS} setValue={setEnableSMS} msg={`SMS\nConfirmation`} />
+                            {
+                                isCreate &&
+                                <>
+                                    {!selectedCustomer && <Text onPress={() => { setMembershipValidationModal(true) }} style={{ color: GlobalColors.blue, textDecorationLine: 'underline' }}>Membership Validation</Text>}
+                                    {membershipValidationModal && <MembershipValidationModal modalVisible={membershipValidationModal} setModalVisible={setMembershipValidationModal} setCustomer={(val) => { setSelectedCustomer(val) }} />}
+                                </>
+                            }
+                        </View>
+                        :
                         stage != APPOINTMENT_CANCELLED &&
-                        <View style={[GlobalStyles.justifiedRow, { width: '100%', marginBottom: 5 }]}>
-                            <TouchableOpacity style={[styles.buttonView, { width: '45%' }]} onPress={() => {
+                        <View style={[GlobalStyles.justifiedRow, { width: '100%', marginBottom: 10 }]}>
+                            <TouchableOpacity style={[styles.buttonView, { width: '45%', borderWidth: 1, borderColor: GlobalColors.blue }]} onPress={() => {
                                 if (formValidation()) {
                                     setIsUpdate(true);
                                     setModalVisible(true);
@@ -463,28 +461,42 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
                             <CancelAppointmentButton cancelSMSDefault={smsConfig!.appointmentCancelled} appointmentDetails={appointmentDetails} navigation={navigation} />
                         </View>
                 }
-                <TouchableOpacity style={[styles.buttonView, { width: '100%', backgroundColor: stage == APPOINTMENT_CANCELLED ? 'lightgray' : GlobalColors.blue }]}
-                    onPress={() => {
-                        if (APPOINTMENT_CREATED == stage) {
-                            formValidation() ? setModalVisible(true) : null;
-                        } else if (APPOINTMENT_CONFIRMED == stage) {
-                            setModalVisible(true);
-                        }
-                        else {
-                            Toast.show("For Bill Generation, use Web instead");
-                        }
-                    }}
-                    disabled={stage == APPOINTMENT_CANCELLED}
-                >
-                    <Text style={styles.buttonText}>{isCreate ? "Create" : stage == APPOINTMENT_CONFIRMED ? "Check In" : stage == APPOINTMENT_CHECKIN ? "Generate Bill" : "Cancelled"}</Text>
-                </TouchableOpacity>
+                {
+                    stage == APPOINTMENT_ONLINE ?
+                        <View style={[GlobalStyles.justifiedRow, { width: '100%' }]}>
+                            <CancelAppointmentButton cancelSMSDefault={smsConfig!.appointmentCancelled} appointmentDetails={appointmentDetails} navigation={navigation} />
+                            <TouchableOpacity style={[styles.onlineAppButton, { backgroundColor: GlobalColors.blue }]} onPress={() => {
+                                if (formValidation()) {
+                                    setModalVisible(true);
+                                }
+                            }}>
+                                <Text style={[styles.buttonText]}>Confirm</Text>
+                            </TouchableOpacity>
+                        </View>
+                        :
+                        <TouchableOpacity style={[styles.buttonView, { width: '100%', backgroundColor: stage == APPOINTMENT_CANCELLED ? 'lightgray' : GlobalColors.blue }]}
+                            onPress={() => {
+                                if (APPOINTMENT_CREATED == stage) {
+                                    formValidation() ? setModalVisible(true) : null;
+                                } else if (APPOINTMENT_CONFIRMED == stage) {
+                                    setModalVisible(true);
+                                }
+                                else {
+                                    Toast.show("For Bill Generation, use Web instead");
+                                }
+                            }}
+                            disabled={stage == APPOINTMENT_CANCELLED}
+                        >
+                            <Text style={styles.buttonText}>{isCreate ? "Create" : stage == APPOINTMENT_CONFIRMED ? "Check In" : stage == APPOINTMENT_CHECKIN ? "Generate Bill" : "Cancelled"}</Text>
+                        </TouchableOpacity>
+                }
             </View>
             {modalVisible &&
                 <AlertModal modalVisible={modalVisible} setModalVisible={setModalVisible}
-                    description={`Are you sure, you want to \n ${isCreate ? "create & confirm an appointment" : !isUpdate ? "mark appointment as Checked In" : "update appointment"}`}
-                    heading={isCreate ? "Create & Confirm \n Appointment" : !isUpdate ? "Checked In \n Appointment" : "Update Appointment"}
+                    description={`Are you sure, you want to \n ${isCreate ? "create & confirm an appointment" : isUpdate ? "update appointment" : stage == APPOINTMENT_ONLINE ? "confirm appointment" : "mark appointment as Checked In"}`}
+                    heading={isCreate ? "Create & Confirm \n Appointment" : isUpdate ? "Update Appointment" : stage == APPOINTMENT_ONLINE ? "Confirm Appointment" : "Checked In \n Appointment"}
                     onConfirm={() => {
-                        appointmentAPICall(isCreate ? APPOINTMENT_CONFIRMED : !isUpdate ? APPOINTMENT_CHECKIN : APPOINTMENT_UPDATED); //wrong here
+                        appointmentAPICall((isCreate || stage == APPOINTMENT_ONLINE) ? APPOINTMENT_CONFIRMED : isUpdate ? APPOINTMENT_UPDATED : APPOINTMENT_CHECKIN);
                     }} />}
         </View>
     );
@@ -515,14 +527,15 @@ const styles = StyleSheet.create({
         backgroundColor: GlobalColors.blue,
         paddingVertical: 10,
         borderRadius: 5,
-        marginBottom: 5
     },
     buttonText: {
         color: "#fff",
         textAlign: "center",
         fontSize: FontSize.large,
         fontWeight: '500'
-    }
+    },
+    spaceBtView: { justifyContent: 'space-between', width: '100%', marginBottom: 20 },
+    onlineAppButton: { width: '45%', paddingVertical: 10, borderRadius: 5, borderWidth: 1, borderColor: GlobalColors.blue }
 });
 
 export default CreateEditAppointment;

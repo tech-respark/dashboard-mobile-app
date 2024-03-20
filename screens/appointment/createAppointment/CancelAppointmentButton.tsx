@@ -4,7 +4,7 @@ import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import AlertModal from "../../../components/AlertModal";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { setIsLoading } from "../../../redux/state/UIStates";
-import { environment } from "../../../utils/Constants";
+import { APPOINTMENT_CANCELLED, environment } from "../../../utils/Constants";
 import { makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
 import { selectUserData } from "../../../redux/state/UserStates";
@@ -29,7 +29,7 @@ const CancelAppointmentButton: FC<ICancelAppointmentButton> = ({cancelSMSDefault
         payload["status"].push({
             staff: loggedInUser!.id,
             createdOn: new Date().toISOString(),
-            status: "CANCELLED"
+            status: APPOINTMENT_CANCELLED
         });
         payload.smsKeys['appointmentCancelled'] = enableCancelSMS;
         let response = await makeAPIRequest(url, payload, "POST");
@@ -44,9 +44,9 @@ const CancelAppointmentButton: FC<ICancelAppointmentButton> = ({cancelSMSDefault
 
     return (
         <>
-            <TouchableOpacity style={[{ width: '45%', backgroundColor: GlobalColors.blue, paddingVertical: 10, borderRadius: 5, marginBottom: 5 }]}
+            <TouchableOpacity style={[{ width: '45%', paddingVertical: 10, borderRadius: 5, borderWidth: 1, borderColor: GlobalColors.blue }]}
                 onPress={() => { setModalVisible(true) }}>
-                <Text style={{ color: "#fff", textAlign: "center", fontSize: FontSize.large, fontWeight: '500' }}>Cancel</Text>
+                <Text style={{ color: GlobalColors.blue, textAlign: "center", fontSize: FontSize.large, fontWeight: '500' }}>Cancel</Text>
             </TouchableOpacity>
             <AlertModal modalVisible={modalVisible} setModalVisible={setModalVisible} heading="Cancel Appointment" description="Are you sure, you want to mark appointment as cancelled" onConfirm={async() => {markAppointmentCancelled()}}
                 checkBoxDescription="Send appointment Cancel SMS" checkBox={enableCancelSMS} setCheckBox={setEnableCancelSMS}

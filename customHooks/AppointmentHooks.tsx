@@ -6,14 +6,14 @@ import { makeAPIRequest } from '../utils/Helper';
 import { GlobalColors } from '../Styles/GlobalStyleConfigs';
 import Toast from 'react-native-root-toast';
 
-export const useTimeIntervalList = () => {
+export const useTimeIntervalList = (timeSlot?: string) => {
     const storeConfig = useAppSelector(selectCurrentStoreConfig);
     const [timeIntervals, setTimeIntervals] = useState<{ [key: string]: string }>({});
 
     const getTimeIntervalList = () => {
         const timeObject: { [key: string]: string } = {};
-        const start = new Date(`1970-01-01T${storeConfig!['startTime']}`);
-        const end = new Date(`1970-01-01T${storeConfig!['closureTime']}`);
+        const start = new Date(`1970-01-01T${timeSlot ? timeSlot.split("-")[0] : storeConfig!['startTime']}`);
+        const end = new Date(`1970-01-01T${timeSlot ? timeSlot.split("-")[1] : storeConfig!['closureTime']}`);
         while (start <= end) {
             const timeString = start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false });
             const formattedTime = start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
@@ -25,44 +25,11 @@ export const useTimeIntervalList = () => {
     };
 
     const memoizedTimeIntervalList = useMemo(() => {
-        if (storeConfig) {
+        if (storeConfig || timeSlot) {
             return getTimeIntervalList();
         }
         return {};
-    }, [storeConfig]);
-
-    useEffect(() => {
-        setTimeIntervals(memoizedTimeIntervalList);
-    }, [memoizedTimeIntervalList]);
-
-    return timeIntervals;
-};
-
-export const useExpertTimeInterval = (timeSlot: string) => {
-    const [timeIntervals, setTimeIntervals] = useState<{ [key: string]: string }>({});
-
-    const getTimeIntervalList = () => {
-        const slots = timeSlot.split("-");
-        const timeObject: { [key: string]: string } = {};
-        const start = new Date(`1970-01-01T${slots[0]}`);
-        const end = new Date(`1970-01-01T${slots[1]}`);
-        while (start <= end) {
-            const timeString = start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false });
-            const formattedTime = start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-            timeObject[timeString] = formattedTime;
-            start.setMinutes(start.getMinutes() + 15);
-        }
-        setTimeIntervals(timeObject);
-        return timeObject;
-    };
-
-    const memoizedTimeIntervalList = useMemo(() => {
-        console.log("Hello", timeSlot)
-        if (timeSlot) {
-            return getTimeIntervalList();
-        }
-        return {};
-    }, [timeSlot]);
+    }, [storeConfig, timeSlot]);
 
     useEffect(() => {
         setTimeIntervals(memoizedTimeIntervalList);

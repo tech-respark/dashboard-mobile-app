@@ -5,7 +5,7 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Ionicons } from "@expo/vector-icons";
 import TimeSlotModal from "../screens/appointment/createAppointment/TimeSlotModal";
 import Toast from "react-native-root-toast";
-import { useExpertTimeInterval } from "../customHooks/AppointmentHooks";
+import { useTimeIntervalList } from "../customHooks/AppointmentHooks";
 import { ServiceDetailsType } from "../utils/Types";
 
 type TextFieldWithBorderHeaderProps = {
@@ -54,8 +54,9 @@ export const TextFieldWithBorderHeader: FC<TextFieldWithBorderHeaderProps> = ({ 
 
 export const TimerWithBorderHeader: FC<TimerWithBorderHeaderProps> = ({ serviceObj, setValue, header, width, isFrom }) => {
   const expertTime = serviceObj.experts.length ? serviceObj.experts[0].slot : null
-  const timeInterval = useExpertTimeInterval(expertTime);
+  const timeInterval = useTimeIntervalList(expertTime);
   const [timeSlotModal, setTimeSlotModal] = useState<boolean>(false);
+
   return (
     <View style={[styles.container, { width: width ?? "40%" }]}>
       <View style={[styles.header, { backgroundColor: "#fff" }]}>

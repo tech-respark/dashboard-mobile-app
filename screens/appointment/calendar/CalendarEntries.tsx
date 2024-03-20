@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
 import { selectCurrentStoreConfig } from "../../../redux/state/UserStates";
 import moment from "moment";
 import { setIsLoading, setShowUserProfileTopBar } from "../../../redux/state/UIStates";
-import { APPOINTMENT_CANCELLED, APPOINTMENT_CHECKIN, APPOINTMENT_CONFIRMED, APPOINTMENT_CREATED, appointmentColorCodes } from "../../../utils/Constants";
+import { APPOINTMENT_CANCELLED, APPOINTMENT_CHECKIN, APPOINTMENT_CONFIRMED, APPOINTMENT_CREATED, APPOINTMENT_ONLINE, appointmentColorCodes } from "../../../utils/Constants";
 import { useTimeIntervalList } from "../../../customHooks/AppointmentHooks";
 import Toast from "react-native-root-toast";
 
@@ -37,9 +37,9 @@ const CalendarEntries: FC<ICalenderEntries> = ({ selectedStaffIndex, staffObject
     //TODO: handle appointment overlapping
     const getExpertAppointmentTimes = (appointments: { [key: string]: any }[]) => {
         let newAppointments: { [key: string]: any } = {};
-        appointments.forEach(appointment => {
+        appointments?.forEach(appointment => {
             let currentExpertId = staffObjects[selectedStaffIndex]['staffId'];
-            if (moment(appointment.appointmentDay).format('YYYY-MM-DD') == selectedDate) {
+            if (appointment.type!=APPOINTMENT_ONLINE && moment(appointment.appointmentDay).format('YYYY-MM-DD') == selectedDate) {
                 appointment.expertAppointments.forEach((expertAppoint: any) => {
                     expertAppoint.contributions.forEach((contributor: any) => {
                         if(contributor.expertId === currentExpertId){

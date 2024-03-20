@@ -12,9 +12,10 @@ type ServiceSearchModalType = {
     headerText: string,
     setSelectedValue: (val: { [key: string]: any }) => void,
     selectedValue: string,
+    gender: string
 }
 
-const ServiceSearchModal: FC<ServiceSearchModalType> = ({ data, selectedValue, setSelectedValue, headerText }) => {
+const ServiceSearchModal: FC<ServiceSearchModalType> = ({ data, selectedValue, setSelectedValue, headerText, gender }) => {
     const type = "service"
     const [modalVisible, setModalVisible] = useState(false);
     const [search, setSearch] = useState<string>(selectedValue ?? "");
@@ -43,6 +44,10 @@ const ServiceSearchModal: FC<ServiceSearchModalType> = ({ data, selectedValue, s
                 </TouchableOpacity> : <View key={currentObj.id}></View>
         );
     };
+
+    useEffect(() => {
+        setSelectedGender(gender=="female" ? "Female" : "Male")
+    }, [gender]);
 
     const renderService = (item: { [key: string]: any }, serviceCategoryId: string, serviceCategory: string) => {
         return (
@@ -160,7 +165,6 @@ const ServiceSearchModal: FC<ServiceSearchModalType> = ({ data, selectedValue, s
                                 </Pressable>
                                 <Pressable style={[styles.buttonContainer, { backgroundColor: clickedItem ? GlobalColors.blue : 'lightgray', width: '30%', borderColor: clickedItem ? GlobalColors.blue : 'lightgray' }]}
                                     onPress={() => {
-                                        console.log(clickedItem);
                                         setSelectedValue(clickedItem!);
                                         setModalVisible(false);
                                     }}

@@ -25,7 +25,7 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
   const [showBranchModal, setShowBranchModal] = useState<boolean>(false);
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const snapPoints = ['1%', '40%'];
+  const snapPoints = ['1%', '45%'];
 
   const handleSheetChanges = (index: number) => {
     if (index === 0) {

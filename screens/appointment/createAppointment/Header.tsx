@@ -3,7 +3,7 @@ import { TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GlobalColors } from '../../../Styles/GlobalStyleConfigs';
 import AlertModal from '../../../components/AlertModal';
-import { environment } from '../../../utils/Constants';
+import { APPOINTMENT_ONLINE, environment } from '../../../utils/Constants';
 import { makeAPIRequest } from '../../../utils/Helper';
 import Toast from 'react-native-root-toast';
 import { useAppDispatch } from '../../../redux/Hooks';
@@ -13,10 +13,11 @@ interface IHeader {
     isCreate: boolean, 
     navigation: any,
     guestName: string,
-    appointmentId: string
+    appointmentId: string,
+    stage: string
 }
 
-const Header: FC<IHeader> = ({ isCreate, navigation, guestName, appointmentId }) => {
+const Header: FC<IHeader> = ({ isCreate, navigation, guestName, appointmentId, stage }) => {
     const dispatch = useAppDispatch();
     const [deleteModal, setDeleteModal] = useState<boolean>(false);
 
@@ -35,7 +36,7 @@ const Header: FC<IHeader> = ({ isCreate, navigation, guestName, appointmentId })
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerTitle: `${isCreate ? "Create" : "Update"} Appointment`,
+            headerTitle: `${isCreate ? "Create" : stage==APPOINTMENT_ONLINE ? "Confirm": "Update"} Appointment`,
             headerTitleAlign: 'left',
             headerLeft: () => (
                 <TouchableOpacity onPress={() => navigation.goBack()}>

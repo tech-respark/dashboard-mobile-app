@@ -44,7 +44,7 @@ const TimeSlotModal: FC<ITimeSlotModal> = ({ modalVisible, setModalVisible, isFr
                             <Ionicons name="close" size={20} color={GlobalColors.error}/>
                         </TouchableOpacity>
                     </View>
-                    <Text style={{textAlign: 'center', color: GlobalColors.grayDark}}>Select time {isFrom ? `before ${serviceObj.toTime}` : `after ${serviceObj.fromTime}`}</Text>
+                    <Text style={{textAlign: 'center', color: GlobalColors.grayDark}}>Select time {isFrom ? `before ${timeInterval[serviceObj.toTime] ?? ''}` : `after ${timeInterval[serviceObj.fromTime] ?? ''}`}</Text>
                     <ScrollView>
                         <View style={{ flexDirection: 'row', flexWrap: 'wrap', margin: 10, justifyContent: 'space-evenly' }}>
                             {Object.keys(timeInterval).map((time: string, index: number) => (

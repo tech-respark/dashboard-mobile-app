@@ -3,13 +3,14 @@ import { useAppDispatch, useAppSelector } from '../redux/Hooks';
 import { setIsLoading } from '../redux/state/UIStates';
 import { environment } from '../utils/Constants';
 import { makeAPIRequest } from '../utils/Helper';
-import { selectBranchId, selectTenantId, setConfig, setCurrrentStoreConfig, setPaymentTypes, setProductServiceCategories, setSMSConfig, setStaffData, setStoreCount } from '../redux/state/UserStates';
+import { selectBranchId, selectCurrentBranch, selectTenantId, setConfig, setCurrrentStoreConfig, setPaymentTypes, setProductServiceCategories, setSMSConfig, setStaffData, setStoreCount } from '../redux/state/UserStates';
 import { setCustomerSources, setSegments } from '../redux/state/AppointmentStates';
 
 const useInitialDataFetch = () => {
     const dispatch = useAppDispatch();
     const storeId = useAppSelector(selectBranchId);
     const tenantId = useAppSelector(selectTenantId);
+    const currentBranch = useAppSelector(selectCurrentBranch);
 
     const getUserConfig = async () => {
         let url = environment.documentBaseUri + `stores`;
@@ -93,7 +94,6 @@ const useInitialDataFetch = () => {
     useEffect(() => {
         dispatch(setIsLoading({ isLoading: true }));
         getUserConfig();
-        getStaffDetails();
         getStoreConfig();
         getSegmentAndItsTypes();
         getCustomerSources();
@@ -101,8 +101,9 @@ const useInitialDataFetch = () => {
         getProductAndServiceCategories();
         getPaymentTypes();
         getSMSConfig();
+        getStaffDetails(); // it is at last for a reason
         dispatch(setIsLoading({ isLoading: false }));
-    }, []);
+    }, [currentBranch]);
 };
 
 export default useInitialDataFetch;

@@ -5,10 +5,11 @@ import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import moment from "moment";
 import { Dropdown } from 'react-native-element-dropdown';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { APPOINTMENT_CANCELLED, APPOINTMENT_COMPLETED, APPOINTMENT_CONFIRMED, APPOINTMENT_FUTURE, APPOINTMENT_ONLINE, APPOINTMENT_TOTAL } from "../../../utils/Constants";
 
 
 type DateAndDropdownType = {
-    data: { [key: string]: number},
+    data: { [key: string]: number },
     selectedDropdown: string,
     setSelectedDropdown: (val: string) => void,
     selectedDate: string,
@@ -19,7 +20,7 @@ const DateAndDropdown: FC<DateAndDropdownType> = ({ selectedDate, setSelectedDat
 
     const [isDatePickerVisible, setIsDatePickerVisible] = useState<boolean>(false);
 
-    const options = [{ label: 'confirmed' },{ label: 'online' },{ label: 'future' },{ label: 'completed'},{ label: 'cancelled' },{ label: 'total'}];
+    const options = [{ label: APPOINTMENT_CONFIRMED }, { label: APPOINTMENT_ONLINE }, { label: APPOINTMENT_FUTURE }, { label: APPOINTMENT_COMPLETED }, { label: APPOINTMENT_CANCELLED }, { label: APPOINTMENT_TOTAL }];
 
     const handlePreviousNextDate = (isNext: boolean) => {
         const currentDate = moment(selectedDate, 'YYYY-MM-DD');
@@ -42,7 +43,7 @@ const DateAndDropdown: FC<DateAndDropdownType> = ({ selectedDate, setSelectedDat
                 <TouchableOpacity style={styles.dateIcon} onPress={() => handlePreviousNextDate(true)}>
                     <Ionicons name="chevron-forward" color={GlobalColors.blue} size={20} />
                 </TouchableOpacity>
-                <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center'}} onPress={() => { setIsDatePickerVisible(true) }}>
+                <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }} onPress={() => { setIsDatePickerVisible(true) }}>
                     <Text style={{ marginHorizontal: 10 }}>{moment(selectedDate, 'YYYY-MM-DD').format('DD/MM/YYYY')}</Text>
                     <FontAwesome5 name="calendar-alt" size={20} color={GlobalColors.blue} />
                 </TouchableOpacity>
@@ -55,38 +56,37 @@ const DateAndDropdown: FC<DateAndDropdownType> = ({ selectedDate, setSelectedDat
                     onCancel={() => setIsDatePickerVisible(false)}
                 />
             </View>
-            <Dropdown
-                style={styles.dropdown}
-                selectedTextStyle={{color: '#fff', textTransform: 'capitalize'}}
-                data={options}
-                labelField="label"
-                valueField="label"
-                value={selectedDropdown}
-                onChange={item => {
-                    setSelectedDropdown(item.label);
-                }}
-                renderRightIcon={() => (
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '35%' }}>
-                        <Text style={{fontSize: FontSize.medium, color: '#fff' }} ellipsizeMode="clip">{data[selectedDropdown] ?? 0}</Text>
-                        <View style={{ backgroundColor: '#fff', borderRadius: 20 }}>
-                            <Ionicons
-                                name="caret-down"
-                                color={GlobalColors.blue}
-                                size={15}
-                                style={{ padding: 4}}
-                            />
+            <View style={{ width: '40%' }}>
+                <Dropdown
+                    style={[styles.dropdown]}
+                    selectedTextStyle={{ color: '#fff', textTransform: 'capitalize' }}
+                    data={options}
+                    labelField="label"
+                    valueField="label"
+                    value={selectedDropdown}
+                    onChange={item => {
+                        setSelectedDropdown(item.label);
+                    }}
+                    renderRightIcon={() => (
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '35%' }}>
+                            <Text style={{ fontSize: FontSize.medium, color: '#fff' }} ellipsizeMode="clip">{data[selectedDropdown] ?? 0}</Text>
+                            <View style={{ backgroundColor: '#fff', borderRadius: 20 }}>
+                                <Ionicons name="caret-down" color={GlobalColors.blue} size={15} style={{ padding: 4 }}/>
+                            </View>
                         </View>
-                    </View>
-                )}
-                renderItem={(item) => (
-                    <View style={{ paddingHorizontal: 10 }}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 0.5, borderColor: 'lightgray' }}>
-                            <Text style={{ paddingRight: 10, fontSize: FontSize.medium, color: item.label == "future" ? 'red' : 'gray', textTransform: 'capitalize' }}>{item.label}</Text>
-                            <Text style={{ fontSize: FontSize.medium, color: item.label == "future" ? 'red' : 'gray' }}>{data[item.label] ?? 0}</Text>
+                    )}
+                    renderItem={(item) => (
+                        <View style={{ paddingHorizontal: 10 }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 0.5, borderColor: 'lightgray' }}>
+                                <Text style={{ paddingRight: 10, fontSize: FontSize.medium, color: (item.label == APPOINTMENT_ONLINE && data[item.label] > 0) ? 'red' : 'gray', textTransform: 'capitalize' }}>{item.label}</Text>
+                                <Text style={{ fontSize: FontSize.medium, color: (item.label == APPOINTMENT_ONLINE && data[item.label] > 0) ? 'red' : 'gray' }}>{data[item.label] ?? 0}</Text>
+                            </View>
                         </View>
-                    </View>
-                )}
-            />
+                    )}
+                />
+                {data[APPOINTMENT_ONLINE] > 0 && <View style={{ backgroundColor: 'red', width: 12, height: 12, borderRadius: 20, position: 'absolute', top: -5, right: -2 }}></View>}
+
+            </View>
         </View>
     );
 };
@@ -110,7 +110,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         justifyContent: 'center',
         alignContent: "center",
-        width: '40%'
     },
 });
 
