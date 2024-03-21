@@ -127,7 +127,10 @@ const AdvanceOrBalance: FC<IAdvanceOrBalance> = ({ isAdvance, customer, setCusto
                                     placeholder="Enter Amount"
                                     underlineColorAndroid="transparent"
                                     onChangeText={(val) => {
-                                        if (!val || parseInt(val) <= customer.balAmount) {
+                                        if(isAdvance){
+                                            setAmount(val);
+                                        }
+                                        else if (!val || parseInt(val) <= customer.balAmount) {
                                             setAmount(val);
                                         }
                                     }}

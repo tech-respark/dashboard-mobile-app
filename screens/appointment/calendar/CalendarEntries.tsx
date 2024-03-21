@@ -43,7 +43,7 @@ const CalendarEntries: FC<ICalenderEntries> = ({ selectedStaffIndex, staffObject
                 appointment.expertAppointments.forEach((expertAppoint: any) => {
                     expertAppoint.contributions.forEach((contributor: any) => {
                         if(contributor.expertId === currentExpertId){
-                            newAppointments[expertAppoint.slot] = appointment
+                            newAppointments[expertAppoint.slot] = {...appointment, ...{expertServiceName: expertAppoint.service}}
                         }
                     })
                 })   
@@ -105,6 +105,7 @@ const CalendarEntries: FC<ICalenderEntries> = ({ selectedStaffIndex, staffObject
                     {Object.keys(timeYPositions).length > 0 && Object.keys(expertAppointments).map((appointmentTime: any, index: number) => {
                         let times = appointmentTime.split("-");
                         let status = expertAppointments[appointmentTime]["status"].slice(-1)[0]["status"];
+
                         return (
                             <TouchableOpacity activeOpacity={0.8} key={index} style={[styles.appointmentView, { backgroundColor: appointmentColorCodes[status], top: timeYPositions[times[0]], height: timeYPositions[times[1]] - timeYPositions[times[0]] }]}
                                 onPress={()=>{
@@ -117,10 +118,10 @@ const CalendarEntries: FC<ICalenderEntries> = ({ selectedStaffIndex, staffObject
                                 }}
                             >
                                 <View style={styles.appointmentFirstRow}>
-                                    <Text style={{ fontWeight: "bold", maxWidth: '50%' }} ellipsizeMode="tail">{expertAppointments[appointmentTime]["guestName"]}</Text>
-                                    <Text style={{ fontSize: FontSize.small }}>{timeIntervals[times[0]]}-{timeIntervals[times[1]]}</Text>
+                                    <Text style={{ fontWeight: "bold", maxWidth: '80%' }} ellipsizeMode="tail">{expertAppointments[appointmentTime]["guestName"]}</Text>
+                                    {/* <Text style={{ fontSize: FontSize.small }}>{timeIntervals[times[0]]}-{timeIntervals[times[1]]}</Text> */}
                                 </View>
-                                <Text ellipsizeMode="tail" numberOfLines={1} style={{ maxWidth: '60%' }}>{expertAppointments[appointmentTime]["expertAppointments"][0]["service"]}</Text>
+                                <Text ellipsizeMode="tail" numberOfLines={1} style={{ maxWidth: '95%' }}>{expertAppointments[appointmentTime]["expertServiceName"]}</Text>
                             </TouchableOpacity>
                         );
                     })
