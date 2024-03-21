@@ -2,7 +2,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import React from "react";
 import AppointmentCalendar from "./calendar/Calendar";
 import CreateEditAppointment from "./createAppointment/CreateEditAppointment";
-import UserHistory from "./userHistory/UserHistory";
+import UserHistory from "../commonScreens/userHistory/UserHistory";
 
 const Stack = createStackNavigator();
 

@@ -91,7 +91,7 @@ const DrawerNavigationRoutes = ({ navigation }: any) => {
             ),
           })}
           drawerContent={(props) => <CustomDrawerContent {...props} />}
-          initialRouteName="Backoffice"
+          initialRouteName="Appointment"
         >
           <Drawer.Screen name="POS" options={({ navigation }) => setLeftHeader(navigation, 'POS')} component={POSMainScreen} />
           <Drawer.Screen name="Appointment" options={({ navigation }) => setLeftHeader(navigation, 'Appointment')} component={AppointmentMain} />

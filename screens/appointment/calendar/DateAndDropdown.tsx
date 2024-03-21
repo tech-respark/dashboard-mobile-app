@@ -38,10 +38,10 @@ const DateAndDropdown: FC<DateAndDropdownType> = ({ selectedDate, setSelectedDat
         <View style={styles.dateView}>
             <View style={{ flexDirection: 'row', alignItems: "center", justifyContent: "center" }}>
                 <TouchableOpacity style={[styles.dateIcon, { marginRight: 10 }]} onPress={() => handlePreviousNextDate(false)}>
-                    <Ionicons name="chevron-back" color={GlobalColors.blue} size={20} />
+                    <Ionicons name="chevron-back" color={GlobalColors.blue} size={25} />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.dateIcon} onPress={() => handlePreviousNextDate(true)}>
-                    <Ionicons name="chevron-forward" color={GlobalColors.blue} size={20} />
+                    <Ionicons name="chevron-forward" color={GlobalColors.blue} size={25} />
                 </TouchableOpacity>
                 <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }} onPress={() => { setIsDatePickerVisible(true) }}>
                     <Text style={{ marginHorizontal: 10 }}>{moment(selectedDate, 'YYYY-MM-DD').format('DD/MM/YYYY')}</Text>
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
     dateIcon: {
         padding: 2,
         backgroundColor: GlobalColors.lightGray2,
-        borderRadius: 15
+        borderRadius: 20
     },
     dropdown: {
         backgroundColor: GlobalColors.blue,

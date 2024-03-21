@@ -1,10 +1,10 @@
 import React, { FC, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { GlobalStyles } from "../../../../Styles/Styles";
+import { GlobalStyles } from "../.././../../Styles/Styles";
 import { FontSize, GlobalColors } from "../../../../Styles/GlobalStyleConfigs";
 import { Ionicons } from "@expo/vector-icons";
 import { MultiSelect } from "react-native-element-dropdown";
-import AddFamilyMemberModal from "../../common/AddFamilyMemberModal";
+import AddFamilyMemberModal from "../../../../screens/appointment/common/AddFamilyMemberModal";
 
 interface IAddMemberView{
     customer: {[key: string]: any},

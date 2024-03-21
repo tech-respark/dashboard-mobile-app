@@ -8,13 +8,12 @@ import AddMemberView from "./AddMemberView";
 import { SHOW_SHIFT_MEMBERSHIP_AFTER_DAYS, environment } from "../../../../utils/Constants";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { selectUserData } from "../../../../redux/state/UserStates";
-import { useAppSelector } from "../../../../redux/Hooks";
+import { selectBranchId, selectTenantId, selectUserData } from "../../../../redux/state/UserStates";
+import { useAppDispatch, useAppSelector } from "../../../../redux/Hooks";
 import { makeAPIRequest } from "../../../../utils/Helper";
 import Toast from "react-native-root-toast";
-import FamilyMembers from "../FamilyMembers";
 import AlertModal from "../../../../components/AlertModal";
-import { getAddedMembersObjects } from "../../../../utils/Appointment";
+import { getAddedMembersObjects, getGuestDetails } from "../../../../utils/Appointment";
 
 interface IShiftMembership {
     customer: { [key: string]: any },
@@ -22,6 +21,9 @@ interface IShiftMembership {
 }
 const ShiftMembership: FC<IShiftMembership> = ({ customer, setCustomer }) => {
     const loggedInUser = useAppSelector(selectUserData);
+    const storeId = useAppSelector(selectBranchId);
+    const tenantId = useAppSelector(selectTenantId);
+    const dispatch = useAppDispatch();
 
     const [selectedFamily, setSelectedFamily] = useState<string[]>([]);
     const [daysRemaining, setDaysRemaining] = useState<number | null>(null);
@@ -55,6 +57,7 @@ const ShiftMembership: FC<IShiftMembership> = ({ customer, setCustomer }) => {
         }
         const response = await makeAPIRequest(url, data, "PUT");
         if (response && response.code == 200) {
+            await getGuestDetails(customer.id, tenantId!, storeId!, dispatch);
             Toast.show("Membership Updated", { backgroundColor: GlobalColors.success, opacity: 1.0 });
         } else {
             Toast.show("Encountered Error", { backgroundColor: GlobalColors.error, opacity:1.0 });
@@ -97,7 +100,6 @@ const ShiftMembership: FC<IShiftMembership> = ({ customer, setCustomer }) => {
                         setShowModal(true)
                     }} />
                 </View>}
-
             <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 5 }}>
                 <Text style={{ fontWeight: '500', marginRight: 10 }}>Membership Id:</Text>
                 <Text>{customer.membership.membershipCode}</Text>
@@ -187,7 +189,7 @@ const ShiftMembership: FC<IShiftMembership> = ({ customer, setCustomer }) => {
 
             <View style={styles.buttonContainer}>
                 <TouchableOpacity style={styles.buttonView}
-                    onPress={() => { }}
+                    onPress={() => {Toast.show("Use Web for shifting of Membership")}}
                 >
                     <Text style={styles.buttonText}>Shift Membership</Text>
                 </TouchableOpacity>

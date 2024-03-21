@@ -1,16 +1,13 @@
-import { useIsFocused } from "@react-navigation/native";
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useAppDispatch, useAppSelector } from "../../../redux/Hooks";
-import { setShowUserProfileTopBar } from "../../../redux/state/UIStates";
 import { Ionicons } from "@expo/vector-icons";
 import { GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import ProfileInfo from "./ProfileInfo";
 import Orders from "./Orders";
 import { environment } from "../../../utils/Constants";
 import { selectBranchId, selectTenantId } from "../../../redux/state/UserStates";
-import { makeAPIRequest, sleep } from "../../../utils/Helper";
-import Toast from "react-native-root-toast";
+import { makeAPIRequest } from "../../../utils/Helper";
 import LoadingState from "../../../components/LoadingState";
 import AboutUser from "./AboutUser";
 import Membership from "./membership/Membership";
@@ -31,6 +28,7 @@ const UserHistory = ({ navigation, route }: any) => {
 
     const userHistorySections = ["Profile Info", "Orders", "About User", "Membership", "Advance", "Due Balance", "Family Members", "Packages"];
     const sectionIcons = ["person-outline", "receipt-outline", "information-circle-outline", "ribbon-outline", "cash-outline", "wallet-outline", "people-outline", "basket-outline"];
+    
     const setCustomerData = (val: {[key: string]: any}) => {
         dispatch(setSelectedGuest({selectedGuest: val}));
     }

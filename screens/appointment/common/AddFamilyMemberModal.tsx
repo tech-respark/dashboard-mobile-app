@@ -4,11 +4,10 @@ import { GlobalStyles } from "../../../Styles/Styles";
 import { FontSize, GlobalColors } from "../../../Styles/GlobalStyleConfigs";
 import GuestExpertDropdown from "../createAppointment/GuestExpertDropdown";
 import { useCustomerData } from "../../../customHooks/AppointmentHooks";
-import AddUpdateUser from "./AddUpdateUser";
 import { environment } from "../../../utils/Constants";
 import { makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
-import { useIsFocused } from "@react-navigation/native";
+import AddUpdateUser from "../../commonScreens/common/AddUpdateUser";
 
 interface IAddFamilyMemberModal {
     modalVisible: boolean,

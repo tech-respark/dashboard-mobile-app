@@ -7,12 +7,12 @@ import { MEMBERSHIPBACKGROUNDS, MEMBERSHIPCOLORS, environment } from "../../../.
 import { useAppDispatch, useAppSelector } from "../../../../redux/Hooks";
 import { selectBranchId, selectPaymentTypes, selectStaffData, selectTenantId, selectUserData } from "../../../../redux/state/UserStates";
 import { makeAPIRequest } from "../../../../utils/Helper";
-import GuestExpertDropdown from "../../createAppointment/GuestExpertDropdown";
+import GuestExpertDropdown from "../../../../screens/appointment/createAppointment/GuestExpertDropdown";
 import LoadingState from "../../../../components/LoadingState";
 import { setIsLoading } from "../../../../redux/state/UIStates";
 import Toast from "react-native-root-toast";
 import AddMemberView from "./AddMemberView";
-import { getAddedMembersObjects } from "../../../../utils/Appointment";
+import { getAddedMembersObjects, getGuestDetails } from "../../../../utils/Appointment";
 
 interface IMembershipModal {
     modalVisible: boolean,
@@ -75,7 +75,6 @@ const MembershipModal: FC<IMembershipModal> = ({ modalVisible, setModalVisible, 
                 payments.push(obj);
             }
         });
-        console.log(payments)
         return payments;
     };
 
@@ -139,6 +138,7 @@ const MembershipModal: FC<IMembershipModal> = ({ modalVisible, setModalVisible, 
             let response = await makeAPIRequest(url, txnObj, "POST");
             if (response && response.code == 200) {
                 setModalVisible(false);
+                await getGuestDetails(customer.id, tenantId!, storeId!, dispatch);
                 Toast.show("Membership assigned", { backgroundColor: GlobalColors.success });
             } else {
                 Toast.show("Error Encountered", { backgroundColor: GlobalColors.error });
@@ -152,7 +152,6 @@ const MembershipModal: FC<IMembershipModal> = ({ modalVisible, setModalVisible, 
             <Pressable key={index} style={{ height: '95%', width: 280, borderRadius: 5, margin: 10 }}
                 onPress={() => {
                     setSelectedMembership(item);
-                    console.log(item)
                     setValidity(item.validity.toString());
                     setPrice(item.membershipFee.toString());
                     setAddMember(item.isSharable);
@@ -253,7 +252,7 @@ const MembershipModal: FC<IMembershipModal> = ({ modalVisible, setModalVisible, 
                                     </View>
                                     <View style={{ marginVertical: 15 }}>
                                         <Text style={{ fontSize: FontSize.medium }}>Staff</Text>
-                                        <GuestExpertDropdown data={staffList!} placeholderText="Select Staff" type="expert" selectedValue={expert.name} setSelected={setExpert} />
+                                        <GuestExpertDropdown data={staffList!} placeholderText="Select Staff" type="expert" selectedValue={expert.name} setSelected={(val) => {setExpert(val!)}} />
                                     </View>
                                     {addMember &&
                                         <AddMemberView customer={customer} setCustomer={setCustomer} selectedFamily={selectedFamily} setSelectedFamily={setSelectedFamily} />
@@ -277,15 +276,15 @@ const MembershipModal: FC<IMembershipModal> = ({ modalVisible, setModalVisible, 
                                                     <View style={[{ borderWidth: 0.5, borderColor: 'lightgray', borderRadius: 2, padding: 3, marginVertical: 5, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-evenly' }]}>
                                                         <Image source={{ uri: type.img }} style={{ width: 25, height: 25 }} />
                                                         <TextInput
+                                                            pointerEvents= {payment[type.name] ? "auto" : "none"}
                                                             value={payment[type.name]}
                                                             style={{ borderBottomWidth: 0.5, width: '50%', borderColor: 'gray' }}
                                                             onChangeText={(val) => {
                                                                 let temp = { ...payment };
                                                                 temp[type.name] = val
                                                                 const total = Object.values(temp).reduce((acc, curr) => acc + parseInt(curr), 0);
-                                                                console.log(temp, payment, total, parseInt(price))
                                                                 if (total < parseInt(price)) {
-                                                                    payment[type.name] = val
+                                                                    setPayment(temp);
                                                                 }
                                                             }}//bug in textField
                                                             editable={price != "" && (Object.values(payment).reduce((acc, curr) => acc + parseInt(curr), 0) < parseInt(price) || payment[type.name])}

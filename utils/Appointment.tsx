@@ -1,5 +1,6 @@
-import { SERVICES_INDEX } from "./Constants";
-import { getTofixValue } from "./Helper";
+import { setSelectedGuest } from "../redux/state/AppointmentStates";
+import { SERVICES_INDEX, environment } from "./Constants";
+import { getTofixValue, makeAPIRequest } from "./Helper";
 
 export const isActiveAtBinaryIndex = (value: any, index: any) => {
     return Boolean((value >> index) % 2)
@@ -52,7 +53,7 @@ export function getActiveStaffsForAppointment(latestStaffList: { [key: string]: 
     return commonStaffList;
   };
 
-  export const getAddedMembersObjects = (selectedFamily: string[], customer: {[key: string]: any}) => {
+export const getAddedMembersObjects = (selectedFamily: string[], customer: {[key: string]: any}) => {
     const objects = selectedFamily.map(item => {
         const foundObject = customer.familyMembers.find((obj:any) => obj.name === item);
         if (foundObject) {
@@ -64,3 +65,14 @@ export function getActiveStaffsForAppointment(latestStaffList: { [key: string]: 
     });
     return objects;
   };
+
+  export const getGuestDetails = async (customerId: string, tenantId: number, storeId: number, dispatch: (val: any) => any) => {
+    const url = environment.guestUrl + `customers/userbyguestid?tenantId=${tenantId}&storeId=${storeId}&guestId=${customerId}`;
+    let response = await makeAPIRequest(url, null, "GET");
+    if (response) {
+        dispatch(setSelectedGuest({ selectedGuest: response }));
+    } else {
+        dispatch(setSelectedGuest({ selectedGuest: {} }));
+    }
+};
+

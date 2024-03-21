@@ -9,7 +9,6 @@ import { environment } from "../../../utils/Constants";
 import { selectBranchId, selectProductServiceCategories, selectTenantId } from "../../../redux/state/UserStates";
 import { makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
-import AddUpdateUser from "../common/AddUpdateUser";
 import GuestExpertDropdown from "./GuestExpertDropdown";
 import { useCustomerData } from "../../../customHooks/AppointmentHooks";
 import { ServiceDetailsType } from "../../../utils/Types";
@@ -18,6 +17,8 @@ import Header from "./Header";
 import { TimerWithBorderHeader } from "../../../components/HeaderTextField";
 import ServiceSearchModal from "./ServiceSearchModal";
 import FooterActionButtons from "./FooterActionButtons";
+import AddUpdateUser from "../../commonScreens/common/AddUpdateUser";
+import { getGuestDetails } from "../../../utils/Appointment";
 
 const CreateEditAppointment = ({ navigation, route }: any) => {
 
@@ -63,17 +64,6 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
         return isValid;
     };
 
-    const getGuestDetails = async (customerId: string) => {
-        const url = environment.guestUrl + `customers/userbyguestid?tenantId=${tenantId}&storeId=${storeId}&guestId=${customerId}`;
-        let response = await makeAPIRequest(url, null, "GET");
-        if (response) {
-            dispatch(setSelectedGuest({ selectedGuest: response }));
-        } else {
-            dispatch(setSelectedGuest({ selectedGuest: {} }));
-            // Toast.show("Encountered issue", { backgroundColor: GlobalColors.error });
-        }
-    };
-
     const setUpdateData = () => {
         setInstructions(appointmentDetails.instruction);
         const mapContributions = (contribution: { [key: string]: any }) => {
@@ -114,7 +104,7 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
                 toTime: route.params.to
             }])
         } else if (appointmentDetails && appointmentDetails.guestId) {
-            getGuestDetails(appointmentDetails.guestId);
+            getGuestDetails(appointmentDetails.guestId, tenantId!, storeId!, dispatch);
             setUpdateData();
         }
     }, []);
@@ -122,7 +112,7 @@ const CreateEditAppointment = ({ navigation, route }: any) => {
     //only used for create
     useEffect(() => {
         if (isCreate && selectedCustomer) {
-            Object.keys(selectedCustomer).length > 0 ? getGuestDetails(selectedCustomer!.id) : dispatch(setSelectedGuest({ selectedGuest: {} }));
+            Object.keys(selectedCustomer).length > 0 ? getGuestDetails(selectedCustomer!.id, tenantId!, storeId!, dispatch) : dispatch(setSelectedGuest({ selectedGuest: {} }));
         }
     }, [selectedCustomer]);
 

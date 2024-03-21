@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { environment } from "../../../utils/Constants";
 import { makeAPIRequest } from "../../../utils/Helper";
 import Toast from "react-native-root-toast";
-import AddFamilyMemberModal from "../common/AddFamilyMemberModal";
+import AddFamilyMemberModal from "../../../screens/appointment/common/AddFamilyMemberModal";
 
 interface IFamilyMembers {
     customer: { [key: string]: any },
